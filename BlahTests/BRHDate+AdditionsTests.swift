@@ -1,16 +1,16 @@
 //
-//  BlahTests.swift
-//  BlahTests
+//  BRHDate+AdditionsTests.swift
+//  Blah
 //
-//  Created by Brad Howes on 9/14/16.
+//  Created by Brad Howes on 9/18/16.
 //  Copyright © 2016 Brad Howes. All rights reserved.
 //
 
 import XCTest
 @testable import Blah
 
-class BlahTests: XCTestCase {
-    
+class BRHDateAdditionsTests: XCTestCase {
+
     override func setUp() {
         super.setUp()
         // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -20,10 +20,11 @@ class BlahTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
     }
-    
-    func testExample() {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+
+    func testSubtraction() {
+        let a = Date()
+        let b = a.addingTimeInterval(123.0)
+        XCTAssertEqual(b - a, 123.0)
     }
     
     func testPerformanceExample() {
@@ -32,5 +33,5 @@ class BlahTests: XCTestCase {
             // Put the code you want to measure the time of here.
         }
     }
-    
+
 }

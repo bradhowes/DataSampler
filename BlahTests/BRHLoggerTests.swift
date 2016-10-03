@@ -1,5 +1,5 @@
 //
-//  BlahTests.swift
+//  BRHLoggerTests
 //  BlahTests
 //
 //  Created by Brad Howes on 9/14/16.
@@ -9,20 +9,33 @@
 import XCTest
 @testable import Blah
 
-class BlahTests: XCTestCase {
-    
+class BRHLoggerTests: XCTestCase {
+
     override func setUp() {
         super.setUp()
         // Put setup code here. This method is called before the invocation of each test method in the class.
     }
-    
+
     override func tearDown() {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
     }
     
     func testExample() {
-        // This is an example of a functional test case.
+        print("NSHomeDirectory: \(NSHomeDirectory())")
+        let log = BRHLogger.sharedInstance()
+        let directory = URL(fileURLWithPath: NSHomeDirectory(), isDirectory: true)
+        log.logPath = directory
+
+        BRHLogger.log(format: "this %@ %d %@", "is", 1, "test")
+        BRHLogger.log("this", "is", 2, "test")
+        log.save()
+        
+        let s = log.logContentFor(folder: directory)
+        print("s: \(s)")
+        XCTAssertTrue(s.contains("this is 1 test\n"))
+        XCTAssertTrue(s.contains("this is 2 test\n"))
+
         // Use XCTAssert and related functions to verify your tests produce the correct results.
     }
     

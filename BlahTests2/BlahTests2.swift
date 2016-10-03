@@ -1,15 +1,14 @@
 //
-//  BlahTests.swift
-//  BlahTests
+//  BlahTests2.swift
+//  BlahTests2
 //
-//  Created by Brad Howes on 9/14/16.
+//  Created by Brad Howes on 9/21/16.
 //  Copyright © 2016 Brad Howes. All rights reserved.
 //
 
 import XCTest
-@testable import Blah
 
-class BlahTests: XCTestCase {
+class BlahTests2: XCTestCase {
     
     override func setUp() {
         super.setUp()

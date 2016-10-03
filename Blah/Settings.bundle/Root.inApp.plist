@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Title</key>
+	<string>Settings</string>
+	<key>PreferenceSpecifiers</key>
+	<array>
+		<dict>
+			<key>Type</key>
+			<string>PSGroupSpecifier</string>
+			<key>Title</key>
+			<string>Notification Driver</string>
+			<key>FooterText</key>
+			<string>Select the type of driver to use for generating notifications. Local Server emits APNs notifications from the device but cannot operate in background. Remote Server uses a remote server to send notifications. Synthetic driver mimics notifications arrivals but does not use APNs.</string>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSMultiValueSpecifier</string>
+			<key>Title</key>
+			<string>Notification Driver</string>
+			<key>Key</key>
+			<string>notificationDriver</string>
+			<key>DefaultValue</key>
+			<string>loop</string>
+			<key>Values</key>
+			<array>
+				<string>loop</string>
+				<string>remote</string>
+				<string>sim</string>
+			</array>
+			<key>Titles</key>
+			<array>
+				<string>Local Server</string>
+				<string>Remote Server</string>
+				<string>Synthetic</string>
+			</array>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSGroupSpecifier</string>
+			<key>Title</key>
+			<string>Notification Interval</string>
+			<key>FooterText</key>
+			<string>The number of seconds between notification attempts.</string>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSTextFieldSpecifier</string>
+			<key>Key</key>
+			<string>emitInterval</string>
+			<key>DefaultValue</key>
+			<string>15</string>
+			<key>KeyboardType</key>
+			<string>NumberPad</string>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSGroupSpecifier</string>
+			<key>Title</key>
+			<string>Max Histogram Bin</string>
+			<key>FooterText</key>
+			<string>The histogram plot groups latencies in 1-second bins. This controls the largest bin to show.</string>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSTextFieldSpecifier</string>
+			<key>Key</key>
+			<string>maxHistogramBin</string>
+			<key>DefaultValue</key>
+			<string>30</string>
+			<key>KeyboardType</key>
+			<string>NumberPad</string>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSGroupSpecifier</string>
+			<key>Title</key>
+			<string>Dropbox Integration</string>
+			<key>FooterText</key>
+			<string>Linking with Dropbox allows NHTest to copy run data to its folder inside your Dropbox Apps folder.</string>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>IASKButtonSpecifier</string>
+			<key>Title</key>
+			<string>Link</string>
+			<key>IASKCellImage</key>
+			<string>dropboxBig</string>
+			<key>Key</key>
+			<string>dropboxLinkButtonText</string>
+		</dict>
+                <dict>
+                    <key>Type</key>
+                    <string>PSToggleSwitchSpecifier</string>
+                    <key>Key</key>
+                    <string>uploadAutomatically</string>
+                    <key>Title</key>
+                    <string>Upload automatically</string>
+                    <key>DefaultValue</key>
+                    <false/>
+                </dict>
+		<dict>
+			<key>Type</key>
+			<string>PSGroupSpecifier</string>
+			<key>Title</key>
+			<string>Remote Server Settings</string>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSTextFieldSpecifier</string>
+			<key>Key</key>
+			<string>remoteServerName</string>
+			<key>Title</key>
+			<string>Host</string>
+			<key>DefaultValue</key>
+			<string>brhemitter.azurewebsites.net</string>
+			<key>KeyboardType</key>
+			<string>URL</string>
+			<key>AutocapitalizationType</key>
+			<string>None</string>
+			<key>AutocorrectionType</key>
+			<string>No</string>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSTextFieldSpecifier</string>
+			<key>Key</key>
+			<string>remoteServerPort</string>
+			<key>Title</key>
+			<string>Port</string>
+			<key>DefaultValue</key>
+			<string>80</string>
+			<key>KeyboardType</key>
+			<string>NumberPad</string>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
+			<key>Key</key>
+			<string>resendUntilFetched</string>
+			<key>Title</key>
+			<string>Resend Until Fetched</string>
+			<key>DefaultValue</key>
+			<false/>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSGroupSpecifier</string>
+			<key>Title</key>
+			<string>Local Server Settings</string>
+			<key>FooterText</key>
+			<string>Certificate settings for the APNs service used by the local server. Certificates must be in PKS12 format and they must be installed in the root of the application bundle.</string>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSTextFieldSpecifier</string>
+			<key>Key</key>
+			<string>apnsProdCertFileName</string>
+			<key>Title</key>
+			<string>APN Cert (Prod)</string>
+			<key>DefaultValue</key>
+			<string>apn-nhtest-prod.p12</string>
+			<key>KeyboardType</key>
+			<string>URL</string>
+			<key>AutocapitalizationType</key>
+			<string>None</string>
+			<key>AutocorrectionType</key>
+			<string>No</string>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSTextFieldSpecifier</string>
+			<key>Key</key>
+			<string>apnsProdCertPassword</string>
+			<key>Title</key>
+			<string>Password</string>
+			<key>IsSecure</key>
+			<true/>
+			<key>DefaultValue</key>
+			<string></string>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSTextFieldSpecifier</string>
+			<key>Key</key>
+			<string>apnsDevCertFileName</string>
+			<key>Title</key>
+			<string>APN Cert (Sandbox)</string>
+			<key>DefaultValue</key>
+			<string>apn-nhtest-dev.p12</string>
+			<key>KeyboardType</key>
+			<string>URL</string>
+			<key>AutocapitalizationType</key>
+			<string>None</string>
+			<key>AutocorrectionType</key>
+			<string>No</string>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSTextFieldSpecifier</string>
+			<key>Key</key>
+			<string>apnsDevCertPassword</string>
+			<key>Title</key>
+			<string>Password</string>
+			<key>IsSecure</key>
+			<true/>
+			<key>DefaultValue</key>
+			<string></string>
+		</dict>
+	</array>
+</dict>
+</plist>

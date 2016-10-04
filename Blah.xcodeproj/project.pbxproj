@@ -50,7 +50,6 @@
 		BD4948AA1D89FB6900C50DE2 /* logs.pdf in Resources */ = {isa = PBXBuildFile; fileRef = BD4948A91D89FB6900C50DE2 /* logs.pdf */; };
 		BD58DDBC1D97C476007765E3 /* BRHTimeFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD58DDBB1D97C476007765E3 /* BRHTimeFormatter.swift */; };
 		BD58DDBE1D97CB7D007765E3 /* BRHTimeFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD58DDBD1D97CB7D007765E3 /* BRHTimeFormatterTests.swift */; };
-		BD5BA8F71DA1C91C000824F8 /* BRHRunData.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = BD5BA8F51DA1C91C000824F8 /* BRHRunData.xcdatamodeld */; };
 		BD5BA8FB1DA1CEED000824F8 /* BRHCoreDataStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD5BA8FA1DA1CEED000824F8 /* BRHCoreDataStack.swift */; };
 		BD7564951D99171000CE455F /* BRHLatencyFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD7564941D99171000CE455F /* BRHLatencyFormatter.swift */; };
 		BD7564971D991C5000CE455F /* BRHLatencyFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD7564961D991C5000CE455F /* BRHLatencyFormatterTests.swift */; };
@@ -139,7 +138,6 @@
 		BD5605351D8FC2F200CFE29B /* BRHUserSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BRHUserSettings.swift; sourceTree = "<group>"; };
 		BD58DDBB1D97C476007765E3 /* BRHTimeFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BRHTimeFormatter.swift; sourceTree = "<group>"; };
 		BD58DDBD1D97CB7D007765E3 /* BRHTimeFormatterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BRHTimeFormatterTests.swift; sourceTree = "<group>"; };
-		BD5BA8F61DA1C91C000824F8 /* BRHRunData.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = BRHRunData.xcdatamodel; sourceTree = "<group>"; };
 		BD5BA8FA1DA1CEED000824F8 /* BRHCoreDataStack.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BRHCoreDataStack.swift; sourceTree = "<group>"; };
 		BD7564941D99171000CE455F /* BRHLatencyFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BRHLatencyFormatter.swift; sourceTree = "<group>"; };
 		BD7564961D991C5000CE455F /* BRHLatencyFormatterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BRHLatencyFormatterTests.swift; sourceTree = "<group>"; };
@@ -229,7 +227,6 @@
 		BD4948451D89F23000C50DE2 /* Blah */ = {
 			isa = PBXGroup;
 			children = (
-				BD5BA8F51DA1C91C000824F8 /* BRHRunData.xcdatamodeld */,
 				BD49484C1D89F23000C50DE2 /* Main.storyboard */,
 				BD4948461D89F23000C50DE2 /* AppDelegate.swift */,
 				BD87F5981D8A2AD1007A6F99 /* PlotsViewController.swift */,
@@ -561,7 +558,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BD5BA8F71DA1C91C000824F8 /* BRHRunData.xcdatamodeld in Sources */,
 				BD4948471D89F23000C50DE2 /* AppDelegate.swift in Sources */,
 				BD87F59F1D8AAAD1007A6F99 /* BRHLatencyByTimeGraph.swift in Sources */,
 				BDFEEC3C1D91E875003E8555 /* BRHUserSettings.swift in Sources */,
@@ -729,6 +725,7 @@
 			baseConfigurationReference = AA6633FA5AD9CE9DEF3BFB71 /* Pods-Blah.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = Z7R62JH5A8;
 				INFOPLIST_FILE = Blah/Info.plist;
@@ -745,6 +742,7 @@
 			baseConfigurationReference = FF00F94554101A88F19C9D5D /* Pods-Blah.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = Z7R62JH5A8;
 				INFOPLIST_FILE = Blah/Info.plist;
@@ -815,19 +813,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCVersionGroup section */
-		BD5BA8F51DA1C91C000824F8 /* BRHRunData.xcdatamodeld */ = {
-			isa = XCVersionGroup;
-			children = (
-				BD5BA8F61DA1C91C000824F8 /* BRHRunData.xcdatamodel */,
-			);
-			currentVersion = BD5BA8F61DA1C91C000824F8 /* BRHRunData.xcdatamodel */;
-			path = BRHRunData.xcdatamodeld;
-			sourceTree = "<group>";
-			versionGroupType = wrapper.xcdatamodel;
-		};
-/* End XCVersionGroup section */
 	};
 	rootObject = BD49483B1D89F23000C50DE2 /* Project object */;
 }

@@ -17,9 +17,17 @@ target 'Blah' do
   pod 'CorePlot', '~> 2.2'
   pod 'InAppSettingsKit', '~> 2.8'
   pod 'SwiftyUserDefaults', '~> 3.0'
-
+  pod 'JSQCoreDataKit'
+  
   target 'BlahTests' do
     inherit! :search_paths
   end
   
+  post_install do |installer|
+      installer.pods_project.targets.each do |target|
+          target.build_configurations.each do |config|
+              config.build_settings['SWIFT_VERSION'] = '3.0'
+          end
+      end
+  end
 end

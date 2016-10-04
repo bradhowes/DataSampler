@@ -10,6 +10,11 @@ import Foundation
 
 final class BRHTimeFormatter : NumberFormatter {
 
+    /**
+     Generate a label for the given value.
+     - parameter obj: the value to convert
+     - returns: formatted strine value
+     */
     override func string(for obj: Any?) -> String? {
         guard let obj = obj as? NSNumber else { return nil }
         var dvalue = obj.doubleValue

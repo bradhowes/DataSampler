@@ -8,7 +8,7 @@
 
 import Foundation
 
-final class BRHBinFormatter : NumberFormatter {
+final class HistogramBinFormatter : NumberFormatter {
     private let lastBin: Int
     private let lastBinLabel: String
     
@@ -18,13 +18,13 @@ final class BRHBinFormatter : NumberFormatter {
 
     init(lastBin: Int) {
         self.lastBin = lastBin
-        self.lastBinLabel = BRHBinFormatter.formatValue(lastBin) + "+"
+        self.lastBinLabel = HistogramBinFormatter.formatValue(lastBin) + "+"
         super.init()
     }
 
     required init?(coder decoder: NSCoder) {
         self.lastBin = decoder.decodeInteger(forKey: "lastBin")
-        self.lastBinLabel = BRHBinFormatter.formatValue(lastBin)
+        self.lastBinLabel = HistogramBinFormatter.formatValue(lastBin)
         super.init(coder: decoder)
     }
 
@@ -34,7 +34,7 @@ final class BRHBinFormatter : NumberFormatter {
         switch value {
         case 0: return "<1"
         case lastBin: return lastBinLabel
-        default: return BRHBinFormatter.formatValue(value)
+        default: return HistogramBinFormatter.formatValue(value)
         }
     }
 }

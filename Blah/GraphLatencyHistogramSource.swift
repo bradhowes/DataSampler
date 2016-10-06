@@ -8,7 +8,7 @@
 
 import Foundation
 
-protocol BRHLatencyHistogramGraphSource {
+protocol GraphLatencyHistogramSource {
     
     func numberOfRecords() -> UInt
     

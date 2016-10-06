@@ -8,9 +8,9 @@
 
 import Foundation
 
-final class BRHHistogram : NSObject {
+final class Histogram : NSObject {
 
-    static let changedNotification = Notification.Name(rawValue: "BRHHistogramChanged")
+    static let changedNotification = Notification.Name(rawValue: "HistogramChanged")
 
     private(set) var bins: Array<Int> = []
     private(set) var maxBinIndex: Int
@@ -21,7 +21,7 @@ final class BRHHistogram : NSObject {
     }
     
     private func notify(binIndex: Int?) {
-        NotificationCenter.default.post(name: BRHHistogram.changedNotification, object: self,
+        NotificationCenter.default.post(name: Histogram.changedNotification, object: self,
                                         userInfo: ["binIndex": binIndex])
     }
 
@@ -67,9 +67,15 @@ final class BRHHistogram : NSObject {
         if !silently { notify(binIndex: index) }
     }
 
-    func replaceWith(values: Array<BRHLatencySample>) {
+    func replace(values: Array<LatencySample>) {
         makeBins(size: bins.count)
         values.forEach { add(value: $0.latency, silently: true) }
+        notify(binIndex: nil)
+    }
+
+    func replace(with rhs: Histogram) {
+        self.bins = rhs.bins
+        self.maxBinIndex = rhs.maxBinIndex
         notify(binIndex: nil)
     }
 
@@ -79,7 +85,7 @@ final class BRHHistogram : NSObject {
     }
 }
 
-extension BRHHistogram : BRHLatencyHistogramGraphSource {
+extension Histogram : GraphLatencyHistogramSource {
 
     func numberOfRecords() -> UInt {
         return UInt(bins.count)

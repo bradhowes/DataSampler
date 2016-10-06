@@ -9,7 +9,7 @@
 import XCTest
 @testable import Blah
 
-class BRHDateAdditionsTests: XCTestCase {
+class DateAdditionsTests: XCTestCase {
 
     override func setUp() {
         super.setUp()

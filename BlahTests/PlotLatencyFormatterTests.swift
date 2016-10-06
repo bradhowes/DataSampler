@@ -9,10 +9,10 @@
 import XCTest
 @testable import Blah
 
-class BRHLatencyFormatterTests: XCTestCase {
+class PlotLatencyFormatterTests: XCTestCase {
     
     func testFormatting() {
-        let lf = BRHLatencyFormatter()
+        let lf = PlotLatencyFormatter()
         XCTAssertEqual(lf.string(for: NSNumber(value: 0.0)), "0")
         XCTAssertEqual(lf.string(for: NSNumber(value: 0.1)), "0.1")
         XCTAssertEqual(lf.string(for: NSNumber(value: 0.01)), "0")

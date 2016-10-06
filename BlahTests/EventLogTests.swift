@@ -1,5 +1,5 @@
 //
-//  BRHLoggerTests
+//  BRHEventLogTests.swift
 //  BlahTests
 //
 //  Created by Brad Howes on 9/14/16.
@@ -9,7 +9,7 @@
 import XCTest
 @testable import Blah
 
-class BRHLoggerTests: XCTestCase {
+class EventLogTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
@@ -23,22 +23,22 @@ class BRHLoggerTests: XCTestCase {
     
     func testExample() {
         print("NSHomeDirectory: \(NSHomeDirectory())")
-        let log = BRHLogger.sharedInstance()
+        let log = EventLog.singleton
         let directory = URL(fileURLWithPath: NSHomeDirectory(), isDirectory: true)
         log.logPath = directory
 
-        BRHLogger.log(format: "this %@ %d %@", "is", 1, "test")
-        BRHLogger.log("this", "is", 2, "test")
+        EventLog.log("this", "is", "a", "test")
+        EventLog.log(1, 2, 3, 4.0, "hello", 5.0)
         log.save()
-        
+
         let s = log.logContentFor(folder: directory)
         print("s: \(s)")
-        XCTAssertTrue(s.contains("this is 1 test\n"))
-        XCTAssertTrue(s.contains("this is 2 test\n"))
 
+        XCTAssertTrue(s.contains("this,is,a,test\n"))
+        XCTAssertTrue(s.contains("1,2,3,4.0,hello,5.0\n"))
         // Use XCTAssert and related functions to verify your tests produce the correct results.
     }
-    
+
     func testPerformanceExample() {
         // This is an example of a performance test case.
         self.measure {

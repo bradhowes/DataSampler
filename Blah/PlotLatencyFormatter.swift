@@ -8,7 +8,7 @@
 
 import Foundation
 
-final class BRHLatencyFormatter : NumberFormatter {
+final class PlotLatencyFormatter : NumberFormatter {
 
     override func string(for obj: Any?) -> String? {
         guard let obj = obj as? NSNumber else { return nil }

@@ -8,7 +8,7 @@
 
 import Foundation
 
-final class BRHTimeFormatter : NumberFormatter {
+final class PlotTimeFormatter : NumberFormatter {
 
     /**
      Generate a label for the given value.

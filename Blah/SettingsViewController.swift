@@ -27,7 +27,7 @@ class SettingsViewController : IASKAppSettingsViewController, IASKSettingsDelega
      */
     override func viewWillAppear(_ animated: Bool) {
         // Just in case the settings changed since we last presented this view -- say from the iOS Settings app
-        BRHUserSettings.settings().syncFromUserDefaults()
+        UserSettings.singleton.syncFromUserDefaults()
         super.viewWillAppear(animated)
     }
 
@@ -38,7 +38,7 @@ class SettingsViewController : IASKAppSettingsViewController, IASKSettingsDelega
      */
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        BRHUserSettings.settings().syncFromUserDefaults()
+        UserSettings.singleton.syncFromUserDefaults()
     }
 
     func settingsViewControllerDidEnd(_ sender: IASKAppSettingsViewController) {

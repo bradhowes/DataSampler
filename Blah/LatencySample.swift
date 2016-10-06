@@ -8,7 +8,7 @@
 
 import Foundation
 
-class BRHLatencySample: NSObject, NSCoding, Comparable {
+class LatencySample: NSObject, NSCoding, Comparable {
     
     let kIdentifierKey: String = "identifier"
     let kLatencyKey: String = "latency"
@@ -64,16 +64,16 @@ class BRHLatencySample: NSObject, NSCoding, Comparable {
 /**
  @brief Support Equatable protocol for BRHLatencySample objects, comparing identifiers
  */
-func ==(x: BRHLatencySample, y: BRHLatencySample) -> Bool { return x.identifier == y.identifier }
+func ==(x: LatencySample, y: LatencySample) -> Bool { return x.identifier == y.identifier }
 
 /**
  @brief Support Comparable protocol for BRHLatencySample objects, ordering by increasing latency value
  */
-func <(x: BRHLatencySample, y: BRHLatencySample) -> Bool { return x.latency < y.latency }
+func <(x: LatencySample, y: LatencySample) -> Bool { return x.latency < y.latency }
 
 /**
  @brief Determine difference between two BRHLatencySample arrival times. If LHS < RHS the result will be negative.
  */
-func -(lhs: BRHLatencySample, rhs: BRHLatencySample) -> TimeInterval {
+func -(lhs: LatencySample, rhs: LatencySample) -> TimeInterval {
     return lhs.arrivalTime.timeIntervalSince(rhs.arrivalTime)
 }

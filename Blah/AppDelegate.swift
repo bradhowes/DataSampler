@@ -8,21 +8,19 @@
 
 import UIKit
 import UserNotifications
+import CoreData
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
+    static var singleton: AppDelegate { return UIApplication.shared.delegate as! AppDelegate }
+
     var window: UIWindow?
     var deviceToken: Data? = nil
-    var runData: BRHRunData = BRHRunData()
+    var runData: RunData = RunData()
+    var recordingsStore = RecordingsStore.singleton
 
-    static func singleton() -> AppDelegate {
-        return UIApplication.shared.delegate as! AppDelegate
-    }
-    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-
-        let _ = BRHUserSettings.settings()
 
         if launchOptions == nil || launchOptions!.count == 0 {
 

@@ -11,12 +11,12 @@ import Foundation
 
 @testable import Blah
 
-class BlahUserSettingsTests: XCTestCase {
+class UserSettingsTests: XCTestCase {
 
-    let userSettings = BRHUserSettings.settings()
+    let userSettings = UserSettings.singleton
 
     override func setUp() {
-        userSettings.emitInterval.value = 120
+        userSettings.emitInterval = 120
         userSettings.syncToUserDefaults()
         super.setUp()
     }
@@ -26,14 +26,13 @@ class BlahUserSettingsTests: XCTestCase {
     }
 
     func testInitialState() {
-        XCTAssertEqual(BRHSettingBase.defaults.count, 12)
+        XCTAssertEqual(SettingBase.defaults.count, 12)
     }
 
     func testDelayedUpdate() {
-        XCTAssertEqual(userSettings.emitInterval.value, 120)
-        userSettings.emitInterval.value = 100
-        XCTAssertEqual(userSettings.emitInterval.value, 100)
-        XCTAssertEqual(userSettings.emitInterval.defaultsValue, "100")
+        XCTAssertEqual(userSettings.emitInterval, 120)
+        userSettings.emitInterval = 100
+        XCTAssertEqual(userSettings.emitInterval, 100)
 
         var ei = UserDefaults.standard.string(forKey: "emitInterval")
         XCTAssertNotNil(ei)
@@ -42,17 +41,17 @@ class BlahUserSettingsTests: XCTestCase {
         userSettings.syncToUserDefaults()
         CFPreferencesAppSynchronize(kCFPreferencesCurrentApplication)
         
-        XCTAssertEqual(userSettings.emitInterval.value, 100)
+        XCTAssertEqual(userSettings.emitInterval, 100)
         ei = UserDefaults.standard.string(forKey: "emitInterval")
         XCTAssertNotNil(ei)
         XCTAssertEqual(ei!, "100")
     }
     
     func testInvalidIntValueUpdate() {
-        XCTAssertEqual(userSettings.emitInterval.value, 120)
+        XCTAssertEqual(userSettings.emitInterval, 120)
         UserDefaults.standard.set("", forKey: "emitInteval")
         userSettings.syncFromUserDefaults()
-        XCTAssertEqual(userSettings.emitInterval.value, 120)
+        XCTAssertEqual(userSettings.emitInterval, 120)
     }
 
     func testPerformanceExample() {

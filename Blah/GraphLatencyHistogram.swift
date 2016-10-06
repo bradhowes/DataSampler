@@ -10,9 +10,9 @@ import Foundation
 import UIKit
 import CorePlot
 
-class BRHLatencyHistogramGraph : CPTGraphHostingView, CPTPlotDataSource, CPTBarPlotDelegate, CPTAxisDelegate {
+class GraphLatencyHistogram : CPTGraphHostingView, CPTPlotDataSource, CPTBarPlotDelegate, CPTAxisDelegate {
 
-    var source: BRHLatencyHistogramGraphSource! {
+    var source: GraphLatencyHistogramSource! {
         didSet {
             if hostedGraph == nil {
                 makeGraph()
@@ -45,7 +45,7 @@ class BRHLatencyHistogramGraph : CPTGraphHostingView, CPTPlotDataSource, CPTBarP
     fileprivate func makeGraph() {
 
         NotificationCenter.default.addObserver(self, selector: #selector(sourceChanged),
-                                               name: BRHHistogram.changedNotification,
+                                               name: Histogram.changedNotification,
                                                object: nil)
 
         let graph = CPTXYGraph(frame: self.frame)
@@ -157,12 +157,8 @@ class BRHLatencyHistogramGraph : CPTGraphHostingView, CPTPlotDataSource, CPTBarP
         updateBounds()
     }
 
-    fileprivate func redraw() {
-        if let plots = hostedGraph?.allPlots() {
-            for each in plots {
-                each.setDataNeedsReloading()
-            }
-        }
+    func redraw() {
+        hostedGraph?.allPlots().forEach { $0.setDataNeedsReloading() }
     }
 
     fileprivate func updateBounds() {
@@ -178,7 +174,7 @@ class BRHLatencyHistogramGraph : CPTGraphHostingView, CPTPlotDataSource, CPTBarP
 
         guard let axisSet = hostedGraph.axisSet as? CPTXYAxisSet else { return }
         guard let x = axisSet.xAxis else { return }
-        x.labelFormatter = BRHBinFormatter(lastBin: binCount - 1)
+        x.labelFormatter = HistogramBinFormatter(lastBin: binCount - 1)
         x.visibleRange = CPTPlotRange(location: -0.5, length: NSNumber(integerLiteral: binCount))
         x.gridLinesRange = CPTPlotRange(location: -1.0, length: NSNumber(integerLiteral: maxY))
 

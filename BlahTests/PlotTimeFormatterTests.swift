@@ -9,10 +9,10 @@
 import XCTest
 @testable import Blah
 
-class BRHTimeFormatterTests: XCTestCase {
+class PlotTimeFormatterTests: XCTestCase {
     
     func testFormatting() {
-        let bf = BRHTimeFormatter()
+        let bf = PlotTimeFormatter()
         XCTAssertEqual(bf.string(for: NSNumber(value: 0.0)), "0s")
         XCTAssertEqual(bf.string(for: NSNumber(value: 0.9)), "1s")
         XCTAssertEqual(bf.string(for: NSNumber(value: 59.99)), "1m")

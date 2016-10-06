@@ -41,7 +41,7 @@ extension DefaultsKeys {
 /**
  @brief Define converters between a natural type and the one use when storing in NSUserDefaults.
  */
-protocol BRHValueConverter {
+protocol ValueConverter {
     associatedtype ValueType
     associatedtype DefaultsType
     
@@ -69,7 +69,7 @@ protocol BRHValueConverter {
 /**
  @brief Define Int<->String converters
  */
-struct BRHIntValueConverter : BRHValueConverter {
+struct IntValueConverter : ValueConverter {
     static func defaultsToValue(_ value: String) -> Int? { return Int(value) }
     static func valueToDefaults(_ value: Int) -> String { return String(value) }
     static func valueToAnyObject(_ value: Int) -> AnyObject? { return NSNumber(value: value as Int) }
@@ -85,7 +85,7 @@ struct BRHIntValueConverter : BRHValueConverter {
 /**
  @brief Define Double<->String converters
  */
-struct BRHDoubleValueConverter : BRHValueConverter {
+struct DoubleValueConverter : ValueConverter {
     static func defaultsToValue(_ value: String) -> Double? { return Double(value) }
     static func valueToDefaults(_ value: Double) -> String { return String(value) }
     static func valueToAnyObject(_ value: Double) -> AnyObject? { return NSNumber(value: value as Double) }
@@ -101,7 +101,7 @@ struct BRHDoubleValueConverter : BRHValueConverter {
 /**
  @brief Define String<->String converters (no-op)
  */
-struct BRHStringValueConverter : BRHValueConverter {
+struct StringValueConverter : ValueConverter {
     static func defaultsToValue(_ value: String) -> String? { return value }
     static func valueToDefaults(_ value: String) -> String { return value }
     static func valueToAnyObject(_ value: String) -> AnyObject? { return NSString(utf8String: value) }
@@ -113,7 +113,7 @@ struct BRHStringValueConverter : BRHValueConverter {
 /**
  @brief Define Bool<->Bool converters (no-op)
  */
-struct BRHBoolValueConverter : BRHValueConverter {
+struct BoolValueConverter : ValueConverter {
     static func defaultsToValue(_ value: Bool) -> Bool? { return value }
     static func valueToDefaults(_ value: Bool) -> Bool { return value }
     static func valueToAnyObject(_ value: Bool) -> AnyObject? { return NSNumber(value: value as Bool) }
@@ -122,7 +122,7 @@ struct BRHBoolValueConverter : BRHValueConverter {
     }
 }
 
-protocol BRHSettingDescription {
+protocol SettingDescription {
     var settingDescription: String { get }
 }
 
@@ -131,12 +131,12 @@ protocol BRHSettingDescription {
  NSUserDefaults. Also registers two closures, one to write current setting value to NSUserDefaults and the other
  to set the current value from a NSUserDefaults entry.
  */
-class BRHSettingBase {
+class SettingBase {
     typealias Synchro = ()->Void
     static var defaults: [String:AnyObject] = [:]
     static var syncToUserDefaultsSynchros: [Synchro] = []
     static var syncFromUserDefaultsSynchros: [Synchro] = []
-    static var settings: [BRHSettingDescription] = []
+    static var settings: [SettingDescription] = []
 
     static func reset() {
         defaults = [:]
@@ -148,22 +148,22 @@ class BRHSettingBase {
     func registerSetting(_ key: String, value: AnyObject?,
                          syncToUserDefaults: @escaping Synchro,
                          syncFromUserDefaults: @escaping Synchro) {
-        BRHSettingBase.defaults[key] = value
-        BRHSettingBase.syncToUserDefaultsSynchros.append(syncToUserDefaults)
-        BRHSettingBase.syncFromUserDefaultsSynchros.append(syncFromUserDefaults)
+        SettingBase.defaults[key] = value
+        SettingBase.syncToUserDefaultsSynchros.append(syncToUserDefaults)
+        SettingBase.syncFromUserDefaultsSynchros.append(syncFromUserDefaults)
     }
 
     /**
      Update NSUserDefaults using the internal values
      */
     static func syncToUserDefaults() {
-        BRHSettingBase.syncToUserDefaultsSynchros.forEach { $0() }
+        SettingBase.syncToUserDefaultsSynchros.forEach { $0() }
     }
     /**
      Update the internal values using contents from NSUserDefaults.
      */
     static func syncFromUserDefaults() {
-        for (index, synchro) in BRHSettingBase.syncFromUserDefaultsSynchros.enumerated() {
+        for (index, synchro) in SettingBase.syncFromUserDefaultsSynchros.enumerated() {
             print("\(index)")
             synchro()
         }
@@ -175,12 +175,12 @@ class BRHSettingBase {
  @brief Define a user setting that knows how to convert between a natural type (eg. Int or Double) and the type used to
  hold the value in the NSUserDefaults database.
  */
-final class BRHSetting<ValueType, DefaultsType, ValueConverter: BRHValueConverter> : BRHSettingBase, BRHSettingDescription, CustomDebugStringConvertible where ValueType: Equatable, ValueType == ValueConverter.ValueType, DefaultsType == ValueConverter.DefaultsType {
+final class Setting<ValueType, DefaultsType, VC: ValueConverter> : SettingBase, SettingDescription, CustomDebugStringConvertible where ValueType: Equatable, ValueType == VC.ValueType, DefaultsType == VC.DefaultsType {
 
     let key: String
     let notificationName: Notification.Name
     var value: ValueType
-    var defaultsValue: DefaultsType { return ValueConverter.valueToDefaults(self.value) }
+    var defaultsValue: DefaultsType { return VC.valueToDefaults(self.value) }
 
     /**
      Initialize new instance
@@ -193,13 +193,13 @@ final class BRHSetting<ValueType, DefaultsType, ValueConverter: BRHValueConverte
         self.notificationName = Notification.Name(rawValue: "BRHUserSettings." + self.key)
         self.value = value
         super.init()
-        BRHSettingBase.settings.append(self)
-        self.registerSetting(self.key, value: ValueConverter.valueToAnyObject(self.value),
+        SettingBase.settings.append(self)
+        self.registerSetting(self.key, value: VC.valueToAnyObject(self.value),
                              syncToUserDefaults: {
-                                Defaults[self.key] = ValueConverter.valueToAnyObject(self.value)
+                                Defaults[self.key] = VC.valueToAnyObject(self.value)
             },
                              syncFromUserDefaults: {
-                                if let value = ValueConverter.anyObjectToValue(Defaults.object(forKey: self.key) as AnyObject?) {
+                                if let value = VC.anyObjectToValue(Defaults.object(forKey: self.key) as AnyObject?) {
                                     if self.value != value {
                                         print("-- setting \(self.key) changed - old: \(self.value) new: \(value)")
                                         self.value = value
@@ -209,7 +209,7 @@ final class BRHSetting<ValueType, DefaultsType, ValueConverter: BRHValueConverte
                                     }
                                 }
                                 else {
-                                    Defaults[self.key] = ValueConverter.valueToAnyObject(self.value)
+                                    Defaults[self.key] = VC.valueToAnyObject(self.value)
                                 }
         })
     }
@@ -222,48 +222,60 @@ final class BRHSetting<ValueType, DefaultsType, ValueConverter: BRHValueConverte
     var settingDescription: String { return description }
 }
 
-typealias BRHStringSetting = BRHSetting<String, String, BRHStringValueConverter>
-typealias BRHIntSetting = BRHSetting<Int, String, BRHIntValueConverter>
-typealias BRHDoubleSetting = BRHSetting<Double, String, BRHDoubleValueConverter>
-typealias BRHBoolSetting = BRHSetting<Bool, Bool, BRHBoolValueConverter>
+typealias StringSetting = Setting<String, String, StringValueConverter>
+typealias IntSetting = Setting<Int, String, IntValueConverter>
+typealias DoubleSetting = Setting<Double, String, DoubleValueConverter>
+typealias BoolSetting = Setting<Bool, Bool, BoolValueConverter>
 
 /**
  @brief Collection of all user settings.
  */
-final class BRHUserSettings {
-    static let kUpdatedNotification = Notification.Name(rawValue: "BRHUserSettingsUpdated")
+final class UserSettings {
+    static let singleton: UserSettings = UserSettings()
+    static let kUpdatedNotification = Notification.Name(rawValue: "UserSettingsUpdated")
 
-    var notificationDriver: BRHStringSetting
-    var emitInterval: BRHIntSetting
-    var maxHistogramBin: BRHIntSetting
-    var dropboxLinkButtonText: BRHStringSetting
-    var uploadAutomatically: BRHBoolSetting
-    var remoteServerName: BRHStringSetting
-    var remoteServerPort: BRHIntSetting
-    var resendUntilFetched: BRHBoolSetting
-    var apnsProdCertFileName: BRHStringSetting
-    var apnsProdCertPassword: BRHStringSetting
-    var apnsDevCertFileName: BRHStringSetting
-    var apnsDevCertPassword: BRHStringSetting
+    private var _notificationDriver: StringSetting
+    var notificationDriver: String {
+        get { return _notificationDriver.value }
+        set { _notificationDriver.value = newValue }
+    }
+
+    private var _emitInterval: IntSetting
+    var emitInterval: Int {
+        get { return _emitInterval.value }
+        set { _emitInterval.value = newValue }
+    }
+
+    var maxHistogramBin: IntSetting
+    var dropboxLinkButtonText: StringSetting
+    var uploadAutomatically: BoolSetting
+    var remoteServerName: StringSetting
+    var remoteServerPort: IntSetting
+    var resendUntilFetched: BoolSetting
+    var apnsProdCertFileName: StringSetting
+    var apnsProdCertPassword: StringSetting
+    var apnsDevCertFileName: StringSetting
+    var apnsDevCertPassword: StringSetting
 
     /**
      Initialize user settings collection. Sets up default values in NSUserDefaults.
      */
-    fileprivate init() {
-        BRHSettingBase.reset()
-        notificationDriver = BRHStringSetting(tag: .notificationDriver, value: "remote")
-        emitInterval = BRHIntSetting(tag: .emitInterval, value: 120)
-        maxHistogramBin = BRHIntSetting(tag: .maxHistogramBin, value: 30)
-        dropboxLinkButtonText = BRHStringSetting(tag: .dropboxLinkButtonText, value: "Link")
-        uploadAutomatically = BRHBoolSetting(tag: .uploadAutomatically, value: true)
-        remoteServerName = BRHStringSetting(tag: .remoteServerName, value: "brhemitter.azurewebsites.net")
-        remoteServerPort = BRHIntSetting(tag: .remoteServerPort, value: 80)
-        resendUntilFetched = BRHBoolSetting(tag: .resendUntilFetched, value: true)
-        apnsProdCertFileName = BRHStringSetting(tag: .apnsProdCertFileName, value: "apn-nhtest-prod.p12")
-        apnsProdCertPassword = BRHStringSetting(tag: .apnsProdCertPassword, value: "")
-        apnsDevCertFileName = BRHStringSetting(tag: .apnsDevCertFileName, value: "apn-nhtest-dev.p12")
-        apnsDevCertPassword = BRHStringSetting(tag: .apnsDevCertPassword, value: "")
-        Defaults.register(defaults: BRHSettingBase.defaults)
+    private init() {
+        SettingBase.reset()
+        _notificationDriver = StringSetting(tag: .notificationDriver, value: "remote")
+        _emitInterval = IntSetting(tag: .emitInterval, value: 120)
+
+        maxHistogramBin = IntSetting(tag: .maxHistogramBin, value: 30)
+        dropboxLinkButtonText = StringSetting(tag: .dropboxLinkButtonText, value: "Link")
+        uploadAutomatically = BoolSetting(tag: .uploadAutomatically, value: true)
+        remoteServerName = StringSetting(tag: .remoteServerName, value: "brhemitter.azurewebsites.net")
+        remoteServerPort = IntSetting(tag: .remoteServerPort, value: 80)
+        resendUntilFetched = BoolSetting(tag: .resendUntilFetched, value: true)
+        apnsProdCertFileName = StringSetting(tag: .apnsProdCertFileName, value: "apn-nhtest-prod.p12")
+        apnsProdCertPassword = StringSetting(tag: .apnsProdCertPassword, value: "")
+        apnsDevCertFileName = StringSetting(tag: .apnsDevCertFileName, value: "apn-nhtest-dev.p12")
+        apnsDevCertPassword = StringSetting(tag: .apnsDevCertPassword, value: "")
+        Defaults.register(defaults: SettingBase.defaults)
         syncFromUserDefaults()
         dump()
     }
@@ -272,15 +284,15 @@ final class BRHUserSettings {
      Update NSUserDefaults using the internal values
      */
     func syncToUserDefaults() {
-        BRHSettingBase.syncToUserDefaults()
+        SettingBase.syncToUserDefaults()
     }
     
     /**
      Update the internal values using contents from NSUserDefaults.
      */
     func syncFromUserDefaults() {
-        BRHSettingBase.syncFromUserDefaults()
-        NotificationCenter.default.post(name: BRHUserSettings.kUpdatedNotification, object: self, userInfo: nil)
+        SettingBase.syncFromUserDefaults()
+        NotificationCenter.default.post(name: UserSettings.kUpdatedNotification, object: self, userInfo: nil)
         dump()
     }
 
@@ -288,14 +300,6 @@ final class BRHUserSettings {
      Print out the current application settings.
      */
     func dump() {
-        BRHSettingBase.settings.forEach { print($0.settingDescription) }
-    }
-}
-
-private var singleton: BRHUserSettings?
-extension BRHUserSettings {
-    static func settings() -> BRHUserSettings {
-        if singleton == nil { singleton = BRHUserSettings() }
-        return singleton!
+        SettingBase.settings.forEach { print($0.settingDescription) }
     }
 }

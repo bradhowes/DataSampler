@@ -9,7 +9,7 @@
 import XCTest
 @testable import Blah
 
-class BRHCollectionAdditionsTests: XCTestCase {
+class CollectionAdditionsTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
@@ -44,7 +44,7 @@ class BRHCollectionAdditionsTests: XCTestCase {
     }
 
     func testOrderedArray() {
-        var collection = BRHOrderedArray<Int>(predicate: <)
+        var collection = OrderedArray<Int>(predicate: <)
         XCTAssertEqual(collection.count, 0)
         collection.add(value:10)
         XCTAssertEqual(collection.count, 1)

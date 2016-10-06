@@ -9,7 +9,7 @@
 import UIKit
 import CorePlot
 
-class BRHLatencyByTimeGraph : CPTGraphHostingView, CPTScatterPlotDataSource {
+class GraphLatencyByTime : CPTGraphHostingView, CPTScatterPlotDataSource {
     
     static let kLatencyPlotId = NSString(string: "Latency")
     static let kAveragePlotId = NSString(string: "Avg")
@@ -18,25 +18,28 @@ class BRHLatencyByTimeGraph : CPTGraphHostingView, CPTScatterPlotDataSource {
     
     let kPlotSymbolSize: Double = 8.0
 
-    var source: BRHRunData! {
+    var source: RunData! {
         didSet {
             if hostedGraph == nil {
                 makeGraph()
             }
             else {
+                updateBounds()
                 redraw()
             }
             updateTitle()
         }
     }
 
-    var updating = false
     var targetYMax: Double?
 
     fileprivate func makeGraph() {
 
         NotificationCenter.default.addObserver(self, selector: #selector(sampleAdded),
-                                               name: BRHRunData.newSample,
+                                               name: RunData.newSample,
+                                               object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(redraw),
+                                               name: RunData.replacedData,
                                                object: nil)
 
         let graph = CPTXYGraph(frame: self.frame)
@@ -104,7 +107,7 @@ class BRHLatencyByTimeGraph : CPTGraphHostingView, CPTScatterPlotDataSource {
 
         x.axisConstraints = CPTConstraints(lowerOffset: 0.0) // Keep the X axis from moving up/down when scrolling
         x.labelingPolicy = .automatic
-        x.labelFormatter = BRHTimeFormatter()
+        x.labelFormatter = PlotTimeFormatter()
         
         x.tickDirection = .negative
         x.majorTickLineStyle = gridLineStyle
@@ -134,7 +137,7 @@ class BRHLatencyByTimeGraph : CPTGraphHostingView, CPTScatterPlotDataSource {
         y.axisConstraints = CPTConstraints(lowerOffset: 0.0)
 
         y.labelingPolicy = .locationsProvided
-        y.labelFormatter = BRHLatencyFormatter()
+        y.labelFormatter = PlotLatencyFormatter()
 
         y.majorGridLineStyle = gridLineStyle
         y.minorGridLineStyle = nil
@@ -196,7 +199,7 @@ class BRHLatencyByTimeGraph : CPTGraphHostingView, CPTScatterPlotDataSource {
     func makeLatencyPlot(graph: CPTXYGraph, plotSpace: CPTXYPlotSpace) {
 
         let plot = CPTScatterPlot()
-        plot.identifier = BRHLatencyByTimeGraph.kLatencyPlotId
+        plot.identifier = GraphLatencyByTime.kLatencyPlotId
         plot.dataSource = self
         plot.cachePrecision = .double
 
@@ -225,7 +228,7 @@ class BRHLatencyByTimeGraph : CPTGraphHostingView, CPTScatterPlotDataSource {
     func makeAveragePlot(graph: CPTXYGraph, plotSpace: CPTXYPlotSpace) {
         
         let plot = CPTScatterPlot()
-        plot.identifier = BRHLatencyByTimeGraph.kAveragePlotId
+        plot.identifier = GraphLatencyByTime.kAveragePlotId
         plot.dataSource = self
         plot.cachePrecision = .double
 
@@ -242,7 +245,7 @@ class BRHLatencyByTimeGraph : CPTGraphHostingView, CPTScatterPlotDataSource {
     func makeMedianPlot(graph: CPTXYGraph, plotSpace: CPTXYPlotSpace) {
 
         let plot = CPTScatterPlot()
-        plot.identifier = BRHLatencyByTimeGraph.kMedianPlotId
+        plot.identifier = GraphLatencyByTime.kMedianPlotId
         plot.dataSource = self
         plot.cachePrecision = .double
         
@@ -259,7 +262,7 @@ class BRHLatencyByTimeGraph : CPTGraphHostingView, CPTScatterPlotDataSource {
     func makeMissingPlot(graph: CPTXYGraph, plotSpace: CPTXYPlotSpace) {
         
         let plot = CPTScatterPlot()
-        plot.identifier = BRHLatencyByTimeGraph.kMissingPlotId
+        plot.identifier = GraphLatencyByTime.kMissingPlotId
         plot.dataSource = self
         plot.cachePrecision = .double
 
@@ -284,6 +287,8 @@ class BRHLatencyByTimeGraph : CPTGraphHostingView, CPTScatterPlotDataSource {
         else {
             x.title = String(format: "%lds Intervals", source.emitInterval)
         }
+
+        Logger.log("new title: \(x.title)")
     }
 
     func sampleAdded(notification: Notification) {
@@ -293,7 +298,7 @@ class BRHLatencyByTimeGraph : CPTGraphHostingView, CPTScatterPlotDataSource {
         guard let missing = userInfo["missing"] as? Int else { return }
 
         plots.forEach {
-            if $0.identifier === BRHLatencyByTimeGraph.kMissingPlotId {
+            if $0.identifier === GraphLatencyByTime.kMissingPlotId {
                 if missing > 0 {
                     let numRecords = missing * 2 + 1
                     $0.insertData(at: UInt(source.missing.count - numRecords), numberOfRecords: UInt(numRecords))
@@ -304,7 +309,9 @@ class BRHLatencyByTimeGraph : CPTGraphHostingView, CPTScatterPlotDataSource {
             }
         }
 
-        updateBounds()
+        DispatchQueue.main.async {
+            self.updateBounds()
+        }
     }
 
     func calculatePlotWidth() -> Double {
@@ -327,15 +334,8 @@ class BRHLatencyByTimeGraph : CPTGraphHostingView, CPTScatterPlotDataSource {
 
     func updateBounds() {
         guard let plotSpace = hostedGraph?.allPlotSpaces().last as? CPTXYPlotSpace else { return }
-        if self.updating { return }
-
-        self.updating = true
-        defer {
-            self.updating = false
-        }
-
-        let visiblePoints = calculatePlotWidth() * source.estArrivalInterval
         let plotData = source.samples
+        let visiblePoints = calculatePlotWidth() * source.estArrivalInterval
 
         var xMin = 0.0
         var xMax = visiblePoints
@@ -345,6 +345,9 @@ class BRHLatencyByTimeGraph : CPTGraphHostingView, CPTScatterPlotDataSource {
             let xPos = xValueFor(sample: tmp)
             if xPos > xMax {
                 xMin = xPos - xMax
+                xMax = xPos
+            }
+            else if xPos < xMax {
                 xMax = xPos
             }
         }
@@ -410,8 +413,11 @@ class BRHLatencyByTimeGraph : CPTGraphHostingView, CPTScatterPlotDataSource {
     }
 
     func redraw() {
-        hostedGraph?.allPlots().forEach { $0.setDataNeedsReloading() }
-        updateBounds()
+        DispatchQueue.main.async {
+            self.hostedGraph?.allPlots().forEach { $0.setDataNeedsReloading() }
+            self.updateTitle()
+            self.updateBounds()
+        }
     }
 
     // - Data Source Methods
@@ -419,31 +425,31 @@ class BRHLatencyByTimeGraph : CPTGraphHostingView, CPTScatterPlotDataSource {
     func numberOfRecords(for plot: CPTPlot) -> UInt {
         guard let tag = plot.identifier as? NSString else { return 0 }
         switch tag {
-        case BRHLatencyByTimeGraph.kMissingPlotId: return UInt(source.missing.count)
+        case GraphLatencyByTime.kMissingPlotId: return UInt(source.missing.count)
         default: return UInt(source.samples.count)
         }
     }
 
-    func xValueFor(sample: BRHLatencySample) -> Double {
+    func xValueFor(sample: LatencySample) -> Double {
         return sample.arrivalTime.timeIntervalSince(source.startTime)
     }
 
-    func yValueFor(sample: BRHLatencySample) -> Double {
+    func yValueFor(sample: LatencySample) -> Double {
         return sample.latency
     }
 
     func number(for plot: CPTPlot, field fieldEnum: UInt, record idx: UInt) -> Any? {
         guard let field = CPTScatterPlotField(rawValue: Int(fieldEnum)) else { return nil }
         guard let tag = plot.identifier as? NSString else { return nil }
-        let sample = tag == BRHLatencyByTimeGraph.kMissingPlotId ? source.missing[Int(idx)] : source.samples[Int(idx)]
+        let sample = tag == GraphLatencyByTime.kMissingPlotId ? source.missing[Int(idx)] : source.samples[Int(idx)]
         switch field {
         case .X: return xValueFor(sample: sample)
         case .Y:
             switch plot.identifier as! NSString {
-            case BRHLatencyByTimeGraph.kLatencyPlotId: return sample.latency
-            case BRHLatencyByTimeGraph.kAveragePlotId: return sample.averageLatency
-            case BRHLatencyByTimeGraph.kMedianPlotId: return sample.medianLatency
-            case BRHLatencyByTimeGraph.kMissingPlotId: return sample.latency
+            case GraphLatencyByTime.kLatencyPlotId: return sample.latency
+            case GraphLatencyByTime.kAveragePlotId: return sample.averageLatency
+            case GraphLatencyByTime.kMedianPlotId: return sample.medianLatency
+            case GraphLatencyByTime.kMissingPlotId: return sample.latency
             default: return 0.0
             }
         }
@@ -451,7 +457,7 @@ class BRHLatencyByTimeGraph : CPTGraphHostingView, CPTScatterPlotDataSource {
 
 }
 
-extension BRHLatencyByTimeGraph : CPTPlotSpaceDelegate {
+extension GraphLatencyByTime : CPTPlotSpaceDelegate {
     
     func plotSpace(_ space: CPTPlotSpace, didChangePlotRangeFor coordinate: CPTCoordinate) {
         guard let plotSpace = space as? CPTXYPlotSpace else { return }
@@ -467,13 +473,13 @@ extension BRHLatencyByTimeGraph : CPTPlotSpaceDelegate {
                 plotSpace.xRange = CPTPlotRange(location: NSNumber(value: 0.0), length: xRange.length)
             }
 
-            if !self.updating { updateYRange() }
+            updateYRange()
         default: break
         }
     }
 }
 
-extension BRHLatencyByTimeGraph : CPTLegendDelegate {
+extension GraphLatencyByTime : CPTLegendDelegate {
     func legend(_ legend: CPTLegend, legendEntryFor plot: CPTPlot, wasSelectedAt idx: UInt) {
         plot.isHidden = !plot.isHidden
     }

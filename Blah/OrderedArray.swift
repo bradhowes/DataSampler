@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct BRHOrderedArray<Element:Comparable> : Collection, CustomDebugStringConvertible {
+struct OrderedArray<Element:Comparable> : Collection, CustomDebugStringConvertible {
 
     typealias Predicate = (Element, Element) -> Bool
 

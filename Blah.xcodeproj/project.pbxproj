@@ -8,15 +8,15 @@
 
 /* Begin PBXBuildFile section */
 		A99F36D20E19A3863256F81F /* Pods_BlahTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9C7739DC058680F7AC8841A /* Pods_BlahTests.framework */; };
-		BD0246371D9C119E008AEC26 /* BRHLoggerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD0246361D9C119E008AEC26 /* BRHLoggerTests.swift */; };
-		BD15AE9A1D91253B00213A88 /* BRHHistorgramTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDA9CA8B1D8BFADF0028991F /* BRHHistorgramTests.swift */; };
-		BD15AE9B1D91253F00213A88 /* BlahUserSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD4C0B071D91217000C0611F /* BlahUserSettingsTests.swift */; };
-		BD15E0AB1D929D72005B709D /* BRHBinFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD15E0AA1D929D72005B709D /* BRHBinFormatterTests.swift */; };
-		BD15E0B01D934486005B709D /* BRHRandomness.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD15E0AF1D934486005B709D /* BRHRandomness.swift */; };
-		BD17D04D1D8E8BC200A18062 /* BRHRunData.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD17D04C1D8E8BC200A18062 /* BRHRunData.swift */; };
-		BD17D0511D8ED9EE00A18062 /* BRHCollection+Additions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD17D0501D8ED9EE00A18062 /* BRHCollection+Additions.swift */; };
-		BD17D0531D8EDA9800A18062 /* BRHDate+AdditionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD17D0521D8EDA9800A18062 /* BRHDate+AdditionsTests.swift */; };
-		BD17D0561D8EE67C00A18062 /* BRHOrderedArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD17D0551D8EE67C00A18062 /* BRHOrderedArray.swift */; };
+		BD0246371D9C119E008AEC26 /* LoggerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD0246361D9C119E008AEC26 /* LoggerTests.swift */; };
+		BD15AE9A1D91253B00213A88 /* HistorgramTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDA9CA8B1D8BFADF0028991F /* HistorgramTests.swift */; };
+		BD15AE9B1D91253F00213A88 /* UserSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD4C0B071D91217000C0611F /* UserSettingsTests.swift */; };
+		BD15E0AB1D929D72005B709D /* HistogramBinFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD15E0AA1D929D72005B709D /* HistogramBinFormatterTests.swift */; };
+		BD15E0B01D934486005B709D /* RandomUniform.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD15E0AF1D934486005B709D /* RandomUniform.swift */; };
+		BD17D04D1D8E8BC200A18062 /* RunData.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD17D04C1D8E8BC200A18062 /* RunData.swift */; };
+		BD17D0511D8ED9EE00A18062 /* Collection+Additions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD17D0501D8ED9EE00A18062 /* Collection+Additions.swift */; };
+		BD17D0531D8EDA9800A18062 /* Date+AdditionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD17D0521D8EDA9800A18062 /* Date+AdditionsTests.swift */; };
+		BD17D0561D8EE67C00A18062 /* OrderedArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD17D0551D8EE67C00A18062 /* OrderedArray.swift */; };
 		BD17D0591D8F42D500A18062 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = BD17D0581D8F42D500A18062 /* Settings.bundle */; };
 		BD4948471D89F23000C50DE2 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD4948461D89F23000C50DE2 /* AppDelegate.swift */; };
 		BD49484E1D89F23000C50DE2 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BD49484C1D89F23000C50DE2 /* Main.storyboard */; };
@@ -48,28 +48,33 @@
 		BD4948A61D89F6E300C50DE2 /* plot.pdf in Resources */ = {isa = PBXBuildFile; fileRef = BD4948A51D89F6E300C50DE2 /* plot.pdf */; };
 		BD4948A81D89F79100C50DE2 /* events.pdf in Resources */ = {isa = PBXBuildFile; fileRef = BD4948A71D89F79100C50DE2 /* events.pdf */; };
 		BD4948AA1D89FB6900C50DE2 /* logs.pdf in Resources */ = {isa = PBXBuildFile; fileRef = BD4948A91D89FB6900C50DE2 /* logs.pdf */; };
-		BD58DDBC1D97C476007765E3 /* BRHTimeFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD58DDBB1D97C476007765E3 /* BRHTimeFormatter.swift */; };
-		BD58DDBE1D97CB7D007765E3 /* BRHTimeFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD58DDBD1D97CB7D007765E3 /* BRHTimeFormatterTests.swift */; };
-		BD5BA8FB1DA1CEED000824F8 /* BRHCoreDataStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD5BA8FA1DA1CEED000824F8 /* BRHCoreDataStack.swift */; };
-		BD7564951D99171000CE455F /* BRHLatencyFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD7564941D99171000CE455F /* BRHLatencyFormatter.swift */; };
-		BD7564971D991C5000CE455F /* BRHLatencyFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD7564961D991C5000CE455F /* BRHLatencyFormatterTests.swift */; };
-		BD7564991D9931A800CE455F /* BRHDate+Additions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD7564981D9931A800CE455F /* BRHDate+Additions.swift */; };
-		BD75649B1D99321500CE455F /* BRHCollection+AdditionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD75649A1D99321500CE455F /* BRHCollection+AdditionsTests.swift */; };
-		BD75649D1D99703900CE455F /* BRHTextRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD75649C1D99703900CE455F /* BRHTextRecorder.swift */; };
-		BD75649F1D99B0B700CE455F /* BRHLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD75649E1D99B0B700CE455F /* BRHLogger.swift */; };
-		BD7564A11D99B67E00CE455F /* BRHEventLogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD7564A01D99B67E00CE455F /* BRHEventLogTests.swift */; };
-		BD7564A31D99C72600CE455F /* BRHEventLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD7564A21D99C72600CE455F /* BRHEventLog.swift */; };
+		BD58DDBC1D97C476007765E3 /* PlotTimeFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD58DDBB1D97C476007765E3 /* PlotTimeFormatter.swift */; };
+		BD58DDBE1D97CB7D007765E3 /* PlotTimeFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD58DDBD1D97CB7D007765E3 /* PlotTimeFormatterTests.swift */; };
+		BD6539EF1DA3F6EE008C32C6 /* Recording.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD6539EE1DA3F6EE008C32C6 /* Recording.swift */; };
+		BD6539F21DA3F71B008C32C6 /* RecordingModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = BD6539F01DA3F71B008C32C6 /* RecordingModel.xcdatamodeld */; };
+		BD6539F81DA448EC008C32C6 /* RecordingsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD6539F71DA448EC008C32C6 /* RecordingsTableViewController.swift */; };
+		BD7564951D99171000CE455F /* PlotLatencyFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD7564941D99171000CE455F /* PlotLatencyFormatter.swift */; };
+		BD7564971D991C5000CE455F /* PlotLatencyFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD7564961D991C5000CE455F /* PlotLatencyFormatterTests.swift */; };
+		BD7564991D9931A800CE455F /* Date+Additions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD7564981D9931A800CE455F /* Date+Additions.swift */; };
+		BD75649B1D99321500CE455F /* Collection+AdditionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD75649A1D99321500CE455F /* Collection+AdditionsTests.swift */; };
+		BD75649D1D99703900CE455F /* TextRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD75649C1D99703900CE455F /* TextRecorder.swift */; };
+		BD75649F1D99B0B700CE455F /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD75649E1D99B0B700CE455F /* Logger.swift */; };
+		BD7564A11D99B67E00CE455F /* EventLogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD7564A01D99B67E00CE455F /* EventLogTests.swift */; };
+		BD7564A31D99C72600CE455F /* EventLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD7564A21D99C72600CE455F /* EventLog.swift */; };
 		BD87F5991D8A2AD1007A6F99 /* PlotsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD87F5981D8A2AD1007A6F99 /* PlotsViewController.swift */; };
-		BD87F59C1D8A2AFE007A6F99 /* RecordingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD87F59A1D8A2AFE007A6F99 /* RecordingsViewController.swift */; };
 		BD87F59D1D8A2AFE007A6F99 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD87F59B1D8A2AFE007A6F99 /* SettingsViewController.swift */; };
-		BD87F59F1D8AAAD1007A6F99 /* BRHLatencyByTimeGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD87F59E1D8AAAD1007A6F99 /* BRHLatencyByTimeGraph.swift */; };
-		BD87F5A31D8AC829007A6F99 /* BRHLatencySample.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD87F5A21D8AC829007A6F99 /* BRHLatencySample.swift */; };
-		BD87F5A51D8ADDE0007A6F99 /* BRHHistogram.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD87F5A41D8ADDE0007A6F99 /* BRHHistogram.swift */; };
-		BDA9CA881D8BF1CB0028991F /* BRHBinFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDA9CA871D8BF1CB0028991F /* BRHBinFormatter.swift */; };
-		BDDC9D781D8AFC4100C36430 /* BRHLatencyHistogramGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDDC9D771D8AFC4100C36430 /* BRHLatencyHistogramGraph.swift */; };
-		BDDC9D7A1D8BDAA300C36430 /* BRHLatencyHistogramGraphSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDDC9D791D8BDAA300C36430 /* BRHLatencyHistogramGraphSource.swift */; };
-		BDFEEC3B1D91D0DC003E8555 /* BlahTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD49485D1D89F23000C50DE2 /* BlahTests.swift */; };
-		BDFEEC3C1D91E875003E8555 /* BRHUserSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD5605351D8FC2F200CFE29B /* BRHUserSettings.swift */; };
+		BD87F59F1D8AAAD1007A6F99 /* GraphLatencyByTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD87F59E1D8AAAD1007A6F99 /* GraphLatencyByTime.swift */; };
+		BD87F5A31D8AC829007A6F99 /* LatencySample.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD87F5A21D8AC829007A6F99 /* LatencySample.swift */; };
+		BD87F5A51D8ADDE0007A6F99 /* Histogram.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD87F5A41D8ADDE0007A6F99 /* Histogram.swift */; };
+		BDA9CA881D8BF1CB0028991F /* HistogramBinFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDA9CA871D8BF1CB0028991F /* HistogramBinFormatter.swift */; };
+		BDBB025B1DA45942000838E0 /* LowerViewManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBB025A1DA45942000838E0 /* LowerViewManager.swift */; };
+		BDBB025D1DA45983000838E0 /* LowerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBB025C1DA45983000838E0 /* LowerView.swift */; };
+		BDBB025F1DA476F2000838E0 /* RecordingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBB025E1DA476F2000838E0 /* RecordingsStore.swift */; };
+		BDBB02671DA4FCE8000838E0 /* Recording+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBB02641DA4FBC7000838E0 /* Recording+CoreDataProperties.swift */; };
+		BDDC9D781D8AFC4100C36430 /* GraphLatencyHistogram.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDDC9D771D8AFC4100C36430 /* GraphLatencyHistogram.swift */; };
+		BDDC9D7A1D8BDAA300C36430 /* GraphLatencyHistogramSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDDC9D791D8BDAA300C36430 /* GraphLatencyHistogramSource.swift */; };
+		BDFEEC3B1D91D0DC003E8555 /* NewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD49485D1D89F23000C50DE2 /* NewTests.swift */; };
+		BDFEEC3C1D91E875003E8555 /* UserSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD5605351D8FC2F200CFE29B /* UserSettings.swift */; };
 		CE6535F626638F337BDB06FC /* Pods_Blah.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ACDA023CC4D206794F87C46E /* Pods_Blah.framework */; };
 /* End PBXBuildFile section */
 
@@ -87,15 +92,15 @@
 		A9C7739DC058680F7AC8841A /* Pods_BlahTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BlahTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA6633FA5AD9CE9DEF3BFB71 /* Pods-Blah.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Blah.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Blah/Pods-Blah.debug.xcconfig"; sourceTree = "<group>"; };
 		ACDA023CC4D206794F87C46E /* Pods_Blah.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Blah.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		BD0246361D9C119E008AEC26 /* BRHLoggerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BRHLoggerTests.swift; sourceTree = "<group>"; };
+		BD0246361D9C119E008AEC26 /* LoggerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoggerTests.swift; sourceTree = "<group>"; };
 		BD15E0A21D9277DE005B709D /* BlahTests2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlahTests2.swift; sourceTree = "<group>"; };
 		BD15E0A41D9277DE005B709D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		BD15E0AA1D929D72005B709D /* BRHBinFormatterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BRHBinFormatterTests.swift; sourceTree = "<group>"; };
-		BD15E0AF1D934486005B709D /* BRHRandomness.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BRHRandomness.swift; sourceTree = "<group>"; };
-		BD17D04C1D8E8BC200A18062 /* BRHRunData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BRHRunData.swift; sourceTree = "<group>"; };
-		BD17D0501D8ED9EE00A18062 /* BRHCollection+Additions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "BRHCollection+Additions.swift"; sourceTree = "<group>"; };
-		BD17D0521D8EDA9800A18062 /* BRHDate+AdditionsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "BRHDate+AdditionsTests.swift"; sourceTree = "<group>"; };
-		BD17D0551D8EE67C00A18062 /* BRHOrderedArray.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BRHOrderedArray.swift; sourceTree = "<group>"; };
+		BD15E0AA1D929D72005B709D /* HistogramBinFormatterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HistogramBinFormatterTests.swift; sourceTree = "<group>"; };
+		BD15E0AF1D934486005B709D /* RandomUniform.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RandomUniform.swift; sourceTree = "<group>"; };
+		BD17D04C1D8E8BC200A18062 /* RunData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RunData.swift; sourceTree = "<group>"; };
+		BD17D0501D8ED9EE00A18062 /* Collection+Additions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Collection+Additions.swift"; sourceTree = "<group>"; };
+		BD17D0521D8EDA9800A18062 /* Date+AdditionsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Date+AdditionsTests.swift"; sourceTree = "<group>"; };
+		BD17D0551D8EE67C00A18062 /* OrderedArray.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OrderedArray.swift; sourceTree = "<group>"; };
 		BD17D0581D8F42D500A18062 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		BD4948431D89F23000C50DE2 /* Blah.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Blah.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BD4948461D89F23000C50DE2 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -104,7 +109,7 @@
 		BD4948521D89F23000C50DE2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		BD4948541D89F23000C50DE2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BD4948591D89F23000C50DE2 /* BlahTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BlahTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		BD49485D1D89F23000C50DE2 /* BlahTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlahTests.swift; sourceTree = "<group>"; };
+		BD49485D1D89F23000C50DE2 /* NewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewTests.swift; sourceTree = "<group>"; };
 		BD49485F1D89F23000C50DE2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BD4948681D89F23000C50DE2 /* BlahUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlahUITests.swift; sourceTree = "<group>"; };
 		BD49486A1D89F23000C50DE2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -134,29 +139,34 @@
 		BD4948A51D89F6E300C50DE2 /* plot.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = plot.pdf; sourceTree = "<group>"; };
 		BD4948A71D89F79100C50DE2 /* events.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = events.pdf; sourceTree = "<group>"; };
 		BD4948A91D89FB6900C50DE2 /* logs.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = logs.pdf; sourceTree = "<group>"; };
-		BD4C0B071D91217000C0611F /* BlahUserSettingsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlahUserSettingsTests.swift; sourceTree = "<group>"; };
-		BD5605351D8FC2F200CFE29B /* BRHUserSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BRHUserSettings.swift; sourceTree = "<group>"; };
-		BD58DDBB1D97C476007765E3 /* BRHTimeFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BRHTimeFormatter.swift; sourceTree = "<group>"; };
-		BD58DDBD1D97CB7D007765E3 /* BRHTimeFormatterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BRHTimeFormatterTests.swift; sourceTree = "<group>"; };
-		BD5BA8FA1DA1CEED000824F8 /* BRHCoreDataStack.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BRHCoreDataStack.swift; sourceTree = "<group>"; };
-		BD7564941D99171000CE455F /* BRHLatencyFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BRHLatencyFormatter.swift; sourceTree = "<group>"; };
-		BD7564961D991C5000CE455F /* BRHLatencyFormatterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BRHLatencyFormatterTests.swift; sourceTree = "<group>"; };
-		BD7564981D9931A800CE455F /* BRHDate+Additions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "BRHDate+Additions.swift"; sourceTree = "<group>"; };
-		BD75649A1D99321500CE455F /* BRHCollection+AdditionsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "BRHCollection+AdditionsTests.swift"; sourceTree = "<group>"; };
-		BD75649C1D99703900CE455F /* BRHTextRecorder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BRHTextRecorder.swift; sourceTree = "<group>"; };
-		BD75649E1D99B0B700CE455F /* BRHLogger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BRHLogger.swift; sourceTree = "<group>"; };
-		BD7564A01D99B67E00CE455F /* BRHEventLogTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BRHEventLogTests.swift; sourceTree = "<group>"; };
-		BD7564A21D99C72600CE455F /* BRHEventLog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BRHEventLog.swift; sourceTree = "<group>"; };
+		BD4C0B071D91217000C0611F /* UserSettingsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserSettingsTests.swift; sourceTree = "<group>"; };
+		BD5605351D8FC2F200CFE29B /* UserSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserSettings.swift; sourceTree = "<group>"; };
+		BD58DDBB1D97C476007765E3 /* PlotTimeFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlotTimeFormatter.swift; sourceTree = "<group>"; };
+		BD58DDBD1D97CB7D007765E3 /* PlotTimeFormatterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlotTimeFormatterTests.swift; sourceTree = "<group>"; };
+		BD6539EE1DA3F6EE008C32C6 /* Recording.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Recording.swift; sourceTree = "<group>"; };
+		BD6539F11DA3F71B008C32C6 /* RecordingModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = RecordingModel.xcdatamodel; sourceTree = "<group>"; };
+		BD6539F71DA448EC008C32C6 /* RecordingsTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RecordingsTableViewController.swift; sourceTree = "<group>"; };
+		BD7564941D99171000CE455F /* PlotLatencyFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlotLatencyFormatter.swift; sourceTree = "<group>"; };
+		BD7564961D991C5000CE455F /* PlotLatencyFormatterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlotLatencyFormatterTests.swift; sourceTree = "<group>"; };
+		BD7564981D9931A800CE455F /* Date+Additions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Date+Additions.swift"; sourceTree = "<group>"; };
+		BD75649A1D99321500CE455F /* Collection+AdditionsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Collection+AdditionsTests.swift"; sourceTree = "<group>"; };
+		BD75649C1D99703900CE455F /* TextRecorder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextRecorder.swift; sourceTree = "<group>"; };
+		BD75649E1D99B0B700CE455F /* Logger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
+		BD7564A01D99B67E00CE455F /* EventLogTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventLogTests.swift; sourceTree = "<group>"; };
+		BD7564A21D99C72600CE455F /* EventLog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventLog.swift; sourceTree = "<group>"; };
 		BD87F5981D8A2AD1007A6F99 /* PlotsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlotsViewController.swift; sourceTree = "<group>"; };
-		BD87F59A1D8A2AFE007A6F99 /* RecordingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RecordingsViewController.swift; sourceTree = "<group>"; };
 		BD87F59B1D8A2AFE007A6F99 /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
-		BD87F59E1D8AAAD1007A6F99 /* BRHLatencyByTimeGraph.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BRHLatencyByTimeGraph.swift; sourceTree = "<group>"; };
-		BD87F5A21D8AC829007A6F99 /* BRHLatencySample.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BRHLatencySample.swift; sourceTree = "<group>"; };
-		BD87F5A41D8ADDE0007A6F99 /* BRHHistogram.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BRHHistogram.swift; sourceTree = "<group>"; };
-		BDA9CA871D8BF1CB0028991F /* BRHBinFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BRHBinFormatter.swift; sourceTree = "<group>"; };
-		BDA9CA8B1D8BFADF0028991F /* BRHHistorgramTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BRHHistorgramTests.swift; sourceTree = "<group>"; };
-		BDDC9D771D8AFC4100C36430 /* BRHLatencyHistogramGraph.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BRHLatencyHistogramGraph.swift; sourceTree = "<group>"; };
-		BDDC9D791D8BDAA300C36430 /* BRHLatencyHistogramGraphSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BRHLatencyHistogramGraphSource.swift; sourceTree = "<group>"; };
+		BD87F59E1D8AAAD1007A6F99 /* GraphLatencyByTime.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GraphLatencyByTime.swift; sourceTree = "<group>"; };
+		BD87F5A21D8AC829007A6F99 /* LatencySample.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LatencySample.swift; sourceTree = "<group>"; };
+		BD87F5A41D8ADDE0007A6F99 /* Histogram.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Histogram.swift; sourceTree = "<group>"; };
+		BDA9CA871D8BF1CB0028991F /* HistogramBinFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HistogramBinFormatter.swift; sourceTree = "<group>"; };
+		BDA9CA8B1D8BFADF0028991F /* HistorgramTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HistorgramTests.swift; sourceTree = "<group>"; };
+		BDBB025A1DA45942000838E0 /* LowerViewManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LowerViewManager.swift; sourceTree = "<group>"; };
+		BDBB025C1DA45983000838E0 /* LowerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LowerView.swift; sourceTree = "<group>"; };
+		BDBB025E1DA476F2000838E0 /* RecordingsStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RecordingsStore.swift; sourceTree = "<group>"; };
+		BDBB02641DA4FBC7000838E0 /* Recording+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Recording+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		BDDC9D771D8AFC4100C36430 /* GraphLatencyHistogram.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GraphLatencyHistogram.swift; sourceTree = "<group>"; };
+		BDDC9D791D8BDAA300C36430 /* GraphLatencyHistogramSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GraphLatencyHistogramSource.swift; sourceTree = "<group>"; };
 		F34C4E5F49323E86C7948436 /* Pods-BlahTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BlahTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-BlahTests/Pods-BlahTests.debug.xcconfig"; sourceTree = "<group>"; };
 		F657859C3132944BCAC76486 /* Pods-BlahTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BlahTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-BlahTests/Pods-BlahTests.release.xcconfig"; sourceTree = "<group>"; };
 		FF00F94554101A88F19C9D5D /* Pods-Blah.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Blah.release.xcconfig"; path = "Pods/Target Support Files/Pods-Blah/Pods-Blah.release.xcconfig"; sourceTree = "<group>"; };
@@ -227,29 +237,14 @@
 		BD4948451D89F23000C50DE2 /* Blah */ = {
 			isa = PBXGroup;
 			children = (
-				BD49484C1D89F23000C50DE2 /* Main.storyboard */,
 				BD4948461D89F23000C50DE2 /* AppDelegate.swift */,
-				BD87F5981D8A2AD1007A6F99 /* PlotsViewController.swift */,
-				BD5BA8FA1DA1CEED000824F8 /* BRHCoreDataStack.swift */,
-				BD15E0AF1D934486005B709D /* BRHRandomness.swift */,
-				BDA9CA871D8BF1CB0028991F /* BRHBinFormatter.swift */,
-				BD17D0501D8ED9EE00A18062 /* BRHCollection+Additions.swift */,
-				BD7564981D9931A800CE455F /* BRHDate+Additions.swift */,
-				BD7564941D99171000CE455F /* BRHLatencyFormatter.swift */,
-				BD58DDBB1D97C476007765E3 /* BRHTimeFormatter.swift */,
-				BD87F5A41D8ADDE0007A6F99 /* BRHHistogram.swift */,
-				BD75649C1D99703900CE455F /* BRHTextRecorder.swift */,
-				BD75649E1D99B0B700CE455F /* BRHLogger.swift */,
-				BD7564A21D99C72600CE455F /* BRHEventLog.swift */,
-				BD87F59E1D8AAAD1007A6F99 /* BRHLatencyByTimeGraph.swift */,
-				BDDC9D771D8AFC4100C36430 /* BRHLatencyHistogramGraph.swift */,
-				BDDC9D791D8BDAA300C36430 /* BRHLatencyHistogramGraphSource.swift */,
-				BD87F5A21D8AC829007A6F99 /* BRHLatencySample.swift */,
-				BD17D0551D8EE67C00A18062 /* BRHOrderedArray.swift */,
-				BD17D04C1D8E8BC200A18062 /* BRHRunData.swift */,
-				BD5605351D8FC2F200CFE29B /* BRHUserSettings.swift */,
-				BD87F59A1D8A2AFE007A6F99 /* RecordingsViewController.swift */,
-				BD87F59B1D8A2AFE007A6F99 /* SettingsViewController.swift */,
+				BD49484C1D89F23000C50DE2 /* Main.storyboard */,
+				BDBB02541DA44EDE000838E0 /* Plots */,
+				BDBB02551DA44F2E000838E0 /* Logs */,
+				BDBB02531DA44EA0000838E0 /* Recordings */,
+				BDBB02561DA44F3E000838E0 /* Settings */,
+				BDBB02571DA44FC0000838E0 /* Data */,
+				BDBB02581DA44FDC000838E0 /* Utils */,
 				BD49484F1D89F23000C50DE2 /* Assets.xcassets */,
 				BD4948541D89F23000C50DE2 /* Info.plist */,
 				BD4948511D89F23000C50DE2 /* LaunchScreen.storyboard */,
@@ -262,16 +257,16 @@
 		BD49485C1D89F23000C50DE2 /* BlahTests */ = {
 			isa = PBXGroup;
 			children = (
-				BD49485D1D89F23000C50DE2 /* BlahTests.swift */,
-				BD7564A01D99B67E00CE455F /* BRHEventLogTests.swift */,
-				BD0246361D9C119E008AEC26 /* BRHLoggerTests.swift */,
-				BD15E0AA1D929D72005B709D /* BRHBinFormatterTests.swift */,
-				BD7564961D991C5000CE455F /* BRHLatencyFormatterTests.swift */,
-				BD58DDBD1D97CB7D007765E3 /* BRHTimeFormatterTests.swift */,
-				BD17D0521D8EDA9800A18062 /* BRHDate+AdditionsTests.swift */,
-				BD75649A1D99321500CE455F /* BRHCollection+AdditionsTests.swift */,
-				BDA9CA8B1D8BFADF0028991F /* BRHHistorgramTests.swift */,
-				BD4C0B071D91217000C0611F /* BlahUserSettingsTests.swift */,
+				BD49485D1D89F23000C50DE2 /* NewTests.swift */,
+				BD75649A1D99321500CE455F /* Collection+AdditionsTests.swift */,
+				BD17D0521D8EDA9800A18062 /* Date+AdditionsTests.swift */,
+				BD7564A01D99B67E00CE455F /* EventLogTests.swift */,
+				BDA9CA8B1D8BFADF0028991F /* HistorgramTests.swift */,
+				BD15E0AA1D929D72005B709D /* HistogramBinFormatterTests.swift */,
+				BD0246361D9C119E008AEC26 /* LoggerTests.swift */,
+				BD7564961D991C5000CE455F /* PlotLatencyFormatterTests.swift */,
+				BD58DDBD1D97CB7D007765E3 /* PlotTimeFormatterTests.swift */,
+				BD4C0B071D91217000C0611F /* UserSettingsTests.swift */,
 				BD49485F1D89F23000C50DE2 /* Info.plist */,
 			);
 			path = BlahTests;
@@ -317,6 +312,82 @@
 				BD49488D1D89F34200C50DE2 /* UIBarButtonAction_2x.png */,
 			);
 			name = Images;
+			sourceTree = "<group>";
+		};
+		BDBB02531DA44EA0000838E0 /* Recordings */ = {
+			isa = PBXGroup;
+			children = (
+				BD6539F01DA3F71B008C32C6 /* RecordingModel.xcdatamodeld */,
+				BDBB02641DA4FBC7000838E0 /* Recording+CoreDataProperties.swift */,
+				BD6539EE1DA3F6EE008C32C6 /* Recording.swift */,
+				BDBB025E1DA476F2000838E0 /* RecordingsStore.swift */,
+				BD6539F71DA448EC008C32C6 /* RecordingsTableViewController.swift */,
+			);
+			name = Recordings;
+			sourceTree = "<group>";
+		};
+		BDBB02541DA44EDE000838E0 /* Plots */ = {
+			isa = PBXGroup;
+			children = (
+				BD87F5981D8A2AD1007A6F99 /* PlotsViewController.swift */,
+				BDBB025C1DA45983000838E0 /* LowerView.swift */,
+				BDBB025A1DA45942000838E0 /* LowerViewManager.swift */,
+				BD87F59E1D8AAAD1007A6F99 /* GraphLatencyByTime.swift */,
+				BDDC9D771D8AFC4100C36430 /* GraphLatencyHistogram.swift */,
+				BDDC9D791D8BDAA300C36430 /* GraphLatencyHistogramSource.swift */,
+				BDBB02591DA45246000838E0 /* Label Formatters */,
+			);
+			name = Plots;
+			sourceTree = "<group>";
+		};
+		BDBB02551DA44F2E000838E0 /* Logs */ = {
+			isa = PBXGroup;
+			children = (
+				BD7564A21D99C72600CE455F /* EventLog.swift */,
+				BD75649E1D99B0B700CE455F /* Logger.swift */,
+				BD75649C1D99703900CE455F /* TextRecorder.swift */,
+			);
+			name = Logs;
+			sourceTree = "<group>";
+		};
+		BDBB02561DA44F3E000838E0 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				BD87F59B1D8A2AFE007A6F99 /* SettingsViewController.swift */,
+				BD5605351D8FC2F200CFE29B /* UserSettings.swift */,
+			);
+			name = Settings;
+			sourceTree = "<group>";
+		};
+		BDBB02571DA44FC0000838E0 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				BD87F5A41D8ADDE0007A6F99 /* Histogram.swift */,
+				BD87F5A21D8AC829007A6F99 /* LatencySample.swift */,
+				BD17D04C1D8E8BC200A18062 /* RunData.swift */,
+			);
+			name = Data;
+			sourceTree = "<group>";
+		};
+		BDBB02581DA44FDC000838E0 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				BD17D0501D8ED9EE00A18062 /* Collection+Additions.swift */,
+				BD7564981D9931A800CE455F /* Date+Additions.swift */,
+				BD17D0551D8EE67C00A18062 /* OrderedArray.swift */,
+				BD15E0AF1D934486005B709D /* RandomUniform.swift */,
+			);
+			name = Utils;
+			sourceTree = "<group>";
+		};
+		BDBB02591DA45246000838E0 /* Label Formatters */ = {
+			isa = PBXGroup;
+			children = (
+				BDA9CA871D8BF1CB0028991F /* HistogramBinFormatter.swift */,
+				BD7564941D99171000CE455F /* PlotLatencyFormatter.swift */,
+				BD58DDBB1D97C476007765E3 /* PlotTimeFormatter.swift */,
+			);
+			name = "Label Formatters";
 			sourceTree = "<group>";
 		};
 		E1DC4418229A0BE213244764 /* Frameworks */ = {
@@ -559,27 +630,32 @@
 			buildActionMask = 2147483647;
 			files = (
 				BD4948471D89F23000C50DE2 /* AppDelegate.swift in Sources */,
-				BD87F59F1D8AAAD1007A6F99 /* BRHLatencyByTimeGraph.swift in Sources */,
-				BDFEEC3C1D91E875003E8555 /* BRHUserSettings.swift in Sources */,
-				BD58DDBC1D97C476007765E3 /* BRHTimeFormatter.swift in Sources */,
-				BD17D0561D8EE67C00A18062 /* BRHOrderedArray.swift in Sources */,
-				BD15E0B01D934486005B709D /* BRHRandomness.swift in Sources */,
-				BDDC9D7A1D8BDAA300C36430 /* BRHLatencyHistogramGraphSource.swift in Sources */,
+				BD87F59F1D8AAAD1007A6F99 /* GraphLatencyByTime.swift in Sources */,
+				BDFEEC3C1D91E875003E8555 /* UserSettings.swift in Sources */,
+				BDBB025D1DA45983000838E0 /* LowerView.swift in Sources */,
+				BD58DDBC1D97C476007765E3 /* PlotTimeFormatter.swift in Sources */,
+				BD17D0561D8EE67C00A18062 /* OrderedArray.swift in Sources */,
+				BD6539F81DA448EC008C32C6 /* RecordingsTableViewController.swift in Sources */,
+				BD15E0B01D934486005B709D /* RandomUniform.swift in Sources */,
+				BDDC9D7A1D8BDAA300C36430 /* GraphLatencyHistogramSource.swift in Sources */,
 				BD87F5991D8A2AD1007A6F99 /* PlotsViewController.swift in Sources */,
-				BD75649D1D99703900CE455F /* BRHTextRecorder.swift in Sources */,
-				BD87F59C1D8A2AFE007A6F99 /* RecordingsViewController.swift in Sources */,
+				BD6539F21DA3F71B008C32C6 /* RecordingModel.xcdatamodeld in Sources */,
+				BD75649D1D99703900CE455F /* TextRecorder.swift in Sources */,
+				BD6539EF1DA3F6EE008C32C6 /* Recording.swift in Sources */,
 				BD87F59D1D8A2AFE007A6F99 /* SettingsViewController.swift in Sources */,
-				BD5BA8FB1DA1CEED000824F8 /* BRHCoreDataStack.swift in Sources */,
-				BD17D04D1D8E8BC200A18062 /* BRHRunData.swift in Sources */,
-				BD75649F1D99B0B700CE455F /* BRHLogger.swift in Sources */,
-				BDDC9D781D8AFC4100C36430 /* BRHLatencyHistogramGraph.swift in Sources */,
-				BD7564991D9931A800CE455F /* BRHDate+Additions.swift in Sources */,
-				BD87F5A31D8AC829007A6F99 /* BRHLatencySample.swift in Sources */,
-				BDA9CA881D8BF1CB0028991F /* BRHBinFormatter.swift in Sources */,
-				BD7564A31D99C72600CE455F /* BRHEventLog.swift in Sources */,
-				BD87F5A51D8ADDE0007A6F99 /* BRHHistogram.swift in Sources */,
-				BD7564951D99171000CE455F /* BRHLatencyFormatter.swift in Sources */,
-				BD17D0511D8ED9EE00A18062 /* BRHCollection+Additions.swift in Sources */,
+				BD17D04D1D8E8BC200A18062 /* RunData.swift in Sources */,
+				BDBB02671DA4FCE8000838E0 /* Recording+CoreDataProperties.swift in Sources */,
+				BD75649F1D99B0B700CE455F /* Logger.swift in Sources */,
+				BDDC9D781D8AFC4100C36430 /* GraphLatencyHistogram.swift in Sources */,
+				BDBB025B1DA45942000838E0 /* LowerViewManager.swift in Sources */,
+				BD7564991D9931A800CE455F /* Date+Additions.swift in Sources */,
+				BDBB025F1DA476F2000838E0 /* RecordingsStore.swift in Sources */,
+				BD87F5A31D8AC829007A6F99 /* LatencySample.swift in Sources */,
+				BDA9CA881D8BF1CB0028991F /* HistogramBinFormatter.swift in Sources */,
+				BD7564A31D99C72600CE455F /* EventLog.swift in Sources */,
+				BD87F5A51D8ADDE0007A6F99 /* Histogram.swift in Sources */,
+				BD7564951D99171000CE455F /* PlotLatencyFormatter.swift in Sources */,
+				BD17D0511D8ED9EE00A18062 /* Collection+Additions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -587,16 +663,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BD58DDBE1D97CB7D007765E3 /* BRHTimeFormatterTests.swift in Sources */,
-				BD15E0AB1D929D72005B709D /* BRHBinFormatterTests.swift in Sources */,
-				BDFEEC3B1D91D0DC003E8555 /* BlahTests.swift in Sources */,
-				BD15AE9A1D91253B00213A88 /* BRHHistorgramTests.swift in Sources */,
-				BD0246371D9C119E008AEC26 /* BRHLoggerTests.swift in Sources */,
-				BD7564A11D99B67E00CE455F /* BRHEventLogTests.swift in Sources */,
-				BD7564971D991C5000CE455F /* BRHLatencyFormatterTests.swift in Sources */,
-				BD15AE9B1D91253F00213A88 /* BlahUserSettingsTests.swift in Sources */,
-				BD75649B1D99321500CE455F /* BRHCollection+AdditionsTests.swift in Sources */,
-				BD17D0531D8EDA9800A18062 /* BRHDate+AdditionsTests.swift in Sources */,
+				BD58DDBE1D97CB7D007765E3 /* PlotTimeFormatterTests.swift in Sources */,
+				BD15E0AB1D929D72005B709D /* HistogramBinFormatterTests.swift in Sources */,
+				BDFEEC3B1D91D0DC003E8555 /* NewTests.swift in Sources */,
+				BD15AE9A1D91253B00213A88 /* HistorgramTests.swift in Sources */,
+				BD0246371D9C119E008AEC26 /* LoggerTests.swift in Sources */,
+				BD7564A11D99B67E00CE455F /* EventLogTests.swift in Sources */,
+				BD7564971D991C5000CE455F /* PlotLatencyFormatterTests.swift in Sources */,
+				BD15AE9B1D91253F00213A88 /* UserSettingsTests.swift in Sources */,
+				BD75649B1D99321500CE455F /* Collection+AdditionsTests.swift in Sources */,
+				BD17D0531D8EDA9800A18062 /* Date+AdditionsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -813,6 +889,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		BD6539F01DA3F71B008C32C6 /* RecordingModel.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				BD6539F11DA3F71B008C32C6 /* RecordingModel.xcdatamodel */,
+			);
+			currentVersion = BD6539F11DA3F71B008C32C6 /* RecordingModel.xcdatamodel */;
+			path = RecordingModel.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = BD49483B1D89F23000C50DE2 /* Project object */;
 }

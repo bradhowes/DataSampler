@@ -9,10 +9,10 @@
 import XCTest
 @testable import Blah
 
-class BRHBinFormatterTests: XCTestCase {
+class HistogramBinFormatterTests: XCTestCase {
     
     func testFormatting() {
-        let bf = BRHBinFormatter(lastBin: 10)
+        let bf = HistogramBinFormatter(lastBin: 10)
         XCTAssertEqual(bf.string(for: NSNumber(integerLiteral: 0)), "<1")
         XCTAssertEqual(bf.string(for: NSNumber(integerLiteral: 1)), "1")
         XCTAssertEqual(bf.string(for: NSNumber(integerLiteral: 9)), "9")

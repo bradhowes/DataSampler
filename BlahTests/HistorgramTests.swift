@@ -9,7 +9,7 @@
 import XCTest
 @testable import Blah
 
-class BRHHistogramTests: XCTestCase {
+class HistogramTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
@@ -20,13 +20,13 @@ class BRHHistogramTests: XCTestCase {
     }
     
     func testInit() {
-        let hist = BRHHistogram.init(size: 10)
+        let hist = Histogram.init(size: 10)
         XCTAssertEqual(hist.binAt(index: 0), 0)
         XCTAssertEqual(hist.maxValue(), 0)
     }
     
     func testBinning() {
-        let hist = BRHHistogram.init(size: 3)
+        let hist = Histogram.init(size: 3)
         XCTAssertEqual(hist.binIndexFor(value: 1.5), 1)
         XCTAssertEqual(hist.binIndexFor(value: 0.0), 0)
         XCTAssertEqual(hist.binIndexFor(value: -1.0), 0)
@@ -35,7 +35,7 @@ class BRHHistogramTests: XCTestCase {
     }
 
     func testAdd() {
-        let hist = BRHHistogram.init(size: 10)
+        let hist = Histogram.init(size: 10)
         var _ = hist.add(value: 0.1)
         _ = hist.add(value: 0.2)
         _ = hist.add(value: 0.3)
@@ -55,7 +55,7 @@ class BRHHistogramTests: XCTestCase {
     }
     
     func testGraphSource() {
-        let hist = BRHHistogram.init(size: 3)
+        let hist = Histogram.init(size: 3)
         var _ = hist.add(value: 0.1)
         _ = hist.add(value: 0.2)
         _ = hist.add(value: 0.3)
@@ -70,7 +70,7 @@ class BRHHistogramTests: XCTestCase {
     }
     
     func testClear() {
-        let hist = BRHHistogram.init(size: 3)
+        let hist = Histogram.init(size: 3)
         var _ = hist.add(value: 0.1)
         _ = hist.add(value: 0.2)
         _ = hist.add(value: 0.3)

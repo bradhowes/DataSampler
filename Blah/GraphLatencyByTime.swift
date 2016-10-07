@@ -9,7 +9,7 @@
 import UIKit
 import CorePlot
 
-class GraphLatencyByTime : CPTGraphHostingView, CPTScatterPlotDataSource {
+final class GraphLatencyByTime: CPTGraphHostingView {
     
     static let kLatencyPlotId = NSString(string: "Latency")
     static let kAveragePlotId = NSString(string: "Avg")
@@ -19,15 +19,43 @@ class GraphLatencyByTime : CPTGraphHostingView, CPTScatterPlotDataSource {
     let kPlotSymbolSize: Double = 8.0
 
     var source: RunData! {
+        willSet {
+            if source != nil {
+                RunDataNewSampleNotification.unobserve(from: source, observer: self)
+            }
+        }
         didSet {
+            RunDataNewSampleNotification.observe(from: source, observer: self, selector: #selector(sampleAdded))
             if hostedGraph == nil {
                 makeGraph()
             }
             else {
-                updateBounds()
-                redraw()
+                reload()
             }
-            updateTitle()
+        }
+    }
+
+    func sampleAdded(notification: Notification) {
+        let info = RunDataNewSampleNotification(notification: notification)
+        guard let plots = hostedGraph?.allPlots() else { return }
+
+        plots.forEach {
+            if $0.identifier === GraphLatencyByTime.kMissingPlotId {
+                if info.sample.missingCount > 0 {
+                    let numRecords = info.sample.missingCount * 2 + 1
+                    $0.insertData(at: UInt(source.missing.count - numRecords), numberOfRecords: UInt(numRecords))
+                }
+            }
+            else {
+                $0.insertData(at: UInt(info.index), numberOfRecords: 1)
+            }
+        }
+
+        if Thread.isMainThread {
+            updateBounds()
+        }
+        else {
+            DispatchQueue.main.async(execute: self.updateBounds)
         }
     }
 
@@ -35,19 +63,9 @@ class GraphLatencyByTime : CPTGraphHostingView, CPTScatterPlotDataSource {
 
     fileprivate func makeGraph() {
 
-        NotificationCenter.default.addObserver(self, selector: #selector(sampleAdded),
-                                               name: RunData.newSample,
-                                               object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(redraw),
-                                               name: RunData.replacedData,
-                                               object: nil)
-
         let graph = CPTXYGraph(frame: self.frame)
         hostedGraph = graph
         
-        graph.backgroundColor = CPTColor.black().cgColor
-        graph.zPosition = 1_000
-
         graph.paddingLeft = 0.0
         graph.paddingRight = 0.0
         graph.paddingTop = 0.0
@@ -277,6 +295,11 @@ class GraphLatencyByTime : CPTGraphHostingView, CPTScatterPlotDataSource {
         graph.add(plot, to: plotSpace)
     }
     
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        updateBounds()
+    }
+
     func updateTitle() {
         guard let axisSet = hostedGraph?.axisSet as? CPTXYAxisSet else { return }
         guard let x = axisSet.xAxis else { return }
@@ -290,27 +313,16 @@ class GraphLatencyByTime : CPTGraphHostingView, CPTScatterPlotDataSource {
 
         Logger.log("new title: \(x.title)")
     }
-
-    func sampleAdded(notification: Notification) {
-        guard let plots = hostedGraph?.allPlots() else { return }
-        guard let userInfo = notification.userInfo else { return }
-        guard let index = userInfo["index"] as? Int else { return }
-        guard let missing = userInfo["missing"] as? Int else { return }
-
-        plots.forEach {
-            if $0.identifier === GraphLatencyByTime.kMissingPlotId {
-                if missing > 0 {
-                    let numRecords = missing * 2 + 1
-                    $0.insertData(at: UInt(source.missing.count - numRecords), numberOfRecords: UInt(numRecords))
-                }
-            }
-            else {
-                $0.insertData(at: UInt(index), numberOfRecords: 1)
-            }
-        }
-
-        DispatchQueue.main.async {
+    
+    func reload() {
+        if Thread.isMainThread {
+            self.hostedGraph?.reloadData()
+            self.updateTitle()
             self.updateBounds()
+            self.setNeedsDisplay()
+        }
+        else {
+            DispatchQueue.main.async(execute: self.reload)
         }
     }
 
@@ -406,22 +418,12 @@ class GraphLatencyByTime : CPTGraphHostingView, CPTScatterPlotDataSource {
         x.visibleRange = xRange
         y.gridLinesRange = xRange
     }
+}
 
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        updateBounds()
-    }
+// - MARK: Data Source Methods
 
-    func redraw() {
-        DispatchQueue.main.async {
-            self.hostedGraph?.allPlots().forEach { $0.setDataNeedsReloading() }
-            self.updateTitle()
-            self.updateBounds()
-        }
-    }
+extension GraphLatencyByTime: CPTScatterPlotDataSource {
 
-    // - Data Source Methods
-    //
     func numberOfRecords(for plot: CPTPlot) -> UInt {
         guard let tag = plot.identifier as? NSString else { return 0 }
         switch tag {
@@ -430,11 +432,11 @@ class GraphLatencyByTime : CPTGraphHostingView, CPTScatterPlotDataSource {
         }
     }
 
-    func xValueFor(sample: LatencySample) -> Double {
+    func xValueFor(sample: Sample) -> Double {
         return sample.arrivalTime.timeIntervalSince(source.startTime)
     }
 
-    func yValueFor(sample: LatencySample) -> Double {
+    func yValueFor(sample: Sample) -> Double {
         return sample.latency
     }
 
@@ -457,7 +459,9 @@ class GraphLatencyByTime : CPTGraphHostingView, CPTScatterPlotDataSource {
 
 }
 
-extension GraphLatencyByTime : CPTPlotSpaceDelegate {
+// - MARK: Plot Space Delegate Methods
+
+extension GraphLatencyByTime: CPTPlotSpaceDelegate {
     
     func plotSpace(_ space: CPTPlotSpace, didChangePlotRangeFor coordinate: CPTCoordinate) {
         guard let plotSpace = space as? CPTXYPlotSpace else { return }
@@ -479,7 +483,9 @@ extension GraphLatencyByTime : CPTPlotSpaceDelegate {
     }
 }
 
-extension GraphLatencyByTime : CPTLegendDelegate {
+// - MARK: Legend Delegate Methods
+
+extension GraphLatencyByTime: CPTLegendDelegate {
     func legend(_ legend: CPTLegend, legendEntryFor plot: CPTPlot, wasSelectedAt idx: UInt) {
         plot.isHidden = !plot.isHidden
     }

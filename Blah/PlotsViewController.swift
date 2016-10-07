@@ -8,7 +8,7 @@
 
 import UIKit
 
-class PlotsViewController: UIViewController {
+final class PlotsViewController: UIViewController {
 
     @IBOutlet private weak var toolbar: UIToolbar!
     @IBOutlet private var startButton: UIBarButtonItem!
@@ -22,15 +22,23 @@ class PlotsViewController: UIViewController {
     @IBOutlet private weak var logView: UITextView!
     @IBOutlet private weak var eventsView: UITextView!
 
-    private var lowerViewManager = LowerViewManager()
-    private var recording: Recording?
+    /// Show the status bar with white text
+    override var preferredStatusBarStyle : UIStatusBarStyle {
+        return .lightContent
+    }
 
-    private var demoTimer: Timer?
+    /// The manager controlling the lower views
+    private var lowerViewManager = LowerViewManager()
+
+    /// The active recording
+    private var currentRecording: Recording?
+    private var viewedRecording: Recording?
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        plotView.layer.zPosition = 1_000
+
+        // Add lower views to the LowerViewManager so we can properly slide them in/out
+        //
         do {
             try lowerViewManager.add(view: histogramView, button: histogramButton)
             try lowerViewManager.add(view: logView, button: logButton)
@@ -40,22 +48,32 @@ class PlotsViewController: UIViewController {
             abort()
         }
 
-        if var items = toolbar.items {
-            items.remove(at: 1)
-            toolbar.setItems(items, animated:false)
-        }
+        // Remove the 'stop' button from the toolbar
+        //
+        var items = toolbar.items!
+        items.remove(at: 1)
+        toolbar.setItems(items, animated: false)
 
-        plotView.source = AppDelegate.singleton.runData
-        histogramView.source = AppDelegate.singleton.runData.histogram
-        
+        // Create an empty RunData instance to serve as data sources for the plots
+        //
+        let runData = RunData()
+        plotView.source = runData
+        histogramView.source = runData.histogram
+
+        // Attach the Logger and EventLog to their respective text views
+        //
         Logger.singleton.textView = logView
         Logger.log("Hello world!")
         EventLog.singleton.textView = eventsView
         EventLog.log("Hello", "world!")
-    }
 
-    override var preferredStatusBarStyle : UIStatusBarStyle {
-        return .lightContent
+        // Be a delegate for the tab bar in order to show a UIView transition when switching tabs
+        //
+        tabBarController!.delegate = self
+
+        // Begin observing notifications from the RecordingsTableViewController
+        //
+        observeRecordingsTableNotifications()
     }
 
     override func didReceiveMemoryWarning() {
@@ -72,18 +90,99 @@ class PlotsViewController: UIViewController {
         lowerViewManager.slideHorizontally(activate: LowerViewManager.Kind(rawValue: button.tag)!)
     }
 
+    /**
+     Start recording.
+     - parameter button: the button that was pressed
+     */
     @IBAction func startButtonPressed(_ button:UIBarButtonItem) {
-        updateControlButton(stopButton)
+        setStartStopButton(stopButton)
 
+        // Create a new Recording instance for the data we will gather
+        //
         let now = Date()
-        recording = RecordingsStore.singleton.newRecording(startTime: now)
-        AppDelegate.singleton.runData.begin(startTime: now)
+        let recording = RecordingsStore.newRecording(startTime: now)!
+        currentRecording = recording
+        viewedRecording = recording
 
+        // Make the recording the data source in our various live views
+        //
+        recording.runData.begin(startTime: now)
+        plotView.source = recording.runData
+        histogramView.source = recording.runData.histogram
+        RecordingsStore.save()
+
+        // Begin logging data
+        //
         Logger.clear()
         EventLog.clear()
 
-        RecordingsStore.singleton.save()
+        beginDemo(now: now)
+    }
 
+    /**
+     Stop recording.
+     - parameter button: button that was pressed
+     */
+    @IBAction func stopButtonPressed(_ button:UIBarButtonItem) {
+        endDemo()
+        setStartStopButton(startButton)
+        currentRecording?.finished()
+        currentRecording = nil
+        RecordingsStore.save()
+    }
+
+    /**
+     Change the toolbar to show the right start/stop button
+     - parameter button: the button to show
+     */
+    private func setStartStopButton(_ button: UIBarButtonItem) {
+        if var items = toolbar.items {
+            items[0] = button
+            toolbar.setItems(items, animated: true)
+        }
+    }
+
+    /**
+     Begin watching for notifications from the RecordingsTableViewController
+     */
+    private func observeRecordingsTableNotifications() {
+        RecordingsTableNotification.observe(kind: .recordingSelected, observer: self, selector: #selector(recordingSelected))
+        RecordingsTableNotification.observe(kind: .recordingDeleted, observer: self, selector: #selector(recordingDeleted))
+    }
+
+    /**
+     Handle the `recordingSelected` notification. Switch various views to show the selected Recording instance.
+     - parameter notification: received notification
+     */
+    func recordingSelected(notification: Notification) {
+        let recording = RecordingsTableNotification(notification: notification).recording
+        if recording !== viewedRecording {
+            viewedRecording = recording
+            plotView.source = recording.runData
+            histogramView.source = recording.runData.histogram
+            Logger.restore(from: recording.folder)
+            EventLog.restore(from: recording.folder)
+        }
+    }
+
+    /**
+     Handle the `recordingDeleted` notification. If the Recording being deleted is what is currently installed, then
+     install an empty RunData.
+     - parameter notification: received notification
+     */
+    func recordingDeleted(notification: Notification) {
+        let recording = RecordingsTableNotification(notification: notification).recording
+        if recording === viewedRecording {
+            viewedRecording = nil
+            let runData = RunData()
+            plotView.source = runData
+            histogramView.source = runData.histogram
+        }
+    }
+
+    private var demoTimer: Timer?
+
+    func beginDemo(now: Date) {
         let rnd = BRHRandomUniform()
         var identifier = 1
         var elapsed = now
@@ -98,31 +197,39 @@ class PlotsViewController: UIViewController {
             elapsed = elapsed.addingTimeInterval(latency)
             let arrivalTime = elapsed
             if rnd.uniform(lower: 0.0, upper: 1.0) > 0.1 {
-                let sample = LatencySample(identifier: identifier, latency: latency,
-                                           emissionTime: emissionTime,
-                                           arrivalTime: arrivalTime,
-                                           medianLatency: 0.0, averageLatency: 0.0)
-                AppDelegate.singleton.runData.recordLatency(sample: sample)
+                let sample = Sample(identifier: identifier, latency: latency, emissionTime: emissionTime,
+                                    arrivalTime: arrivalTime, medianLatency: 0.0, averageLatency: 0.0)
+                self.currentRecording?.runData.recordLatency(sample: sample)
             }
             identifier += 1
         }
-
-        plotView.redraw()
-        histogramView.redraw()
     }
 
-    @IBAction func stopButtonPressed(_ button:UIBarButtonItem) {
+    func endDemo() {
         demoTimer?.invalidate()
-        updateControlButton(startButton)
-        recording?.finished(runData: AppDelegate.singleton.runData)
-        RecordingsStore.singleton.save()
-        recording = nil
-    }
-
-    private func updateControlButton(_ button: UIBarButtonItem) {
-        if var items = toolbar.items {
-            items[0] = button
-            toolbar.setItems(items, animated:false)
-        }
     }
 }
+
+extension PlotsViewController: UITabBarControllerDelegate {
+
+    /**
+     Switching to another tab. Use a transition animation between the views.
+     - parameter tabBarController: the UITabBarController to work with
+     - parameter viewController: the UIViewController that will become active
+     - returns: true to switch to the new view
+     */
+    public func tabBarController(_ tabBarController: UITabBarController,
+                                 shouldSelect viewController: UIViewController) -> Bool {
+
+        let fromView: UIView = tabBarController.selectedViewController!.view
+        let toView: UIView = viewController.view
+        guard fromView != toView else { return false }
+        UIView.transition(from: fromView, to: toView, duration: 0.25, options: [.transitionCrossDissolve]) {
+            (finished: Bool) in
+        }
+
+        return true
+    }
+
+}
+

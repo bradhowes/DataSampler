@@ -9,7 +9,11 @@
 import CoreData
 import JSQCoreDataKit
 
-class RecordingsStore : NSObject {
+/** 
+ Manager of the Core Data stack for recordings.
+ */
+final class RecordingsStore : NSObject {
+
     static let singleton: RecordingsStore = RecordingsStore()
 
     private(set) var stack: CoreDataStack?
@@ -32,6 +36,7 @@ class RecordingsStore : NSObject {
                 self.fetcher = NSFetchedResultsController(fetchRequest: Recording.fetchRequest,
                                                           managedObjectContext: mainContext,
                                                           sectionNameKeyPath: nil, cacheName: nil)
+
                 Logger.log("fetcher: \(self.fetcher)")
 
             case .failure(let err):
@@ -45,7 +50,15 @@ class RecordingsStore : NSObject {
         return singleton.newRecording(startTime: startTime)
     }
 
-    func newRecording(startTime: Date) -> Recording? {
+    class func save() {
+        return singleton.save()
+    }
+
+    class func delete(recording: Recording) {
+        singleton.delete(recording: recording)
+    }
+
+    private func newRecording(startTime: Date) -> Recording? {
         Logger.log("creating new recording")
         guard let mainContext = stack?.mainContext else {
             Logger.log("*** RecordingsStore.newRecording: nil stack")
@@ -54,24 +67,16 @@ class RecordingsStore : NSObject {
         return Recording(context: mainContext, startTime: startTime)
     }
 
-    class func save() {
-        return singleton.save()
-    }
-
-    func save() {
+    private func save() {
         guard let mainContext = stack?.mainContext else {
             Logger.log("*** RecordingsStore.save: nil stack")
             return
         }
         Logger.log("saving main context")
-        saveContext(mainContext, wait: false) { Logger.log("saveContext: \($0)") }
+        saveContext(mainContext, wait: true) { Logger.log("saveContext: \($0)") }
     }
 
-    class func delete(recording: Recording) {
-        singleton.delete(recording: recording)
-    }
-
-    func delete(recording: Recording) {
+    private func delete(recording: Recording) {
         guard let stack = self.stack else { return }
         stack.mainContext.performAndWait {
             self.stack?.mainContext.delete(recording)

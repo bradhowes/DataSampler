@@ -129,6 +129,10 @@ struct LowerView {
         }
     }
 
+    /**
+     Change the enabled state of the tool bar button for the view.
+     - parameter state: true if enabled
+     */
     func enableButton(state: Bool) {
         self.button.isEnabled = state
     }

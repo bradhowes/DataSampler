@@ -9,7 +9,7 @@
 import UIKit
 import InAppSettingsKit
 
-class SettingsViewController : IASKAppSettingsViewController, IASKSettingsDelegate {
+final class SettingsViewController : IASKAppSettingsViewController, IASKSettingsDelegate {
 
     override func viewDidLoad() {
         self.delegate = self
@@ -22,23 +22,26 @@ class SettingsViewController : IASKAppSettingsViewController, IASKSettingsDelega
 
     /**
      Update NSUserDefaults values using values from Parameters class
-     
      - parameter animated: true if the view should animate its appearance
      */
     override func viewWillAppear(_ animated: Bool) {
         // Just in case the settings changed since we last presented this view -- say from the iOS Settings app
-        UserSettings.singleton.syncFromUserDefaults()
+        UserSettings.singleton.read()
         super.viewWillAppear(animated)
+
+        // - NOTE: for some reason, we need this to remove ugly "jump" of the title when the appearance of the view
+        // is controlled by a transition animation
+        //
+        navigationController?.navigationBar.layer.removeAllAnimations()
     }
 
     /**
      Update the Parameters class instances using values from NSUserDefaults
-     
      - parameter animated: true if the view snould animate its disappearance
      */
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        UserSettings.singleton.syncFromUserDefaults()
+        UserSettings.singleton.read()
     }
 
     func settingsViewControllerDidEnd(_ sender: IASKAppSettingsViewController) {

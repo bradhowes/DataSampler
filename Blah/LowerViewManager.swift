@@ -83,10 +83,16 @@ struct LowerViewManager {
         transition(activate: activate, dir: dir)
     }
 
+    /**
+     Begin the sliding operation. Disable all bar button items until the sliding is done.
+     */
     func beginSlide() {
         lowerViews.forEach { $0.value.enableButton(state: false) }
     }
 
+    /**
+     End the sliding operation. Enable all bar button items.
+     */
     func endSlide() {
         lowerViews.forEach { $0.value.enableButton(state: true) }
     }

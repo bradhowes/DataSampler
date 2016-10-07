@@ -14,7 +14,7 @@ import CoreData
 extension Recording {
 
     @nonobjc public class func fetchRequest() -> NSFetchRequest<Recording> {
-        return NSFetchRequest<Recording>(entityName: "Recording");
+        return NSFetchRequest<Recording>(entityName: "Recording")
     }
 
     @NSManaged public var awaitingUpload: Bool

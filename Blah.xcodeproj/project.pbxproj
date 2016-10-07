@@ -64,15 +64,15 @@
 		BD87F5991D8A2AD1007A6F99 /* PlotsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD87F5981D8A2AD1007A6F99 /* PlotsViewController.swift */; };
 		BD87F59D1D8A2AFE007A6F99 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD87F59B1D8A2AFE007A6F99 /* SettingsViewController.swift */; };
 		BD87F59F1D8AAAD1007A6F99 /* GraphLatencyByTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD87F59E1D8AAAD1007A6F99 /* GraphLatencyByTime.swift */; };
-		BD87F5A31D8AC829007A6F99 /* LatencySample.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD87F5A21D8AC829007A6F99 /* LatencySample.swift */; };
+		BD87F5A31D8AC829007A6F99 /* Sample.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD87F5A21D8AC829007A6F99 /* Sample.swift */; };
 		BD87F5A51D8ADDE0007A6F99 /* Histogram.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD87F5A41D8ADDE0007A6F99 /* Histogram.swift */; };
 		BDA9CA881D8BF1CB0028991F /* HistogramBinFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDA9CA871D8BF1CB0028991F /* HistogramBinFormatter.swift */; };
 		BDBB025B1DA45942000838E0 /* LowerViewManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBB025A1DA45942000838E0 /* LowerViewManager.swift */; };
 		BDBB025D1DA45983000838E0 /* LowerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBB025C1DA45983000838E0 /* LowerView.swift */; };
 		BDBB025F1DA476F2000838E0 /* RecordingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBB025E1DA476F2000838E0 /* RecordingsStore.swift */; };
 		BDBB02671DA4FCE8000838E0 /* Recording+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBB02641DA4FBC7000838E0 /* Recording+CoreDataProperties.swift */; };
+		BDBCEF411DA7898300B09DC9 /* AppNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBCEF401DA7898300B09DC9 /* AppNotifications.swift */; };
 		BDDC9D781D8AFC4100C36430 /* GraphLatencyHistogram.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDDC9D771D8AFC4100C36430 /* GraphLatencyHistogram.swift */; };
-		BDDC9D7A1D8BDAA300C36430 /* GraphLatencyHistogramSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDDC9D791D8BDAA300C36430 /* GraphLatencyHistogramSource.swift */; };
 		BDFEEC3B1D91D0DC003E8555 /* NewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD49485D1D89F23000C50DE2 /* NewTests.swift */; };
 		BDFEEC3C1D91E875003E8555 /* UserSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD5605351D8FC2F200CFE29B /* UserSettings.swift */; };
 		CE6535F626638F337BDB06FC /* Pods_Blah.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ACDA023CC4D206794F87C46E /* Pods_Blah.framework */; };
@@ -157,7 +157,7 @@
 		BD87F5981D8A2AD1007A6F99 /* PlotsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlotsViewController.swift; sourceTree = "<group>"; };
 		BD87F59B1D8A2AFE007A6F99 /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		BD87F59E1D8AAAD1007A6F99 /* GraphLatencyByTime.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GraphLatencyByTime.swift; sourceTree = "<group>"; };
-		BD87F5A21D8AC829007A6F99 /* LatencySample.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LatencySample.swift; sourceTree = "<group>"; };
+		BD87F5A21D8AC829007A6F99 /* Sample.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sample.swift; sourceTree = "<group>"; };
 		BD87F5A41D8ADDE0007A6F99 /* Histogram.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Histogram.swift; sourceTree = "<group>"; };
 		BDA9CA871D8BF1CB0028991F /* HistogramBinFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HistogramBinFormatter.swift; sourceTree = "<group>"; };
 		BDA9CA8B1D8BFADF0028991F /* HistorgramTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HistorgramTests.swift; sourceTree = "<group>"; };
@@ -165,8 +165,8 @@
 		BDBB025C1DA45983000838E0 /* LowerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LowerView.swift; sourceTree = "<group>"; };
 		BDBB025E1DA476F2000838E0 /* RecordingsStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RecordingsStore.swift; sourceTree = "<group>"; };
 		BDBB02641DA4FBC7000838E0 /* Recording+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Recording+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		BDBCEF401DA7898300B09DC9 /* AppNotifications.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppNotifications.swift; sourceTree = "<group>"; };
 		BDDC9D771D8AFC4100C36430 /* GraphLatencyHistogram.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GraphLatencyHistogram.swift; sourceTree = "<group>"; };
-		BDDC9D791D8BDAA300C36430 /* GraphLatencyHistogramSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GraphLatencyHistogramSource.swift; sourceTree = "<group>"; };
 		F34C4E5F49323E86C7948436 /* Pods-BlahTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BlahTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-BlahTests/Pods-BlahTests.debug.xcconfig"; sourceTree = "<group>"; };
 		F657859C3132944BCAC76486 /* Pods-BlahTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BlahTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-BlahTests/Pods-BlahTests.release.xcconfig"; sourceTree = "<group>"; };
 		FF00F94554101A88F19C9D5D /* Pods-Blah.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Blah.release.xcconfig"; path = "Pods/Target Support Files/Pods-Blah/Pods-Blah.release.xcconfig"; sourceTree = "<group>"; };
@@ -238,12 +238,13 @@
 			isa = PBXGroup;
 			children = (
 				BD4948461D89F23000C50DE2 /* AppDelegate.swift */,
+				BDBCEF401DA7898300B09DC9 /* AppNotifications.swift */,
 				BD49484C1D89F23000C50DE2 /* Main.storyboard */,
 				BDBB02541DA44EDE000838E0 /* Plots */,
-				BDBB02551DA44F2E000838E0 /* Logs */,
 				BDBB02531DA44EA0000838E0 /* Recordings */,
 				BDBB02561DA44F3E000838E0 /* Settings */,
 				BDBB02571DA44FC0000838E0 /* Data */,
+				BDBB02551DA44F2E000838E0 /* Logs */,
 				BDBB02581DA44FDC000838E0 /* Utils */,
 				BD49484F1D89F23000C50DE2 /* Assets.xcassets */,
 				BD4948541D89F23000C50DE2 /* Info.plist */,
@@ -317,11 +318,11 @@
 		BDBB02531DA44EA0000838E0 /* Recordings */ = {
 			isa = PBXGroup;
 			children = (
-				BD6539F01DA3F71B008C32C6 /* RecordingModel.xcdatamodeld */,
-				BDBB02641DA4FBC7000838E0 /* Recording+CoreDataProperties.swift */,
-				BD6539EE1DA3F6EE008C32C6 /* Recording.swift */,
-				BDBB025E1DA476F2000838E0 /* RecordingsStore.swift */,
 				BD6539F71DA448EC008C32C6 /* RecordingsTableViewController.swift */,
+				BDBB025E1DA476F2000838E0 /* RecordingsStore.swift */,
+				BD6539EE1DA3F6EE008C32C6 /* Recording.swift */,
+				BDBB02641DA4FBC7000838E0 /* Recording+CoreDataProperties.swift */,
+				BD6539F01DA3F71B008C32C6 /* RecordingModel.xcdatamodeld */,
 			);
 			name = Recordings;
 			sourceTree = "<group>";
@@ -334,7 +335,6 @@
 				BDBB025A1DA45942000838E0 /* LowerViewManager.swift */,
 				BD87F59E1D8AAAD1007A6F99 /* GraphLatencyByTime.swift */,
 				BDDC9D771D8AFC4100C36430 /* GraphLatencyHistogram.swift */,
-				BDDC9D791D8BDAA300C36430 /* GraphLatencyHistogramSource.swift */,
 				BDBB02591DA45246000838E0 /* Label Formatters */,
 			);
 			name = Plots;
@@ -363,7 +363,7 @@
 			isa = PBXGroup;
 			children = (
 				BD87F5A41D8ADDE0007A6F99 /* Histogram.swift */,
-				BD87F5A21D8AC829007A6F99 /* LatencySample.swift */,
+				BD87F5A21D8AC829007A6F99 /* Sample.swift */,
 				BD17D04C1D8E8BC200A18062 /* RunData.swift */,
 			);
 			name = Data;
@@ -637,7 +637,7 @@
 				BD17D0561D8EE67C00A18062 /* OrderedArray.swift in Sources */,
 				BD6539F81DA448EC008C32C6 /* RecordingsTableViewController.swift in Sources */,
 				BD15E0B01D934486005B709D /* RandomUniform.swift in Sources */,
-				BDDC9D7A1D8BDAA300C36430 /* GraphLatencyHistogramSource.swift in Sources */,
+				BDBCEF411DA7898300B09DC9 /* AppNotifications.swift in Sources */,
 				BD87F5991D8A2AD1007A6F99 /* PlotsViewController.swift in Sources */,
 				BD6539F21DA3F71B008C32C6 /* RecordingModel.xcdatamodeld in Sources */,
 				BD75649D1D99703900CE455F /* TextRecorder.swift in Sources */,
@@ -650,7 +650,7 @@
 				BDBB025B1DA45942000838E0 /* LowerViewManager.swift in Sources */,
 				BD7564991D9931A800CE455F /* Date+Additions.swift in Sources */,
 				BDBB025F1DA476F2000838E0 /* RecordingsStore.swift in Sources */,
-				BD87F5A31D8AC829007A6F99 /* LatencySample.swift in Sources */,
+				BD87F5A31D8AC829007A6F99 /* Sample.swift in Sources */,
 				BDA9CA881D8BF1CB0028991F /* HistogramBinFormatter.swift in Sources */,
 				BD7564A31D99C72600CE455F /* EventLog.swift in Sources */,
 				BD87F5A51D8ADDE0007A6F99 /* Histogram.swift in Sources */,

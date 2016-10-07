@@ -11,6 +11,8 @@ import UIKit
 
 class TextRecorder: NSObject, UITextViewDelegate {
 
+    var isHistorical: Bool
+
     var textView: UITextView? {
         willSet {
             textView?.delegate = nil
@@ -29,6 +31,7 @@ class TextRecorder: NSObject, UITextViewDelegate {
     private var scrollToEnd: Bool
 
     internal init(fileName: String) {
+        self.isHistorical = false
         self.fileName = fileName
         self.dateTimeFormatter = DateFormatter()
         self.dateTimeFormatter.setLocalizedDateFormatFromTemplate("HH:mm:ss.SSS")
@@ -50,6 +53,7 @@ class TextRecorder: NSObject, UITextViewDelegate {
         let logPath = from.appendingPathComponent(fileName)
         DispatchQueue.global().async {
             do {
+                self.isHistorical = true
                 let s = try String(contentsOf: logPath)
                 self.logText = NSMutableString(string: s)
                 DispatchQueue.main.async {
@@ -61,15 +65,10 @@ class TextRecorder: NSObject, UITextViewDelegate {
                 Logger.log("*** failed to restore text from \(logPath)")
             }
         }
-        do {
-            let s = try String(contentsOf: logPath)
-            add(s)
-        } catch {
-            Logger.log("*** failed to restore text from \(logPath)")
-        }
     }
 
     public func clear() {
+        isHistorical = false
         logText = ""
         DispatchQueue.main.async {
             self.textView?.text = ""
@@ -85,6 +84,7 @@ class TextRecorder: NSObject, UITextViewDelegate {
     }
 
     internal func add(_ line: String) {
+        guard !isHistorical else { return }
         logText.append(line)
         guard let textView = self.textView else { return }
         let when = DispatchTime.now()

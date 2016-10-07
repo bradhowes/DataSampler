@@ -8,6 +8,9 @@
 
 import Foundation
 
+/**
+ A label formatter for a scatter plot chart with the X axis showing time values
+ */
 final class PlotTimeFormatter : NumberFormatter {
 
     /**

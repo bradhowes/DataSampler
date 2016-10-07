@@ -12,26 +12,7 @@ import JSQCoreDataKit
 
 final class Recording : NSManagedObject, CoreDataEntityProtocol {
 
-    static let defaultSortDescriptors = [NSSortDescriptor(key: "startTime", ascending: true)]
-
-    var displayName: String {
-        return Recording.displayName(from: self.startTime as! Date)
-    }
-
-    var directoryName: String {
-        return Recording.directoryName(from: self.startTime as! Date)
-    }
-
-    var folder: URL? {
-        get {
-            let fileManager = FileManager.default
-            guard let docDir = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
-                Logger.log("*** failed to obtain document directory")
-                return nil
-            }
-            return docDir.appendingPathComponent(directoryName, isDirectory: true)
-        }
-    }
+    static let defaultSortDescriptors = [NSSortDescriptor(key: "startTime", ascending: false)]
 
     private static var directoryNameDateFormatter: DateFormatter = {
         let dateFormatter = DateFormatter()
@@ -46,7 +27,7 @@ final class Recording : NSManagedObject, CoreDataEntityProtocol {
         dateFormatter.timeStyle = .medium
         return dateFormatter
     }()
-
+    
     private class func directoryName(from date: Date) -> String {
         return Recording.directoryNameDateFormatter.string(from: date)
     }
@@ -54,8 +35,45 @@ final class Recording : NSManagedObject, CoreDataEntityProtocol {
     private class func displayName(from date: Date) -> String {
         return Recording.displayNameDateFormatter.string(from: date)
     }
+    
+    var displayName: String {
+        return Recording.displayName(from: self.startTime as! Date)
+    }
 
-    private var byteSize: Int64 = 0
+    var directoryName: String {
+        return Recording.directoryName(from: self.startTime as! Date)
+    }
+
+    lazy var folder: URL = {
+        let fileManager = FileManager.default
+        let docDir = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+        return docDir.appendingPathComponent(self.directoryName, isDirectory: true)
+    }()
+
+    lazy var runData: RunData = {
+        var tmp = RunData()
+        let archivePath = self.folder.appendingPathComponent("runData.archive")
+        do {
+            let archiveData = try Data(contentsOf: archivePath)
+            Logger.log("archiveData size: \(archiveData.count)")
+            guard let obj = NSKeyedUnarchiver.unarchiveObject(with: archiveData) else {
+                return tmp
+            }
+
+            tmp = obj as! RunData
+            tmp.startTime = self.startTime! as Date
+            tmp.name = self.displayName
+        } catch {
+            Logger.log("*** unable to reconstitute \(archivePath)")
+        }
+
+        return tmp
+    }()
+
+    override func willSave() {
+        super.willSave()
+        Logger.log("Recording.willSave - \(startTime) updated: \(isUpdated) deleted: \(isDeleted)")
+    }
 
     init(context: NSManagedObjectContext, startTime: Date) {
         super.init(entity: Recording.entity(context: context), insertInto: context)
@@ -65,20 +83,9 @@ final class Recording : NSManagedObject, CoreDataEntityProtocol {
         self.size = "Recording"
         self.awaitingUpload = false
         self.uploaded = false
-        self.driver = UserSettings.singleton.notificationDriver
-        self.emitInterval = Int32(UserSettings.singleton.emitInterval)
-
-        Logger.log("recording directory: \(folder!)")
-
-        // Create folder to hold the recording data
-        //
-        let fileManager = FileManager.default
-        do {
-            try fileManager.createDirectory(at: folder!, withIntermediateDirectories: true, attributes: nil)
-            Logger.log("created recording directory")
-        } catch {
-            Logger.log("failed to create directory")
-        }
+        self.driver = UserSettings.notificationDriver
+        self.emitInterval = Int32(UserSettings.emitInterval)
+        self.runData = RunData()
     }
 
     @objc
@@ -86,75 +93,53 @@ final class Recording : NSManagedObject, CoreDataEntityProtocol {
         super.init(entity: entity, insertInto: context)
     }
 
-    func finished(runData: RunData) {
+    func finished() {
         Logger.log("Recording.finished")
+
         let now = Date()
         self.endTime = now as NSDate?
-        if let folder = self.folder {
 
-            let archivePath = folder.appendingPathComponent("runData.archive")
-            let archiveData = NSKeyedArchiver.archivedData(withRootObject: runData)
-
-            Logger.log("archiving run data: \(archiveData.count)")
-            DispatchQueue.global().async {
-                var bytes : Int64 = Int64(archiveData.count)
-                do {
-                    try archiveData.write(to: archivePath)
-                } catch {
-                    Logger.log("*** failed to write to \(archivePath)")
-                }
-
-                Logger.save(to: folder) { bytes += $0 }
-                EventLog.save(to: folder) { bytes += $0 }
-
-                Logger.log("size: \(bytes)")
-                self.size = ByteCountFormatter.string(fromByteCount: bytes, countStyle: .file)
-
-                RecordingsStore.save()
-            }
+        // Create folder to hold the recording data
+        //
+        let fileManager = FileManager.default
+        do {
+            try fileManager.createDirectory(at: self.folder, withIntermediateDirectories: true, attributes: nil)
+            Logger.log("created recording directory")
+        } catch {
+            Logger.log("failed to create directory")
         }
-        else {
+
+        let archivePath = folder.appendingPathComponent("runData.archive")
+        let archiveData = NSKeyedArchiver.archivedData(withRootObject: runData)
+
+        Logger.log("archiving run data: \(archiveData.count)")
+        DispatchQueue.global().async {
+            var bytes : Int64 = Int64(archiveData.count)
+            do {
+                try archiveData.write(to: archivePath)
+            } catch {
+                Logger.log("*** failed to write to \(archivePath)")
+            }
+
+            Logger.save(to: self.folder) { bytes += $0 }
+            EventLog.save(to: self.folder) { bytes += $0 }
+
+            Logger.log("+ size: \(bytes)")
+            self.size = ByteCountFormatter.string(fromByteCount: bytes, countStyle: .file)
+
             RecordingsStore.save()
         }
     }
 
-    func restore() {
-        guard let folder = self.folder else {
-            Logger.log("*** recording folder is nil")
-            return
-        }
-
-        let archivePath = folder.appendingPathComponent("runData.archive")
-        do {
-            let archiveData = try Data(contentsOf: archivePath)
-            Logger.log("archiveData size: \(archiveData.count)")
-            guard let obj = NSKeyedUnarchiver.unarchiveObject(with: archiveData) else {
-                return
-            }
-
-            let runData = obj as! RunData
-            runData.startTime = self.startTime! as Date
-            runData.name = self.displayName
-            AppDelegate.singleton.runData.replace(with: runData)
-
-            Logger.restore(from: folder)
-            EventLog.restore(from: folder)
-        } catch {
-            Logger.log("*** unable to reconstitute \(archivePath)")
-            return
-        }
-    }
-
     func delete() {
-        guard let folder = self.folder else { return }
         let fileManager = FileManager.default
         do {
-            try fileManager.removeItem(atPath: folder.path)
+            try fileManager.removeItem(atPath: self.folder.path)
             Logger.log("removed recording directory \(folder)")
         } catch {
             Logger.log("failed to remove directory \(folder) - \(error)")
         }
 
-        RecordingsStore.singleton.delete(recording: self)
+        RecordingsStore.delete(recording: self)
     }
 }

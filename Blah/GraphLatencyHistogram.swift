@@ -10,53 +10,48 @@ import Foundation
 import UIKit
 import CorePlot
 
-class GraphLatencyHistogram : CPTGraphHostingView, CPTPlotDataSource, CPTBarPlotDelegate, CPTAxisDelegate {
+final class GraphLatencyHistogram : CPTGraphHostingView, CPTPlotDataSource, CPTBarPlotDelegate, CPTAxisDelegate {
 
-    var source: GraphLatencyHistogramSource! {
+    var source: Histogram! {
+        willSet {
+            if source != nil {
+                HistogramBinChangedNotification.unobserve(from: source, observer: self)
+            }
+        }
         didSet {
+            HistogramBinChangedNotification.observe(from: source, observer: self, selector: #selector(binChanged))
             if hostedGraph == nil {
                 makeGraph()
             }
             else {
-                updateBounds()
-                redraw()
+                reload()
             }
         }
     }
 
-    func sourceChanged(notification: Notification) {
-        guard let userInfo = notification.userInfo, let binIndexObj = userInfo["binIndex"] else { return }
-        if let binIndex = binIndexObj as? Int {
-            hostedGraph?.allPlots().last!.reloadData(inIndexRange: NSMakeRange(binIndex, 1))
+    private var binCount: Int { return source.bins.count }
+    private var maxValue: Int { return source.bins[source.maxBinIndex] }
+
+    func binChanged(notification: Notification) {
+        let notif = HistogramBinChangedNotification(notification: notification)
+        hostedGraph?.allPlots().last!.reloadData(inIndexRange: NSMakeRange(notif.index, 1))
+        if Thread.isMainThread {
+            self.updateBounds()
         }
         else {
-            hostedGraph?.reloadData()
-            let axisSet = hostedGraph?.axisSet as? CPTXYAxisSet
-            if let x = axisSet?.xAxis {
-                let binCount = Int(source.numberOfRecords()) - 1
-                x.labelingPolicy = .locationsProvided
-                x.majorTickLocations = Set<NSNumber>([0, binCount / 2, binCount].map { NSNumber(integerLiteral: $0) })
-            }
+            DispatchQueue.main.async(execute: self.updateBounds)
         }
-
-        updateBounds()
     }
 
-    fileprivate func makeGraph() {
-
-        NotificationCenter.default.addObserver(self, selector: #selector(sourceChanged),
-                                               name: Histogram.changedNotification,
-                                               object: nil)
-
+    private func makeGraph() {
         let graph = CPTXYGraph(frame: self.frame)
         hostedGraph = graph
-//        graph.applyTheme(CPTTheme(named: kCPTDarkGradientTheme))
-        
+
         graph.paddingTop = 0.0
         graph.paddingLeft = 0.0
         graph.paddingBottom = 0.0
         graph.paddingRight = 0.0
-//
+
         graph.plotAreaFrame?.masksToBorder = false;
         graph.plotAreaFrame?.borderLineStyle = nil
         graph.plotAreaFrame?.cornerRadius = 0.0
@@ -101,7 +96,6 @@ class GraphLatencyHistogram : CPTGraphHostingView, CPTPlotDataSource, CPTBarPlot
         x.labelTextStyle = labelStyle
         x.labelOffset = -3.0
 
-        let binCount = Int(source.numberOfRecords())
         x.labelingPolicy = .locationsProvided
         x.majorTickLocations = Set<NSNumber>([0, binCount / 2, binCount - 1].map { NSNumber(integerLiteral: $0) })
 
@@ -157,19 +151,29 @@ class GraphLatencyHistogram : CPTGraphHostingView, CPTPlotDataSource, CPTBarPlot
         updateBounds()
     }
 
-    func redraw() {
-        hostedGraph?.allPlots().forEach { $0.setDataNeedsReloading() }
+    func reload() {
+        if Thread.isMainThread {
+            self.hostedGraph?.reloadData()
+            let axisSet = self.hostedGraph?.axisSet as? CPTXYAxisSet
+            if let x = axisSet?.xAxis {
+                x.labelingPolicy = .locationsProvided
+                x.majorTickLocations = Set<NSNumber>([0, binCount / 2, binCount - 1].map { NSNumber(integerLiteral: $0) })
+            }
+            self.updateBounds()
+            self.setNeedsDisplay()
+        }
+        else {
+            DispatchQueue.main.async(execute: self.reload)
+        }
     }
 
     fileprivate func updateBounds() {
-        guard let source = self.source else { return }
         guard let hostedGraph = self.hostedGraph else { return }
         guard let plotSpace = hostedGraph.allPlotSpaces().last as? CPTXYPlotSpace else { return }
 
-        let binCount = Int(source.numberOfRecords())
         plotSpace.xRange = CPTPlotRange(location: -0.5, length: NSNumber(integerLiteral: binCount))
 
-        let maxY = ((max(source.maxValue(), 10) + 9) / 10) * 10
+        let maxY = ((max(maxValue, 10) + 9) / 10) * 10
         plotSpace.yRange = CPTPlotRange(location: 0.0, length: NSNumber(integerLiteral: maxY))
 
         guard let axisSet = hostedGraph.axisSet as? CPTXYAxisSet else { return }
@@ -186,11 +190,6 @@ class GraphLatencyHistogram : CPTGraphHostingView, CPTPlotDataSource, CPTBarPlot
         y.majorTickLocations = Set<NSNumber>([0, maxY / 2, maxY].map { NSNumber(integerLiteral: $0) })
     }
 
-    func update() {
-        hostedGraph?.reloadData()
-        updateBounds()
-    }
-    
     func renderPDF(_ context: CGContext) {
         let graph = self.hostedGraph!
         var mediaBox = CGRect(x:0, y:0, width:graph.bounds.size.width, height:graph.bounds.size.height)
@@ -202,15 +201,14 @@ class GraphLatencyHistogram : CPTGraphHostingView, CPTPlotDataSource, CPTBarPlot
     // - Data Source Methods
     //
     func numberOfRecords(for plot: CPTPlot) -> UInt {
-        return source.numberOfRecords()
+        return UInt(source.bins.count)
     }
-
 
     func number(for plot: CPTPlot, field fieldEnum: UInt, record idx: UInt) -> Any? {
         guard let field = CPTBarPlotField(rawValue: Int(fieldEnum)) else { return nil }
         switch field {
         case .barLocation: return idx as AnyObject?
-        case .barTip: return source.valueForRecord(idx)
+        case .barTip: return source.bins[Int(idx)]
         default: return nil
         }
     }

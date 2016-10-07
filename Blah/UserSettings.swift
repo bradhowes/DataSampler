@@ -1,5 +1,5 @@
 //
-//  BRHUserSettings.swift
+//  UserSettings.swift
 //  Blah
 //
 //  Created by Brad Howes on 9/19/16.
@@ -9,6 +9,9 @@
 import Foundation
 import SwiftyUserDefaults
 
+/**
+ Enumeration of string constants that will be used as keys into UserDefaults. Minimizes typos.
+ */
 private enum Tags: String {
     case notificationDriver, emitInterval, maxHistogramBin, dropboxLinkButtonText, uploadAutomatically
     case remoteServerName, remoteServerPort, resendUntilFetched
@@ -16,6 +19,9 @@ private enum Tags: String {
     case apnsDevCertFileName, apnsDevCertPassword
 }
 
+/**
+ Allow the use of a `Tag` enum to initialize a `DefaultsKey` instance.
+ */
 private extension DefaultsKey {
     convenience init(tag: Tags) {
         self.init(tag.rawValue)
@@ -23,6 +29,10 @@ private extension DefaultsKey {
 }
 
 // MARK: - Key definitions
+
+/**
+ Create keys in `DefaultsKeys` so that they can be used later on in indexing operations on `DefaultsKeys`.
+ */
 extension DefaultsKeys {
     static let notificationDriver = DefaultsKey<String>(tag: .notificationDriver)
     static let emitInterval = DefaultsKey<String>(tag: .emitInterval)
@@ -39,39 +49,34 @@ extension DefaultsKeys {
 }
 
 /**
- @brief Define converters between a natural type and the one use when storing in NSUserDefaults.
+ Define converters between a Swift native type and one used for UserDefaults.
  */
 protocol ValueConverter {
-    associatedtype ValueType
-    associatedtype DefaultsType
-    
-    /**
-     Convert a NSUserDefaults value to a natural type
-     
-     - parameter value: the value to convert
-     
-     - returns: the converted value
-     */
-    static func defaultsToValue(_ value: DefaultsType) -> ValueType?
-    /**
-     Convert a natural type value to the NSUserDefaults one
-     
-     - parameter value: the value to convert
-     
-     - returns: the converted value
-     */
-    static func valueToDefaults(_ value: ValueType) -> DefaultsType
 
+    /** 
+     The native Swift type we wish to work in (eg `Int` or `String`)
+     */
+    associatedtype ValueType
+
+    /**
+     Convert a Swift native type value to NSObject-based type
+     - parameter value: the value to convert
+     - returns: the converted value
+     */
     static func valueToAnyObject(_ value: ValueType) -> AnyObject?
+
+    /**
+     Convert an NSObject-based type to a Swift native type.
+     - parameter value: the value to convert
+     - returns: the converted value
+     */
     static func anyObjectToValue(_ value: AnyObject?) -> ValueType?
 }
 
 /**
- @brief Define Int<->String converters
+ Define Int<->NSNumber converters
  */
 struct IntValueConverter : ValueConverter {
-    static func defaultsToValue(_ value: String) -> Int? { return Int(value) }
-    static func valueToDefaults(_ value: Int) -> String { return String(value) }
     static func valueToAnyObject(_ value: Int) -> AnyObject? { return NSNumber(value: value as Int) }
     static func anyObjectToValue(_ value: AnyObject?) -> Int? {
         switch value {
@@ -83,11 +88,9 @@ struct IntValueConverter : ValueConverter {
 }
 
 /**
- @brief Define Double<->String converters
+ Double<->NSNumber converters
  */
 struct DoubleValueConverter : ValueConverter {
-    static func defaultsToValue(_ value: String) -> Double? { return Double(value) }
-    static func valueToDefaults(_ value: Double) -> String { return String(value) }
     static func valueToAnyObject(_ value: Double) -> AnyObject? { return NSNumber(value: value as Double) }
     static func anyObjectToValue(_ value: AnyObject?) -> Double? {
         switch value {
@@ -99,11 +102,9 @@ struct DoubleValueConverter : ValueConverter {
 }
 
 /**
- @brief Define String<->String converters (no-op)
+ String<->String converters (no-op)
  */
 struct StringValueConverter : ValueConverter {
-    static func defaultsToValue(_ value: String) -> String? { return value }
-    static func valueToDefaults(_ value: String) -> String { return value }
     static func valueToAnyObject(_ value: String) -> AnyObject? { return NSString(utf8String: value) }
     static func anyObjectToValue(_ value: AnyObject?) -> String? {
         return value != nil ? (value as! String) : nil
@@ -111,76 +112,89 @@ struct StringValueConverter : ValueConverter {
 }
 
 /**
- @brief Define Bool<->Bool converters (no-op)
+ Bool<->NSNumber converters
  */
 struct BoolValueConverter : ValueConverter {
-    static func defaultsToValue(_ value: Bool) -> Bool? { return value }
-    static func valueToDefaults(_ value: Bool) -> Bool { return value }
     static func valueToAnyObject(_ value: Bool) -> AnyObject? { return NSNumber(value: value as Bool) }
     static func anyObjectToValue(_ value: AnyObject?) -> Bool? {
         return value != nil ? (value as! NSNumber).boolValue : nil
     }
 }
 
+/** 
+ Description protocol for settings.
+ */
 protocol SettingDescription {
+
+    /// Setting description getter
     var settingDescription: String { get }
 }
 
 /**
- @brief Base class for all user settings. Registers a default value for when a setting does not yet exist in
- NSUserDefaults. Also registers two closures, one to write current setting value to NSUserDefaults and the other
+ Base class for all user settings. Registers a default value for when a setting does not yet exist in
+ UserDefaults. Also registers two closures, one to write current setting value to NSUserDefaults and the other
  to set the current value from a NSUserDefaults entry.
  */
 class SettingBase {
     typealias Synchro = ()->Void
+
+    /// Mapping between setting name (key) and the default value to use when the setting does not exist in UserDefaults
     static var defaults: [String:AnyObject] = [:]
-    static var syncToUserDefaultsSynchros: [Synchro] = []
-    static var syncFromUserDefaultsSynchros: [Synchro] = []
+    /// Vector of functions to call to flush native values into `UserDefaults`
+    static var writers: [Synchro] = []
+    /// Vector of functions to call to load `UserDefaults` and convert into native values.
+    static var readers: [Synchro] = []
+    /// Collection of setting descriptors
     static var settings: [SettingDescription] = []
 
+    /**
+     Remove all previously-registered user settings.
+     */
     static func reset() {
         defaults = [:]
-        syncToUserDefaultsSynchros = []
-        syncFromUserDefaultsSynchros = []
+        writers = []
+        readers = []
         settings = []
     }
 
-    func registerSetting(_ key: String, value: AnyObject?,
-                         syncToUserDefaults: @escaping Synchro,
-                         syncFromUserDefaults: @escaping Synchro) {
+    /**
+     Register a new setting
+     - parameter key: the name of the setting
+     - parameter value: default value to use if none exists
+     - parameter writer: function to create an NSObject-derived value for storing in UserDefaults
+     - parameter reader: function to create a native Swift type from UserDefaults value
+     */
+    func registerSetting(_ key: String, value: AnyObject?, writer: @escaping Synchro, reader: @escaping Synchro) {
         SettingBase.defaults[key] = value
-        SettingBase.syncToUserDefaultsSynchros.append(syncToUserDefaults)
-        SettingBase.syncFromUserDefaultsSynchros.append(syncFromUserDefaults)
+        SettingBase.writers.append(writer)
+        SettingBase.readers.append(reader)
     }
 
     /**
      Update NSUserDefaults using the internal values
      */
-    static func syncToUserDefaults() {
-        SettingBase.syncToUserDefaultsSynchros.forEach { $0() }
+    static func write() {
+        SettingBase.writers.forEach { $0() }
     }
+
     /**
      Update the internal values using contents from NSUserDefaults.
      */
-    static func syncFromUserDefaults() {
-        for (index, synchro) in SettingBase.syncFromUserDefaultsSynchros.enumerated() {
-            print("\(index)")
-            synchro()
-        }
-        // BRHSettingBase.syncFromUserDefaultsSynchros.forEach { $0() }
+    static func read() {
+        SettingBase.readers.forEach { $0() }
     }
 }
 
 /**
- @brief Define a user setting that knows how to convert between a natural type (eg. Int or Double) and the type used to
+ Define a user setting that knows how to convert between a natural type (eg. Int or Double) and the type used to
  hold the value in the NSUserDefaults database.
  */
-final class Setting<ValueType, DefaultsType, VC: ValueConverter> : SettingBase, SettingDescription, CustomDebugStringConvertible where ValueType: Equatable, ValueType == VC.ValueType, DefaultsType == VC.DefaultsType {
+final class Setting<ValueType, VC: ValueConverter>: SettingBase, SettingDescription, CustomDebugStringConvertible where
+ValueType: Equatable, ValueType == VC.ValueType {
 
     let key: String
-    let notificationName: Notification.Name
+    let changedNotification: Notification.Name
     var value: ValueType
-    var defaultsValue: DefaultsType { return VC.valueToDefaults(self.value) }
 
     /**
      Initialize new instance
@@ -190,20 +204,20 @@ final class Setting<ValueType, DefaultsType, VC: ValueConverter> : SettingBase, 
      */
     fileprivate init(tag: Tags, value: ValueType) {
         self.key = tag.rawValue
-        self.notificationName = Notification.Name(rawValue: "BRHUserSettings." + self.key)
+        self.changedNotification = Notification.Name(rawValue: "UserSettings." + self.key)
         self.value = value
         super.init()
         SettingBase.settings.append(self)
         self.registerSetting(self.key, value: VC.valueToAnyObject(self.value),
-                             syncToUserDefaults: {
+                             writer: {
                                 Defaults[self.key] = VC.valueToAnyObject(self.value)
             },
-                             syncFromUserDefaults: {
+                             reader: {
                                 if let value = VC.anyObjectToValue(Defaults.object(forKey: self.key) as AnyObject?) {
                                     if self.value != value {
                                         print("-- setting \(self.key) changed - old: \(self.value) new: \(value)")
                                         self.value = value
-                                        NotificationCenter.default.post(name: self.notificationName,
+                                        NotificationCenter.default.post(name: self.changedNotification,
                                                                         object: self,
                                                                         userInfo: ["old": self.value, "new": value])
                                     }
@@ -222,30 +236,20 @@ final class Setting<ValueType, DefaultsType, VC: ValueConverter> : SettingBase, 
     var settingDescription: String { return description }
 }
 
-typealias StringSetting = Setting<String, String, StringValueConverter>
-typealias IntSetting = Setting<Int, String, IntValueConverter>
-typealias DoubleSetting = Setting<Double, String, DoubleValueConverter>
-typealias BoolSetting = Setting<Bool, Bool, BoolValueConverter>
+typealias StringSetting = Setting<String, StringValueConverter>
+typealias IntSetting = Setting<Int, IntValueConverter>
+typealias DoubleSetting = Setting<Double, DoubleValueConverter>
+typealias BoolSetting = Setting<Bool, BoolValueConverter>
 
 /**
- @brief Collection of all user settings.
+ Collection of all user settings.
  */
 final class UserSettings {
     static let singleton: UserSettings = UserSettings()
-    static let kUpdatedNotification = Notification.Name(rawValue: "UserSettingsUpdated")
+    static let updatedNotification = Notification.Name(rawValue: "UserSettings.updatedNotification")
 
-    private var _notificationDriver: StringSetting
-    var notificationDriver: String {
-        get { return _notificationDriver.value }
-        set { _notificationDriver.value = newValue }
-    }
-
-    private var _emitInterval: IntSetting
-    var emitInterval: Int {
-        get { return _emitInterval.value }
-        set { _emitInterval.value = newValue }
-    }
-
+    var notificationDriver: StringSetting
+    var emitInterval: IntSetting
     var maxHistogramBin: IntSetting
     var dropboxLinkButtonText: StringSetting
     var uploadAutomatically: BoolSetting
@@ -262,9 +266,8 @@ final class UserSettings {
      */
     private init() {
         SettingBase.reset()
-        _notificationDriver = StringSetting(tag: .notificationDriver, value: "remote")
-        _emitInterval = IntSetting(tag: .emitInterval, value: 120)
-
+        notificationDriver = StringSetting(tag: .notificationDriver, value: "remote")
+        emitInterval = IntSetting(tag: .emitInterval, value: 120)
         maxHistogramBin = IntSetting(tag: .maxHistogramBin, value: 30)
         dropboxLinkButtonText = StringSetting(tag: .dropboxLinkButtonText, value: "Link")
         uploadAutomatically = BoolSetting(tag: .uploadAutomatically, value: true)
@@ -276,23 +279,23 @@ final class UserSettings {
         apnsDevCertFileName = StringSetting(tag: .apnsDevCertFileName, value: "apn-nhtest-dev.p12")
         apnsDevCertPassword = StringSetting(tag: .apnsDevCertPassword, value: "")
         Defaults.register(defaults: SettingBase.defaults)
-        syncFromUserDefaults()
+        read()
         dump()
     }
 
     /**
      Update NSUserDefaults using the internal values
      */
-    func syncToUserDefaults() {
-        SettingBase.syncToUserDefaults()
+    func write() {
+        SettingBase.write()
     }
-    
+
     /**
      Update the internal values using contents from NSUserDefaults.
      */
-    func syncFromUserDefaults() {
-        SettingBase.syncFromUserDefaults()
-        NotificationCenter.default.post(name: UserSettings.kUpdatedNotification, object: self, userInfo: nil)
+    func read() {
+        SettingBase.read()
+        NotificationCenter.default.post(name: UserSettings.updatedNotification, object: self, userInfo: nil)
         dump()
     }
 
@@ -302,4 +305,22 @@ final class UserSettings {
     func dump() {
         SettingBase.settings.forEach { print($0.settingDescription) }
     }
+}
+
+/** 
+ Create shortcuts in the UserSettings class so we don't have to type '.singleton'
+ */
+extension UserSettings {
+    static var notificationDriver: String { return singleton.notificationDriver.value }
+    static var emitInterval: Int { return singleton.emitInterval.value }
+    static var maxHistogramBin: Int { return singleton.maxHistogramBin.value }
+    static var dropboxLinkButtonText: String { return singleton.dropboxLinkButtonText.value }
+    static var uploadAutomatically: Bool { return singleton.uploadAutomatically.value }
+    static var remoteServerName: String { return singleton.remoteServerName.value }
+    static var remoteServerPort: Int { return singleton.remoteServerPort.value }
+    static var resendUntilFetched: Bool { return singleton.resendUntilFetched.value }
+    static var apnsProdCertFileName: String { return singleton.apnsDevCertFileName.value }
+    static var apnsProdCertPassword: String { return singleton.apnsProdCertPassword.value }
+    static var apnsDevCertFileName: String { return singleton.apnsDevCertFileName.value }
+    static var apnsDevCertPassword: String { return singleton.apnsDevCertPassword.value }
 }

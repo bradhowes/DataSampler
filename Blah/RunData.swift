@@ -11,30 +11,32 @@ import Foundation
 /**
  Tags used for NSCoding operations
  */
-private enum Tags: String { case name, startTime, samples, missing, emitInterval, binsCount }
+private enum Tag: String { case name, startTime, samples, missing, emitInterval, estArrivalInterval, binsCount }
 
 /**
  Extension of NSCoder to support above Tags enumeration
  */
 private extension NSCoder {
-    func decodeObject(forTag: Tags) -> Any? { return decodeObject(forKey: forTag.rawValue) }
-    func decodeInteger(forTag: Tags) -> Int { return decodeInteger(forKey: forTag.rawValue) }
+    func encode<T>(_ value: T, forTag: Tag) { encode(value, forKey: forTag.rawValue) }
+
+    func decodeObject(forTag: Tag) -> Any? { return decodeObject(forKey: forTag.rawValue) }
+    func decodeInteger(forTag: Tag) -> Int { return decodeInteger(forKey: forTag.rawValue) }
+    func decodeDouble(forTag: Tag) -> Double { return decodeDouble(forKey: forTag.rawValue) }
+
+    func containsValue(forTag: Tag) -> Bool { return containsValue(forKey: forTag.rawValue) }
 }
 
 /**
  Container for runtime data collected during a run.
  */
-class RunData : NSObject, NSCoding {
-    
-    static let newSample = Notification.Name(rawValue: "RunData.newSample")
-    static let replacedData = Notification.Name(rawValue: "RunData.replacedData")
+final class RunData : NSObject, NSCoding {
 
     var name: String
     var startTime: Date
 
-    private(set) var samples: [LatencySample] = []
-    private(set) var missing: [LatencySample] = []
-    private(set) var orderedSamples = OrderedArray<LatencySample>()
+    private(set) var samples: [Sample] = []
+    private(set) var missing: [Sample] = []
+    private(set) var orderedSamples = OrderedArray<Sample>()
     private(set) var histogram: Histogram
     private(set) var emitInterval: Int
     private(set) var estArrivalInterval: Double
@@ -46,22 +48,26 @@ class RunData : NSObject, NSCoding {
         samples = []
         missing = []
         orderedSamples = OrderedArray(predicate: (<))
-        histogram = Histogram(size: UserSettings.singleton.maxHistogramBin.value)
-        emitInterval = 30 // secs
+        histogram = Histogram(size: UserSettings.maxHistogramBin)
+        emitInterval = UserSettings.emitInterval
         estArrivalInterval = Double(emitInterval)
 
         super.init()
-
-        NotificationCenter.default.addObserver(self, selector: #selector(maxHistogramBinChanged),
-            name: UserSettings.singleton.maxHistogramBin.notificationName, object: nil)
     }
 
     required convenience init?(coder decoder: NSCoder) {
         self.init()
 
-        samples = decoder.decodeObject(forTag: .samples) as! [LatencySample]
-        missing = decoder.decodeObject(forTag: .missing) as! [LatencySample]
+        samples = decoder.decodeObject(forTag: .samples) as! [Sample]
+        missing = decoder.decodeObject(forTag: .missing) as! [Sample]
         emitInterval = decoder.decodeInteger(forTag: .emitInterval)
+        if decoder.containsValue(forTag: .estArrivalInterval) {
+            estArrivalInterval = decoder.decodeDouble(forTag: .estArrivalInterval)
+        }
+        else {
+            estArrivalInterval = Double(emitInterval)
+        }
+
         histogram = Histogram(size: decoder.decodeInteger(forTag: .binsCount))
 
         samples.forEach {
@@ -71,45 +77,22 @@ class RunData : NSObject, NSCoding {
     }
 
     func encode(with encoder: NSCoder) {
-        encoder.encode(samples, forKey: Tags.samples.rawValue)
-        encoder.encode(missing, forKey: Tags.missing.rawValue)
-        encoder.encode(emitInterval, forKey: Tags.emitInterval.rawValue)
-        encoder.encode(histogram.bins.count, forKey: Tags.binsCount.rawValue)
+        encoder.encode(samples, forTag: .samples)
+        encoder.encode(missing, forTag: .missing)
+        encoder.encode(emitInterval, forTag: .emitInterval)
+        encoder.encode(estArrivalInterval, forTag: .estArrivalInterval)
+        encoder.encode(histogram.bins.count, forTag: .binsCount)
     }
 
     func begin(startTime: Date) {
         self.startTime = startTime
         name = startTime.description
-        samples = []
-        missing = []
-        histogram.clear()
-        orderedSamples.removeAll()
     }
 
-    func replace(with rhs: RunData) {
-        startTime = rhs.startTime
-        name = rhs.name
-        samples = rhs.samples
-        missing = rhs.missing
-        orderedSamples = rhs.orderedSamples
-        emitInterval = rhs.emitInterval
-        estArrivalInterval = rhs.estArrivalInterval
-        histogram.replace(with: rhs.histogram)
+    func minSample() -> Sample? { return orderedSamples.first }
+    func maxSample() -> Sample? { return orderedSamples.last }
 
-        NotificationCenter.default.post(name: RunData.replacedData, object: self, userInfo: nil)
-    }
-
-    func maxHistogramBinChanged(notification: Notification) {
-        guard let userInfo = notification.userInfo, let newSizeObj = userInfo["new"] else { return }
-        guard let newSize: Int = newSizeObj as? Int else { return }
-        histogram.resize(size: newSize)
-        histogram.replace(values: samples)
-    }
-
-    func minSample() -> LatencySample? { return orderedSamples.first }
-    func maxSample() -> LatencySample? { return orderedSamples.last }
-
-    func orderedSampleAt(index: Int) -> LatencySample? {
+    func orderedSampleAt(index: Int) -> Sample? {
         return index >= 0 && index < orderedSamples.count ? orderedSamples[index] : nil
     }
 
@@ -117,34 +100,27 @@ class RunData : NSObject, NSCoding {
      Add a sample to the collection.
      - parameter sample: the stats to record
      */
-    func recordLatency(sample: LatencySample) {
+    func recordLatency(sample: Sample) {
+        EventLog.log("sample", sample.identifier, sample.emissionTime.description, sample.arrivalTime.description)
         var missingCount = 0
         if let prev = samples.last {
             missingCount = (sample.identifier - prev.identifier - 1)
             if missingCount > 0 {
+                EventLog.log("missing", missingCount)
+                sample.missingCount = missingCount
                 let spacing = (sample - prev) / Double(missingCount)
                 var arrivalTime = prev.arrivalTime
-                missing.append(LatencySample(identifier: prev.identifier + 1,
-                                                latency: 0.0,
-                                                emissionTime: arrivalTime,
-                                                arrivalTime: arrivalTime,
-                                                medianLatency: 0.0,
-                                                averageLatency: 0.0))
+                missing.append(Sample(identifier: prev.identifier + 1, latency: 0.0, emissionTime: arrivalTime,
+                                      arrivalTime: arrivalTime, medianLatency: 0.0, averageLatency: 0.0))
                 for ident in 0..<missingCount {
                     arrivalTime = arrivalTime.addingTimeInterval(spacing / 2.0)
-                    missing.append(LatencySample(identifier: prev.identifier + 1 + ident,
-                                                    latency: 100_000.0,
-                                                    emissionTime: arrivalTime,
-                                                    arrivalTime: arrivalTime,
-                                                    medianLatency: 0.0,
-                                                    averageLatency: 0.0))
+                    missing.append(Sample(identifier: prev.identifier + 1 + ident, latency: 100_000.0,
+                                          emissionTime: arrivalTime, arrivalTime: arrivalTime, medianLatency: 0.0,
+                                          averageLatency: 0.0))
                     arrivalTime = arrivalTime.addingTimeInterval(spacing / 2.0)
-                    missing.append(LatencySample(identifier: prev.identifier + 1 + ident,
-                                                    latency: 0.0,
-                                                    emissionTime: arrivalTime,
-                                                    arrivalTime: arrivalTime,
-                                                    medianLatency: 0.0,
-                                                    averageLatency: 0.0))
+                    missing.append(Sample(identifier: prev.identifier + 1 + ident, latency: 0.0,
+                                          emissionTime: arrivalTime, arrivalTime: arrivalTime, medianLatency: 0.0,
+                                          averageLatency: 0.0))
                 }
             }
 
@@ -157,6 +133,7 @@ class RunData : NSObject, NSCoding {
             }
 
             sample.averageLatency = (sample.latency + prev.averageLatency * denom) / (denom + 1.0)
+            EventLog.log("averageLatency", sample.averageLatency)
         }
 
         orderedSamples.add(value: sample)
@@ -169,10 +146,9 @@ class RunData : NSObject, NSCoding {
             medianLatency = (medianLatency + orderedSamples[middle - 1].latency) / 2.0
         }
 
+        EventLog.log("medianLatency", medianLatency)
         sample.medianLatency = medianLatency
 
-        NotificationCenter.default.post(name: RunData.newSample, object: self,
-                                        userInfo: ["sample": sample, "index": samples.count - 1,
-                                                   "missing": missingCount])
+        RunDataNewSampleNotification.post(sender: self, sample: sample, index: samples.count - 1)
     }
 }

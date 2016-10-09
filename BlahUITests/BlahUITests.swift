@@ -2,7 +2,7 @@
 //  BlahUITests.swift
 //  BlahUITests
 //
-//  Created by Brad Howes on 9/14/16.
+//  Created by Brad Howes on 10/8/16.
 //  Copyright © 2016 Brad Howes. All rights reserved.
 //
 
@@ -27,8 +27,14 @@ class BlahUITests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
     }
-    
+
     func testExample() {
+
+        let toolbarsQuery = XCUIApplication().toolbars
+        toolbarsQuery.buttons["Histogram"].tap()
+        toolbarsQuery.buttons["Log"].tap()
+        toolbarsQuery.buttons["Events"].tap()
+
         // Use recording to get started writing UI tests.
         // Use XCTAssert and related functions to verify your tests produce the correct results.
     }

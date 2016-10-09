@@ -93,6 +93,14 @@ final class Recording : NSManagedObject, CoreDataEntityProtocol {
         super.init(entity: entity, insertInto: context)
     }
 
+    func save() {
+        guard let context = self.managedObjectContext else {
+            Logger.log("*** managedObjectContext is nil")
+            return
+        }
+        saveContext(context) { Logger.log("saveContext: \($0)") }
+    }
+
     func finished() {
         Logger.log("Recording.finished")
 
@@ -127,7 +135,7 @@ final class Recording : NSManagedObject, CoreDataEntityProtocol {
             Logger.log("+ size: \(bytes)")
             self.size = ByteCountFormatter.string(fromByteCount: bytes, countStyle: .file)
 
-            RecordingsStore.save()
+            self.save()
         }
     }
 
@@ -140,6 +148,8 @@ final class Recording : NSManagedObject, CoreDataEntityProtocol {
             Logger.log("failed to remove directory \(folder) - \(error)")
         }
 
-        RecordingsStore.delete(recording: self)
+        self.managedObjectContext?.delete(self)
+        save()
+        //RecordingsStore.delete(recording: self)
     }
 }

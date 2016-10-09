@@ -11,7 +11,7 @@ import UIKit
 
 class TextRecorder: NSObject, UITextViewDelegate {
 
-    var isHistorical: Bool
+    private(set) var isHistorical: Bool
 
     var textView: UITextView? {
         willSet {
@@ -25,8 +25,9 @@ class TextRecorder: NSObject, UITextViewDelegate {
         }
     }
 
-    private var fileName: String
-    private var logText = NSMutableString()
+    private(set) var fileName: String
+    private(set) var logText = NSMutableString()
+
     private var dateTimeFormatter: DateFormatter
     private var scrollToEnd: Bool
 
@@ -51,19 +52,17 @@ class TextRecorder: NSObject, UITextViewDelegate {
 
     public func restore(from: URL) {
         let logPath = from.appendingPathComponent(fileName)
-        DispatchQueue.global().async {
-            do {
-                self.isHistorical = true
-                let s = try String(contentsOf: logPath)
-                self.logText = NSMutableString(string: s)
-                DispatchQueue.main.async {
-                    guard let tv = self.textView else { return }
-                    tv.text = String(validatingUTF8: s) ?? ""
-                    tv.scrollRangeToVisible(NSMakeRange(self.logText.length, 0))
-                }
-            } catch {
-                Logger.log("*** failed to restore text from \(logPath)")
+        do {
+            self.isHistorical = true
+            let s = try String(contentsOf: logPath)
+            self.logText = NSMutableString(string: s)
+            DispatchQueue.main.async {
+                guard let tv = self.textView else { return }
+                tv.text = String(validatingUTF8: s) ?? ""
+                tv.scrollRangeToVisible(NSMakeRange(self.logText.length, 0))
             }
+        } catch {
+            Logger.log("*** failed to restore text from \(logPath)")
         }
     }
 
@@ -85,16 +84,17 @@ class TextRecorder: NSObject, UITextViewDelegate {
 
     internal func add(_ line: String) {
         guard !isHistorical else { return }
-        logText.append(line)
-        guard let textView = self.textView else { return }
-        let when = DispatchTime.now()
-        DispatchQueue.main.asyncAfter(deadline: when, execute: {
-            let fromBottom = textView.contentSize.height - textView.contentOffset.y - 2 * textView.bounds.size.height
-            textView.textStorage.append(NSAttributedString(string: line, attributes: textView.typingAttributes))
-            if fromBottom < 0 || self.scrollToEnd {
-                self.scrollToEnd = true
-                textView.scrollRangeToVisible(NSMakeRange(textView.textStorage.length, 0))
+        synchronized(obj: self) {
+            logText.append(line)
+            guard let textView = self.textView else { return }
+            DispatchQueue.main.async {
+                let fromBottom = textView.contentSize.height - textView.contentOffset.y - 2 * textView.bounds.size.height
+                textView.textStorage.append(NSAttributedString(string: line, attributes: textView.typingAttributes))
+                if fromBottom < 0 || self.scrollToEnd {
+                    self.scrollToEnd = true
+                    textView.scrollRangeToVisible(NSMakeRange(textView.textStorage.length, 0))
+                }
             }
-        })
+        }
     }
 }

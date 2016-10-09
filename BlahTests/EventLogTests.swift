@@ -25,18 +25,19 @@ class EventLogTests: XCTestCase {
         print("NSHomeDirectory: \(NSHomeDirectory())")
         let log = EventLog.singleton
         let directory = URL(fileURLWithPath: NSHomeDirectory(), isDirectory: true)
-        log.logPath = directory
 
         EventLog.log("this", "is", "a", "test")
         EventLog.log(1, 2, 3, 4.0, "hello", 5.0)
-        log.save()
-
-        let s = log.logContentFor(folder: directory)
-        print("s: \(s)")
-
-        XCTAssertTrue(s.contains("this,is,a,test\n"))
-        XCTAssertTrue(s.contains("1,2,3,4.0,hello,5.0\n"))
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+        log.save(to: directory) { (count: Int64) in
+            XCTAssertEqual(count, 21)
+            let s = String(log.logText)
+            print(s)
+            XCTAssertTrue(s.contains(",this,is,a,test"))
+            XCTAssertTrue(s.contains(",1,2,3,4.0,hello,5.0"))
+            log.clear()
+            log.restore(from: directory)
+            XCTAssertEqual(String(log.logText), s)
+        }
     }
 
     func testPerformanceExample() {

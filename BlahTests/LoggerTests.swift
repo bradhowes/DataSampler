@@ -25,18 +25,20 @@ class LoggerTests: XCTestCase {
         print("NSHomeDirectory: \(NSHomeDirectory())")
         let log = Logger.singleton
         let directory = URL(fileURLWithPath: NSHomeDirectory(), isDirectory: true)
-        log.logPath = directory
 
         Logger.log(format: "this %@ %d %@", "is", 1, "test")
         Logger.log("this", "is", 2, "test")
-        log.save()
-        
-        let s = log.logContentFor(folder: directory)
-        print("s: \(s)")
-        XCTAssertTrue(s.contains("this is 1 test\n"))
-        XCTAssertTrue(s.contains("this is 2 test\n"))
 
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+        log.save(to: directory) { (count: Int64) in
+            XCTAssertEqual(count, 56)
+            let s = String(log.logText)
+            print(s)
+            XCTAssertTrue(s.contains("this is 1 test"))
+            XCTAssertTrue(s.contains("this is 2 test"))
+            log.clear()
+            Logger.restore(from: directory)
+            XCTAssertEqual(String(log.logText), s)
+        }
     }
     
     func testPerformanceExample() {

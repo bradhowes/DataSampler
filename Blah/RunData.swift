@@ -61,13 +61,7 @@ final class RunData : NSObject, NSCoding {
         samples = decoder.decodeObject(forTag: .samples) as! [Sample]
         missing = decoder.decodeObject(forTag: .missing) as! [Sample]
         emitInterval = decoder.decodeInteger(forTag: .emitInterval)
-        if decoder.containsValue(forTag: .estArrivalInterval) {
-            estArrivalInterval = decoder.decodeDouble(forTag: .estArrivalInterval)
-        }
-        else {
-            estArrivalInterval = Double(emitInterval)
-        }
-
+        estArrivalInterval = decoder.decodeDouble(forTag: .estArrivalInterval)
         histogram = Histogram(size: decoder.decodeInteger(forTag: .binsCount))
 
         samples.forEach {

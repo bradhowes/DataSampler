@@ -22,7 +22,7 @@ class HistogramTests: XCTestCase {
     func testInit() {
         let hist = Histogram.init(size: 10)
         XCTAssertEqual(hist.binAt(index: 0), 0)
-        XCTAssertEqual(hist.maxValue(), 0)
+        XCTAssertEqual(hist.maxBinIndex, 0)
     }
     
     func testBinning() {
@@ -41,20 +41,21 @@ class HistogramTests: XCTestCase {
         _ = hist.add(value: 0.3)
         _ = hist.add(value: 0.4)
         XCTAssertEqual(hist.binAt(index: 0), 4)
-        XCTAssertEqual(hist.maxValue(), 4)
+        XCTAssertEqual(hist.binAt(index: hist.maxBinIndex), 4)
         _ = hist.add(value: 1.1)
         _ = hist.add(value: 1.2)
         XCTAssertEqual(hist.binAt(index: 0), 4)
         XCTAssertEqual(hist.binAt(index: 1), 2)
-        XCTAssertEqual(hist.maxValue(), 4)
+        XCTAssertEqual(hist.binAt(index: hist.maxBinIndex), 4)
         _ = hist.add(value: 1.3)
         _ = hist.add(value: 1.4)
         _ = hist.add(value: 1.5)
-        XCTAssertEqual(hist.maxValue(), 5)
+        XCTAssertEqual(hist.binAt(index: hist.maxBinIndex), 5)
         XCTAssertEqual(hist.binAt(index: 2), 0)
     }
     
-    func testGraphSource() {
+    func testBinIndexing
+        () {
         let hist = Histogram.init(size: 3)
         var _ = hist.add(value: 0.1)
         _ = hist.add(value: 0.2)
@@ -65,29 +66,8 @@ class HistogramTests: XCTestCase {
         _ = hist.add(value: 1.3)
         _ = hist.add(value: 1.4)
         _ = hist.add(value: 1.5)
-        XCTAssertEqual(hist.numberOfRecords(), 3)
-        XCTAssertEqual(hist.valueForRecord(0), 4)
-    }
-    
-    func testClear() {
-        let hist = Histogram.init(size: 3)
-        var _ = hist.add(value: 0.1)
-        _ = hist.add(value: 0.2)
-        _ = hist.add(value: 0.3)
-        _ = hist.add(value: 0.4)
-        _ = hist.add(value: 1.1)
-        _ = hist.add(value: 1.2)
-        _ = hist.add(value: 1.3)
-        _ = hist.add(value: 1.4)
-        _ = hist.add(value: 1.5)
-        XCTAssertEqual(hist.binAt(index: 0), 4)
-        XCTAssertEqual(hist.binAt(index: 1), 5)
-        XCTAssertEqual(hist.maxValue(), 5)
-        
-        hist.clear()
-        XCTAssertEqual(hist.binAt(index: 0), 0)
-        XCTAssertEqual(hist.binAt(index: 1), 0)
-        XCTAssertEqual(hist.maxValue(), 0)
+        XCTAssertEqual(hist.bins.count, 3)
+        XCTAssertEqual(hist.bins[0], 4)
     }
     
     func testPerformanceExample() {

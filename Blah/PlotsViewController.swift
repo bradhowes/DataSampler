@@ -22,6 +22,8 @@ final class PlotsViewController: UIViewController {
     @IBOutlet private weak var logView: UITextView!
     @IBOutlet private weak var eventsView: UITextView!
 
+    private var recordingsStore: RecordingsStoreInterface!
+
     /// Show the status bar with white text
     override var preferredStatusBarStyle : UIStatusBarStyle {
         return .lightContent
@@ -36,6 +38,12 @@ final class PlotsViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        self.recordingsStore = PassiveDependencyInjector.singleton.recordingsStore
+
+        histogramButton.accessibilityLabel = "Histogram"
+        logButton.accessibilityLabel = "Log"
+        eventsButton.accessibilityLabel = "Events"
 
         // Add lower views to the LowerViewManager so we can properly slide them in/out
         //
@@ -100,16 +108,17 @@ final class PlotsViewController: UIViewController {
         // Create a new Recording instance for the data we will gather
         //
         let now = Date()
-        let recording = RecordingsStore.newRecording(startTime: now)!
+        let recording = recordingsStore.newRecording(startTime: now)!
         currentRecording = recording
         viewedRecording = recording
 
         // Make the recording the data source in our various live views
         //
         recording.runData.begin(startTime: now)
+        recording.save()
+
         plotView.source = recording.runData
         histogramView.source = recording.runData.histogram
-        RecordingsStore.save()
 
         // Begin logging data
         //
@@ -126,9 +135,9 @@ final class PlotsViewController: UIViewController {
     @IBAction func stopButtonPressed(_ button:UIBarButtonItem) {
         endDemo()
         setStartStopButton(startButton)
-        currentRecording?.finished()
+        currentRecording!.finished()
+        currentRecording!.save()
         currentRecording = nil
-        RecordingsStore.save()
     }
 
     /**
@@ -182,7 +191,7 @@ final class PlotsViewController: UIViewController {
 
     private var demoTimer: Timer?
 
-    func beginDemo(now: Date) {
+    private func beginDemo(now: Date) {
         let rnd = BRHRandomUniform()
         var identifier = 1
         var elapsed = now
@@ -205,7 +214,7 @@ final class PlotsViewController: UIViewController {
         }
     }
 
-    func endDemo() {
+    private func endDemo() {
         demoTimer?.invalidate()
     }
 }

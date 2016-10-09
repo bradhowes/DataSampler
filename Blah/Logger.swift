@@ -8,11 +8,19 @@
 
 import Foundation
 
+protocol LoggerInterface {
+    static func clear()
+    static func save(to url: URL, done: @escaping (Int64)->() )
+    static func restore(from url: URL)
+    static func log(format: String, _ args: CVarArg...)
+    static func log(_ args: CVarArg...)
+}
+
 /**
  A `Logger` instance collects log statements for saving to a file and displaying in a UITextView.
  - SeeAlso: `TextRecorder`
  */
-class Logger : TextRecorder {
+class Logger : TextRecorder, LoggerInterface {
 
     /// The sole instance available for logging.
     static let singleton = Logger()

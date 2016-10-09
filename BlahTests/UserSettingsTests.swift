@@ -16,8 +16,8 @@ class UserSettingsTests: XCTestCase {
     let userSettings = UserSettings.singleton
 
     override func setUp() {
-        userSettings.emitInterval = 120
-        userSettings.syncToUserDefaults()
+        userSettings.emitInterval.value = 120
+        userSettings.write()
         super.setUp()
     }
 
@@ -30,28 +30,28 @@ class UserSettingsTests: XCTestCase {
     }
 
     func testDelayedUpdate() {
-        XCTAssertEqual(userSettings.emitInterval, 120)
-        userSettings.emitInterval = 100
-        XCTAssertEqual(userSettings.emitInterval, 100)
+        XCTAssertEqual(userSettings.emitInterval.value, 120)
+        userSettings.emitInterval.value = 100
+        XCTAssertEqual(userSettings.emitInterval.value, 100)
 
         var ei = UserDefaults.standard.string(forKey: "emitInterval")
         XCTAssertNotNil(ei)
         XCTAssertEqual(ei!, "120")
 
-        userSettings.syncToUserDefaults()
+        userSettings.write()
         CFPreferencesAppSynchronize(kCFPreferencesCurrentApplication)
         
-        XCTAssertEqual(userSettings.emitInterval, 100)
+        XCTAssertEqual(userSettings.emitInterval.value, 100)
         ei = UserDefaults.standard.string(forKey: "emitInterval")
         XCTAssertNotNil(ei)
         XCTAssertEqual(ei!, "100")
     }
     
     func testInvalidIntValueUpdate() {
-        XCTAssertEqual(userSettings.emitInterval, 120)
+        XCTAssertEqual(userSettings.emitInterval.value, 120)
         UserDefaults.standard.set("", forKey: "emitInteval")
-        userSettings.syncFromUserDefaults()
-        XCTAssertEqual(userSettings.emitInterval, 120)
+        userSettings.read()
+        XCTAssertEqual(userSettings.emitInterval.value, 120)
     }
 
     func testPerformanceExample() {

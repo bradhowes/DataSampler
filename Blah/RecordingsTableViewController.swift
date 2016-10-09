@@ -15,8 +15,8 @@ import JSQCoreDataKit
  */
 final class RecordingsTableViewController: UITableViewController, NSFetchedResultsControllerDelegate {
 
-    private var stack: CoreDataStack? { return RecordingsStore.singleton.stack }
-    private var fetcher: NSFetchedResultsController<Recording>? { return RecordingsStore.singleton.fetcher }
+    private var recordingsStore: RecordingsStoreInterface!
+    private var fetcher: NSFetchedResultsController<Recording>!
 
     private var selectedRecording: Recording? = nil
     private var selectedRecordingIndex: IndexPath? = nil
@@ -26,6 +26,9 @@ final class RecordingsTableViewController: UITableViewController, NSFetchedResul
      */
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        recordingsStore = PassiveDependencyInjector.singleton.recordingsStore
+        fetcher = recordingsStore.recordingsFetcher()
         fetcher?.delegate = self
 
         // Fetch recordings.

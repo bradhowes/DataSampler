@@ -8,12 +8,19 @@
 
 import Foundation
 
+protocol EventLogInterface {
+    static func clear()
+    static func save(to url: URL, done: @escaping (Int64)->() )
+    static func restore(from url: URL)
+    static func log(_ args: CVarArg...)
+}
+
 /**
  An `EventLog` instance collects "events", a comma-separated list of values. The collection can be saved to a file 
  and shown in a UITextView.
  - SeeAlso: `TextRecorder`
  */
-class EventLog : TextRecorder {
+class EventLog : TextRecorder, EventLogInterface {
 
     /// The sole instance available for logging.
     static let singleton = EventLog()

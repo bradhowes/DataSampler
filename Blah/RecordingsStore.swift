@@ -9,12 +9,16 @@
 import CoreData
 import JSQCoreDataKit
 
+protocol RecordingsStoreInterface {
+    func newRecording(startTime: Date) -> Recording?
+    func recordingsFetcher() -> NSFetchedResultsController<Recording>?
+    func save()
+}
+
 /** 
  Manager of the Core Data stack for recordings.
  */
-final class RecordingsStore : NSObject {
-
-    static let singleton: RecordingsStore = RecordingsStore()
+final class RecordingsStore : NSObject, RecordingsStoreInterface {
 
     private(set) var stack: CoreDataStack?
     private(set) var fetcher: NSFetchedResultsController<Recording>?
@@ -46,19 +50,7 @@ final class RecordingsStore : NSObject {
         }
     }
 
-    class func newRecording(startTime: Date) -> Recording? {
-        return singleton.newRecording(startTime: startTime)
-    }
-
-    class func save() {
-        return singleton.save()
-    }
-
-    class func delete(recording: Recording) {
-        singleton.delete(recording: recording)
-    }
-
-    private func newRecording(startTime: Date) -> Recording? {
+    func newRecording(startTime: Date) -> Recording? {
         Logger.log("creating new recording")
         guard let mainContext = stack?.mainContext else {
             Logger.log("*** RecordingsStore.newRecording: nil stack")
@@ -67,13 +59,17 @@ final class RecordingsStore : NSObject {
         return Recording(context: mainContext, startTime: startTime)
     }
 
-    private func save() {
+    func recordingsFetcher() -> NSFetchedResultsController<Recording>? {
+        return fetcher
+    }
+
+    func save() {
         guard let mainContext = stack?.mainContext else {
             Logger.log("*** RecordingsStore.save: nil stack")
             return
         }
         Logger.log("saving main context")
-        saveContext(mainContext, wait: true) { Logger.log("saveContext: \($0)") }
+        saveContext(mainContext) { Logger.log("savedContext: \($0)") }
     }
 
     private func delete(recording: Recording) {

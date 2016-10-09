@@ -12,7 +12,7 @@ protocol EventLogInterface {
     static func clear()
     static func save(to url: URL, done: @escaping (Int64)->() )
     static func restore(from url: URL)
-    static func log(_ args: CVarArg...)
+    @discardableResult static func log(_ args: CVarArg...) -> String
 }
 
 /**
@@ -44,9 +44,9 @@ class EventLog : TextRecorder, EventLogInterface {
      Add a new event entry. Converts given arguments to a String.
      - parameter args: the arguments to add
      */
-    static func log(_ args: CVarArg...) {
+    @discardableResult static func log(_ args: CVarArg...) -> String {
         let value = args.map { "\($0)" }.joined(separator: ",")
-        singleton.add(value)
+        return singleton.add(value)
     }
 
     /**
@@ -60,12 +60,12 @@ class EventLog : TextRecorder, EventLogInterface {
      Add a new event entry.
      - parameter line: the event entry
      */
-    override internal func add(_ line: String) {
+    @discardableResult override internal func add(_ line: String) -> String {
         var s = line
         if !s.hasSuffix("\n") {
             s.append("\n")
         }
         s = self.timestamp() + "," + s
-        super.add(s)
+        return super.add(s)
     }
 }

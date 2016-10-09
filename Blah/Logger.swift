@@ -12,8 +12,8 @@ protocol LoggerInterface {
     static func clear()
     static func save(to url: URL, done: @escaping (Int64)->() )
     static func restore(from url: URL)
-    static func log(format: String, _ args: CVarArg...)
-    static func log(_ args: CVarArg...)
+    static func log(format: String, _ args: CVarArg...) -> String
+    @discardableResult static func log(_ args: CVarArg...) -> String
 }
 
 /**
@@ -45,18 +45,18 @@ class Logger : TextRecorder, LoggerInterface {
      - parameter format: the format to apply to the arguments
      - parameter args: the arguments to format
      */
-    static func log(format: String, _ args: CVarArg...) {
+    @discardableResult static func log(format: String, _ args: CVarArg...) -> String {
         let s = String(format: format, arguments: args)
-        singleton.add(s)
+        return singleton.add(s)
     }
 
     /**
      Add a new log entry. Converts given arguments to a String.
      - parameter args: the arguments to add
      */
-    static func log(_ args: CVarArg...) {
+    @discardableResult static func log(_ args: CVarArg...) -> String {
         let value = args.map { "\($0)" }.joined(separator: " ")
-        singleton.add(value)
+        return singleton.add(value)
     }
 
     /**
@@ -70,13 +70,13 @@ class Logger : TextRecorder, LoggerInterface {
      Add a new log entry.
      - parameter line: the log entry
      */
-    override internal func add(_ line: String) {
+    @discardableResult override internal func add(_ line: String) -> String {
         var s = line
         if !s.hasSuffix("\n") {
             s.append("\n")
         }
         s = self.timestamp() + " " + s
         NSLog(s)
-        super.add(s)
+        return super.add(s)
     }
 }

@@ -82,8 +82,8 @@ class TextRecorder: NSObject, UITextViewDelegate {
         self.scrollToEnd = false
     }
 
-    internal func add(_ line: String) {
-        guard !isHistorical else { return }
+    internal func add(_ line: String) -> String {
+        guard !isHistorical else { return line }
         synchronized(obj: self) {
             logText.append(line)
             guard let textView = self.textView else { return }
@@ -96,5 +96,6 @@ class TextRecorder: NSObject, UITextViewDelegate {
                 }
             }
         }
+        return line
     }
 }

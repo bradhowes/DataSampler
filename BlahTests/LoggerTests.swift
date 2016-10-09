@@ -40,7 +40,31 @@ class LoggerTests: XCTestCase {
             XCTAssertEqual(String(log.logText), s)
         }
     }
-    
+
+    func testMultithreading() {
+        let group = DispatchGroup()
+        let log = Logger.singleton
+        log.clear()
+        for i in 0...3 {
+            for j in 0...3 {
+                group.enter()
+                DispatchQueue.global(qos: .userInitiated).async(group: group, qos: .userInitiated, flags: .assignCurrentContext) { () -> Void in
+                    Logger.log(format: "block %d - %d", i, j)
+                    group.leave()
+                }
+            }
+        }
+
+        group.wait()
+        Logger.log("done")
+        let s = String(log.logText)
+        for i in 0...3 {
+            for j in 0...3 {
+                XCTAssertTrue(s.contains(" block \(i) - \(j)\n"))
+            }
+        }
+    }
+
     func testPerformanceExample() {
         // This is an example of a performance test case.
         self.measure {

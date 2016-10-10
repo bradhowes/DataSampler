@@ -50,6 +50,10 @@ final class RecordingsTableViewController: UITableViewController, NSFetchedResul
         navigationController?.navigationBar.layer.removeAllAnimations()
     }
 
+    override func viewWillDisappear(_ animated: Bool) {
+        setEditing(false, animated: false)
+    }
+
     /**
      View controller method to control table editing.
      - parameter editing: editing state
@@ -93,6 +97,10 @@ final class RecordingsTableViewController: UITableViewController, NSFetchedResul
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         guard section == 0 else { return 0 }
         let count = fetcher?.fetchedObjects?.count ?? 0
+
+        if count == 0 && tableView.isEditing {
+            setEditing(false, animated: true)
+        }
 
         // Don't allow editing if the table is empty.
         //

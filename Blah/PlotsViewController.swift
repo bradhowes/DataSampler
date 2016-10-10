@@ -22,7 +22,13 @@ final class PlotsViewController: UIViewController {
     @IBOutlet private weak var logView: UITextView!
     @IBOutlet private weak var eventsView: UITextView!
 
+    private var viewedRecording: Recording?
+
     private var recordingsStore: RecordingsStoreInterface!
+    private var recordingActivityLogic: RecordingActivityLogicInterface!
+    private var userSettings: UserSettingsInterface!
+
+    private var runDataGenerator: ((UserSettingsInterface) -> RunDataInterface)!
 
     /// Show the status bar with white text
     override var preferredStatusBarStyle : UIStatusBarStyle {
@@ -32,14 +38,13 @@ final class PlotsViewController: UIViewController {
     /// The manager controlling the lower views
     private var lowerViewManager = LowerViewManager()
 
-    /// The active recording
-    private var currentRecording: Recording?
-    private var viewedRecording: Recording?
-
     override func viewDidLoad() {
         super.viewDidLoad()
 
         self.recordingsStore = PassiveDependencyInjector.singleton.recordingsStore
+        self.recordingActivityLogic = PassiveDependencyInjector.singleton.recordingActivityLogic
+        self.userSettings = PassiveDependencyInjector.singleton.userSettings
+        self.runDataGenerator = PassiveDependencyInjector.singleton.runDataGenerator
 
         histogramButton.accessibilityLabel = "Histogram"
         logButton.accessibilityLabel = "Log"
@@ -62,12 +67,6 @@ final class PlotsViewController: UIViewController {
         items.remove(at: 1)
         toolbar.setItems(items, animated: false)
 
-        // Create an empty RunData instance to serve as data sources for the plots
-        //
-        let runData = RunData()
-        plotView.source = runData
-        histogramView.source = runData.histogram
-
         // Attach the Logger and EventLog to their respective text views
         //
         Logger.singleton.textView = logView
@@ -82,6 +81,8 @@ final class PlotsViewController: UIViewController {
         // Begin observing notifications from the RecordingsTableViewController
         //
         observeRecordingsTableNotifications()
+
+        clear()
     }
 
     override func didReceiveMemoryWarning() {
@@ -105,27 +106,10 @@ final class PlotsViewController: UIViewController {
     @IBAction func startButtonPressed(_ button:UIBarButtonItem) {
         setStartStopButton(stopButton)
 
-        // Create a new Recording instance for the data we will gather
-        //
-        let now = Date()
-        let recording = recordingsStore.newRecording(startTime: now)!
-        currentRecording = recording
-        viewedRecording = recording
-
-        // Make the recording the data source in our various live views
-        //
-        recording.runData.begin(startTime: now)
-        recording.save()
-
-        plotView.source = recording.runData
-        histogramView.source = recording.runData.histogram
-
-        // Begin logging data
-        //
-        Logger.clear()
-        EventLog.clear()
-
-        beginDemo(now: now)
+        let runData = self.runDataGenerator(userSettings)
+        viewedRecording = recordingActivityLogic.startRecording(userSettings: userSettings, runData: runData)
+        plotView.source = viewedRecording!.runData
+        histogramView.source = viewedRecording!.runData.histogram
     }
 
     /**
@@ -133,11 +117,8 @@ final class PlotsViewController: UIViewController {
      - parameter button: button that was pressed
      */
     @IBAction func stopButtonPressed(_ button:UIBarButtonItem) {
-        endDemo()
         setStartStopButton(startButton)
-        currentRecording!.finished()
-        currentRecording!.save()
-        currentRecording = nil
+        recordingActivityLogic.stopRecording()
     }
 
     /**
@@ -155,8 +136,10 @@ final class PlotsViewController: UIViewController {
      Begin watching for notifications from the RecordingsTableViewController
      */
     private func observeRecordingsTableNotifications() {
-        RecordingsTableNotification.observe(kind: .recordingSelected, observer: self, selector: #selector(recordingSelected))
-        RecordingsTableNotification.observe(kind: .recordingDeleted, observer: self, selector: #selector(recordingDeleted))
+        RecordingsTableNotification.observe(kind: .recordingSelected, observer: self,
+                                            selector: #selector(recordingSelected))
+        RecordingsTableNotification.observe(kind: .recordingDeleted, observer: self,
+                                            selector: #selector(recordingDeleted))
     }
 
     /**
@@ -169,8 +152,7 @@ final class PlotsViewController: UIViewController {
             viewedRecording = recording
             plotView.source = recording.runData
             histogramView.source = recording.runData.histogram
-            Logger.restore(from: recording.folder)
-            EventLog.restore(from: recording.folder)
+            recordingActivityLogic.select(recording: recording)
         }
     }
 
@@ -183,39 +165,15 @@ final class PlotsViewController: UIViewController {
         let recording = RecordingsTableNotification(notification: notification).recording
         if recording === viewedRecording {
             viewedRecording = nil
-            let runData = RunData()
-            plotView.source = runData
-            histogramView.source = runData.histogram
+            clear()
+            recordingActivityLogic.delete(recording: recording)
         }
     }
 
-    private var demoTimer: Timer?
-
-    private func beginDemo(now: Date) {
-        let rnd = BRHRandomUniform()
-        var identifier = 1
-        var elapsed = now
-
-        // Create timer to continue to add synthesized data
-        //
-        demoTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { timer in
-            elapsed = elapsed.addingTimeInterval(2.0)
-            let emissionTime = elapsed
-            let latency = rnd.uniform(lower: 0.5, upper: 10.0) *
-                (rnd.uniform(lower: 0.0, upper: 1.0) > 0.95 ? rnd.uniform(lower: 2.0, upper: 10.0) : 1.0)
-            elapsed = elapsed.addingTimeInterval(latency)
-            let arrivalTime = elapsed
-            if rnd.uniform(lower: 0.0, upper: 1.0) > 0.1 {
-                let sample = Sample(identifier: identifier, latency: latency, emissionTime: emissionTime,
-                                    arrivalTime: arrivalTime, medianLatency: 0.0, averageLatency: 0.0)
-                self.currentRecording?.runData.recordLatency(sample: sample)
-            }
-            identifier += 1
-        }
-    }
-
-    private func endDemo() {
-        demoTimer?.invalidate()
+    private func clear() {
+        let runData = self.runDataGenerator(userSettings)
+        plotView.source = runData
+        histogramView.source = runData.histogram
     }
 }
 

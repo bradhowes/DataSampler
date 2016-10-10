@@ -12,6 +12,9 @@ class PassiveDependencyInjector: NSObject {
     static var singleton: PassiveDependencyInjector = PassiveDependencyInjector()
 
     var recordingsStore: RecordingsStoreInterface!
+    var recordingActivityLogic: RecordingActivityLogicInterface!
+    var userSettings: UserSettingsInterface!
+    var runDataGenerator: ((UserSettingsInterface) -> RunDataInterface)!
 
     private override init() {
         super.init()

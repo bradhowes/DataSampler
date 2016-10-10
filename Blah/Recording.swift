@@ -50,24 +50,21 @@ final class Recording : NSManagedObject, CoreDataEntityProtocol {
         return docDir.appendingPathComponent(self.directoryName, isDirectory: true)
     }()
 
-    lazy var runData: RunData = {
-        var tmp = RunData()
+    lazy var runData: RunDataInterface = {
         let archivePath = self.folder.appendingPathComponent("runData.archive")
         do {
             let archiveData = try Data(contentsOf: archivePath)
             Logger.log("archiveData size: \(archiveData.count)")
-            guard let obj = NSKeyedUnarchiver.unarchiveObject(with: archiveData) else {
-                return tmp
+            if let obj = NSKeyedUnarchiver.unarchiveObject(with: archiveData) as? RunData {
+                obj.startTime = self.startTime! as Date
+                obj.name = self.displayName
+                return obj
             }
-
-            tmp = obj as! RunData
-            tmp.startTime = self.startTime! as Date
-            tmp.name = self.displayName
         } catch {
             Logger.log("*** unable to reconstitute \(archivePath)")
         }
 
-        return tmp
+        return RunData()
     }()
 
     override func willSave() {
@@ -75,17 +72,20 @@ final class Recording : NSManagedObject, CoreDataEntityProtocol {
         Logger.log("Recording.willSave - \(startTime) updated: \(isUpdated) deleted: \(isDeleted)")
     }
 
-    init(context: NSManagedObjectContext, startTime: Date) {
+    init(context: NSManagedObjectContext, userSettings: UserSettingsInterface, runData: RunDataInterface) {
         super.init(entity: Recording.entity(context: context), insertInto: context)
 
-        self.startTime = startTime as NSDate?
+        let now = Date()
+        self.runData = runData
+        self.runData.startTime = now
+        self.runData.name = now.description
+        self.startTime = now as NSDate?
         self.endTime = self.startTime
         self.size = "Recording"
         self.awaitingUpload = false
         self.uploaded = false
-        self.driver = UserSettings.notificationDriver
-        self.emitInterval = Int32(UserSettings.emitInterval)
-        self.runData = RunData()
+        self.emitInterval = Int32(userSettings.emitInterval)
+        self.driver = userSettings.notificationDriver
     }
 
     @objc
@@ -105,7 +105,7 @@ final class Recording : NSManagedObject, CoreDataEntityProtocol {
         Logger.log("Recording.finished")
 
         let now = Date()
-        self.endTime = now as NSDate?
+        endTime = now as NSDate?
 
         // Create folder to hold the recording data
         //

@@ -10,7 +10,7 @@ import CoreData
 import JSQCoreDataKit
 
 protocol RecordingsStoreInterface {
-    func newRecording(startTime: Date) -> Recording?
+    func newRecording(userSettings: UserSettingsInterface, runData: RunDataInterface) -> Recording?
     func recordingsFetcher() -> NSFetchedResultsController<Recording>?
     func save()
 }
@@ -50,13 +50,13 @@ final class RecordingsStore : NSObject, RecordingsStoreInterface {
         }
     }
 
-    func newRecording(startTime: Date) -> Recording? {
+    func newRecording(userSettings: UserSettingsInterface, runData: RunDataInterface) -> Recording? {
         Logger.log("creating new recording")
         guard let mainContext = stack?.mainContext else {
             Logger.log("*** RecordingsStore.newRecording: nil stack")
             return nil
         }
-        return Recording(context: mainContext, startTime: startTime)
+        return Recording(context: mainContext, userSettings: userSettings, runData: runData)
     }
 
     func recordingsFetcher() -> NSFetchedResultsController<Recording>? {

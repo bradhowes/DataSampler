@@ -18,7 +18,7 @@ final class GraphLatencyByTime: CPTGraphHostingView {
     
     let kPlotSymbolSize: Double = 8.0
 
-    var source: RunData! {
+    var source: RunDataInterface! {
         willSet {
             if source != nil {
                 RunDataNewSampleNotification.unobserve(from: source, observer: self)
@@ -28,6 +28,7 @@ final class GraphLatencyByTime: CPTGraphHostingView {
             RunDataNewSampleNotification.observe(from: source, observer: self, selector: #selector(sampleAdded))
             if hostedGraph == nil {
                 makeGraph()
+                updateTitle()
             }
             else {
                 reload()

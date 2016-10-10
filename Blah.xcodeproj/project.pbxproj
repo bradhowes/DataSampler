@@ -53,6 +53,9 @@
 		BD6539EF1DA3F6EE008C32C6 /* Recording.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD6539EE1DA3F6EE008C32C6 /* Recording.swift */; };
 		BD6539F21DA3F71B008C32C6 /* RecordingModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = BD6539F01DA3F71B008C32C6 /* RecordingModel.xcdatamodeld */; };
 		BD6539F81DA448EC008C32C6 /* RecordingsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD6539F71DA448EC008C32C6 /* RecordingsTableViewController.swift */; };
+		BD73D3611DAB6E5000845EEF /* RecordingActivityLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD73D3601DAB6E5000845EEF /* RecordingActivityLogic.swift */; };
+		BD73D3631DAB706100845EEF /* DemoDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD73D3621DAB706100845EEF /* DemoDriver.swift */; };
+		BD73D3651DAB907700845EEF /* TimestampGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD73D3641DAB907700845EEF /* TimestampGenerator.swift */; };
 		BD7564951D99171000CE455F /* PlotLatencyFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD7564941D99171000CE455F /* PlotLatencyFormatter.swift */; };
 		BD7564971D991C5000CE455F /* PlotLatencyFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD7564961D991C5000CE455F /* PlotLatencyFormatterTests.swift */; };
 		BD7564991D9931A800CE455F /* Date+Additions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD7564981D9931A800CE455F /* Date+Additions.swift */; };
@@ -75,6 +78,7 @@
 		BDBCEF4E1DA8F9A800B09DC9 /* BlahUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBCEF4D1DA8F9A800B09DC9 /* BlahUITests.swift */; };
 		BDBCEF561DA9CC5400B09DC9 /* CriticalSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBCEF551DA9CC5400B09DC9 /* CriticalSection.swift */; };
 		BDBCEF581DA9CE3D00B09DC9 /* PassiveDependencyInjector.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBCEF571DA9CE3D00B09DC9 /* PassiveDependencyInjector.swift */; };
+		BDD553DF1DABAB1100D2167E /* FixedTimestampGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDD553DE1DABAB1100D2167E /* FixedTimestampGenerator.swift */; };
 		BDDC9D781D8AFC4100C36430 /* GraphLatencyHistogram.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDDC9D771D8AFC4100C36430 /* GraphLatencyHistogram.swift */; };
 		BDFEEC3B1D91D0DC003E8555 /* NewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD49485D1D89F23000C50DE2 /* NewTests.swift */; };
 		BDFEEC3C1D91E875003E8555 /* UserSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD5605351D8FC2F200CFE29B /* UserSettings.swift */; };
@@ -152,6 +156,9 @@
 		BD6539EE1DA3F6EE008C32C6 /* Recording.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Recording.swift; sourceTree = "<group>"; };
 		BD6539F11DA3F71B008C32C6 /* RecordingModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = RecordingModel.xcdatamodel; sourceTree = "<group>"; };
 		BD6539F71DA448EC008C32C6 /* RecordingsTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RecordingsTableViewController.swift; sourceTree = "<group>"; };
+		BD73D3601DAB6E5000845EEF /* RecordingActivityLogic.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RecordingActivityLogic.swift; sourceTree = "<group>"; };
+		BD73D3621DAB706100845EEF /* DemoDriver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DemoDriver.swift; sourceTree = "<group>"; };
+		BD73D3641DAB907700845EEF /* TimestampGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimestampGenerator.swift; sourceTree = "<group>"; };
 		BD7564941D99171000CE455F /* PlotLatencyFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlotLatencyFormatter.swift; sourceTree = "<group>"; };
 		BD7564961D991C5000CE455F /* PlotLatencyFormatterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlotLatencyFormatterTests.swift; sourceTree = "<group>"; };
 		BD7564981D9931A800CE455F /* Date+Additions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Date+Additions.swift"; sourceTree = "<group>"; };
@@ -177,6 +184,7 @@
 		BDBCEF4F1DA8F9A800B09DC9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BDBCEF551DA9CC5400B09DC9 /* CriticalSection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CriticalSection.swift; sourceTree = "<group>"; };
 		BDBCEF571DA9CE3D00B09DC9 /* PassiveDependencyInjector.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PassiveDependencyInjector.swift; sourceTree = "<group>"; };
+		BDD553DE1DABAB1100D2167E /* FixedTimestampGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FixedTimestampGenerator.swift; sourceTree = "<group>"; };
 		BDDC9D771D8AFC4100C36430 /* GraphLatencyHistogram.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GraphLatencyHistogram.swift; sourceTree = "<group>"; };
 		F34C4E5F49323E86C7948436 /* Pods-BlahTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BlahTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-BlahTests/Pods-BlahTests.debug.xcconfig"; sourceTree = "<group>"; };
 		F657859C3132944BCAC76486 /* Pods-BlahTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BlahTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-BlahTests/Pods-BlahTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -250,6 +258,8 @@
 				BD4948461D89F23000C50DE2 /* AppDelegate.swift */,
 				BDBCEF401DA7898300B09DC9 /* AppNotifications.swift */,
 				BD49484C1D89F23000C50DE2 /* Main.storyboard */,
+				BD73D3601DAB6E5000845EEF /* RecordingActivityLogic.swift */,
+				BD73D3621DAB706100845EEF /* DemoDriver.swift */,
 				BDBB02541DA44EDE000838E0 /* Plots */,
 				BDBB02531DA44EA0000838E0 /* Recordings */,
 				BDBB02561DA44F3E000838E0 /* Settings */,
@@ -279,6 +289,7 @@
 				BD58DDBD1D97CB7D007765E3 /* PlotTimeFormatterTests.swift */,
 				BD4C0B071D91217000C0611F /* UserSettingsTests.swift */,
 				BD49485F1D89F23000C50DE2 /* Info.plist */,
+				BDD553DE1DABAB1100D2167E /* FixedTimestampGenerator.swift */,
 			);
 			path = BlahTests;
 			sourceTree = "<group>";
@@ -347,6 +358,7 @@
 				BD7564A21D99C72600CE455F /* EventLog.swift */,
 				BD75649E1D99B0B700CE455F /* Logger.swift */,
 				BD75649C1D99703900CE455F /* TextRecorder.swift */,
+				BD73D3641DAB907700845EEF /* TimestampGenerator.swift */,
 			);
 			name = Logs;
 			sourceTree = "<group>";
@@ -673,6 +685,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BD4948471D89F23000C50DE2 /* AppDelegate.swift in Sources */,
+				BD73D3631DAB706100845EEF /* DemoDriver.swift in Sources */,
 				BD87F59F1D8AAAD1007A6F99 /* GraphLatencyByTime.swift in Sources */,
 				BDFEEC3C1D91E875003E8555 /* UserSettings.swift in Sources */,
 				BDBB025D1DA45983000838E0 /* LowerView.swift in Sources */,
@@ -685,12 +698,14 @@
 				BDBCEF411DA7898300B09DC9 /* AppNotifications.swift in Sources */,
 				BD87F5991D8A2AD1007A6F99 /* PlotsViewController.swift in Sources */,
 				BD6539F21DA3F71B008C32C6 /* RecordingModel.xcdatamodeld in Sources */,
+				BD73D3651DAB907700845EEF /* TimestampGenerator.swift in Sources */,
 				BD75649D1D99703900CE455F /* TextRecorder.swift in Sources */,
 				BD6539EF1DA3F6EE008C32C6 /* Recording.swift in Sources */,
 				BD87F59D1D8A2AFE007A6F99 /* SettingsViewController.swift in Sources */,
 				BD17D04D1D8E8BC200A18062 /* RunData.swift in Sources */,
 				BDBB02671DA4FCE8000838E0 /* Recording+CoreDataProperties.swift in Sources */,
 				BD75649F1D99B0B700CE455F /* Logger.swift in Sources */,
+				BD73D3611DAB6E5000845EEF /* RecordingActivityLogic.swift in Sources */,
 				BDDC9D781D8AFC4100C36430 /* GraphLatencyHistogram.swift in Sources */,
 				BDBB025B1DA45942000838E0 /* LowerViewManager.swift in Sources */,
 				BD7564991D9931A800CE455F /* Date+Additions.swift in Sources */,
@@ -717,6 +732,7 @@
 				BD7564971D991C5000CE455F /* PlotLatencyFormatterTests.swift in Sources */,
 				BD15AE9B1D91253F00213A88 /* UserSettingsTests.swift in Sources */,
 				BD75649B1D99321500CE455F /* Collection+AdditionsTests.swift in Sources */,
+				BDD553DF1DABAB1100D2167E /* FixedTimestampGenerator.swift in Sources */,
 				BD17D0531D8EDA9800A18062 /* Date+AdditionsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

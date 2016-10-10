@@ -8,6 +8,9 @@
 
 import Foundation
 
+/**
+ Protocol for all EventLog classes
+ */
 protocol EventLogInterface {
     static func clear()
     static func save(to url: URL, done: @escaping (Int64)->() )
@@ -26,16 +29,25 @@ class EventLog : TextRecorder, EventLogInterface {
     static let singleton = EventLog()
 
     /**
-     Clear out any previous log data.
+     Clear out any previous log data, and allow for new entries
      */
     static func clear() {
         singleton.clear()
     }
 
+    /**
+     Save the current collection of events to a file
+     - parameter url: the location where the file will be
+     - parameter done: closure invoked at end of save operation that conveys the number of bytes that were written
+     */
     static func save(to url: URL, done: @escaping (Int64)->() ) {
         singleton.save(to: url, done: done)
     }
 
+    /**
+     Restore a previously-saved collection of events
+     - parameter url: the location where file is
+     */
     static func restore(from url: URL) {
         singleton.restore(from: url)
     }
@@ -50,15 +62,17 @@ class EventLog : TextRecorder, EventLogInterface {
     }
 
     /**
-     Constructor for a new `EventLog` instance
+     Constructor for a new `EventLog` instance.
+     - parameter timestampGenerator: a generator for timestamp values
      */
-    private init() {
-        super.init(fileName: "events.csv")
+    private init(timestampGenerator: TimestampGeneratorInterface = TimestampGenerator()) {
+        super.init(fileName: "events.csv", timestampGenerator: timestampGenerator)
     }
 
     /**
      Add a new event entry.
      - parameter line: the event entry
+     - returns: the full text that was added to the log
      */
     @discardableResult override internal func add(_ line: String) -> String {
         var s = line

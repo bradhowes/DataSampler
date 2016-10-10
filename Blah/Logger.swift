@@ -8,6 +8,9 @@
 
 import Foundation
 
+/** 
+ Protocol for all Logger classes
+ */
 protocol LoggerInterface {
     static func clear()
     static func save(to url: URL, done: @escaping (Int64)->() )
@@ -32,10 +35,19 @@ class Logger : TextRecorder, LoggerInterface {
         singleton.clear()
     }
 
+    /**
+     Write the contents of Logger to disk.
+     - parameter url: the location where to write to
+     - parameter done: closure called when done which reports how many bytes were written
+     */
     static func save(to url: URL, done: @escaping (Int64)->() ) {
         singleton.save(to: url, done: done)
     }
 
+    /**
+     Restore the contents of Logger from disk
+     - parameter url: the location where to read from
+     */
     static func restore(from url: URL) {
         singleton.restore(from: url)
     }
@@ -44,6 +56,7 @@ class Logger : TextRecorder, LoggerInterface {
      Add a new log entry by applying a format string to a set of arguments
      - parameter format: the format to apply to the arguments
      - parameter args: the arguments to format
+     - returns: the full text that was added to the log
      */
     @discardableResult static func log(format: String, _ args: CVarArg...) -> String {
         let s = String(format: format, arguments: args)
@@ -53,6 +66,7 @@ class Logger : TextRecorder, LoggerInterface {
     /**
      Add a new log entry. Converts given arguments to a String.
      - parameter args: the arguments to add
+     - returns: the full text that was added to the log
      */
     @discardableResult static func log(_ args: CVarArg...) -> String {
         let value = args.map { "\($0)" }.joined(separator: " ")
@@ -62,13 +76,14 @@ class Logger : TextRecorder, LoggerInterface {
     /**
      Constructor for a new `Logger`
      */
-    private init() {
-        super.init(fileName: "log.txt")
+    private init(timestampGenerator: TimestampGeneratorInterface = TimestampGenerator()) {
+        super.init(fileName: "log.txt", timestampGenerator: timestampGenerator)
     }
 
     /**
      Add a new log entry.
      - parameter line: the log entry
+     - returns: the full text that was added to the log
      */
     @discardableResult override internal func add(_ line: String) -> String {
         var s = line

@@ -121,80 +121,39 @@ struct BoolValueConverter : ValueConverter {
     }
 }
 
-/** 
- Description protocol for settings.
- */
-protocol SettingDescription {
-
-    /// Setting description getter
-    var settingDescription: String { get }
-}
-
 /**
  Base class for all user settings. Registers a default value for when a setting does not yet exist in
  UserDefaults. Also registers two closures, one to write current setting value to NSUserDefaults and the other
  to set the current value from a NSUserDefaults entry.
  */
-class SettingBase {
-    typealias Synchro = ()->Void
+protocol SettingInterface {
 
-    /// Mapping between setting name (key) and the default value to use when the setting does not exist in UserDefaults
-    static var defaults: [String:AnyObject] = [:]
-    /// Vector of functions to call to flush native values into `UserDefaults`
-    static var writers: [Synchro] = []
-    /// Vector of functions to call to load `UserDefaults` and convert into native values.
-    static var readers: [Synchro] = []
-    /// Collection of setting descriptors
-    static var settings: [SettingDescription] = []
+    var key: String { get }
+    var valueObject: AnyObject? { get }
+    var settingDescription: String { get }
 
-    /**
-     Remove all previously-registered user settings.
-     */
-    static func reset() {
-        defaults = [:]
-        writers = []
-        readers = []
-        settings = []
-    }
-
-    /**
-     Register a new setting
-     - parameter key: the name of the setting
-     - parameter value: default value to use if none exists
-     - parameter writer: function to create an NSObject-derived value for storing in UserDefaults
-     - parameter reader: function to create a native Swift type from UserDefaults value
-     */
-    func registerSetting(_ key: String, value: AnyObject?, writer: @escaping Synchro, reader: @escaping Synchro) {
-        SettingBase.defaults[key] = value
-        SettingBase.writers.append(writer)
-        SettingBase.readers.append(reader)
-    }
-
-    /**
-     Update NSUserDefaults using the internal values
-     */
-    static func write() {
-        SettingBase.writers.forEach { $0() }
-    }
-
-    /**
-     Update the internal values using contents from NSUserDefaults.
-     */
-    static func read() {
-        SettingBase.readers.forEach { $0() }
-    }
+    func read()
+    func write()
 }
+
+
+//func registerSetting(_ key: String, value: AnyObject?, writer: @escaping Synchro, reader: @escaping Synchro) {
+//    SettingBase.defaults[key] = value
+//    SettingBase.writers.append(writer)
+//    SettingBase.readers.append(reader)
+//}
 
 /**
  Define a user setting that knows how to convert between a natural type (eg. Int or Double) and the type used to
  hold the value in the NSUserDefaults database.
  */
-final class Setting<ValueType, VC: ValueConverter>: SettingBase, SettingDescription, CustomDebugStringConvertible where
+final class Setting<ValueType, VC: ValueConverter>: SettingInterface, CustomDebugStringConvertible where
 ValueType: Equatable, ValueType == VC.ValueType {
 
-    let key: String
-    let changedNotification: Notification.Name
+    var key: String
     var value: ValueType
+    var valueObject: AnyObject? { return VC.valueToAnyObject(self.value) }
+    let changedNotification: Notification.Name
 
     /**
      Initialize new instance
@@ -206,28 +165,27 @@ ValueType: Equatable, ValueType == VC.ValueType {
         self.key = tag.rawValue
         self.changedNotification = Notification.Name(rawValue: "UserSettings." + self.key)
         self.value = value
-        super.init()
-        SettingBase.settings.append(self)
-        self.registerSetting(self.key, value: VC.valueToAnyObject(self.value),
-                             writer: {
-                                Defaults[self.key] = VC.valueToAnyObject(self.value)
-            },
-                             reader: {
-                                if let value = VC.anyObjectToValue(Defaults.object(forKey: self.key) as AnyObject?) {
-                                    if self.value != value {
-                                        print("-- setting \(self.key) changed - old: \(self.value) new: \(value)")
-                                        self.value = value
-                                        NotificationCenter.default.post(name: self.changedNotification,
-                                                                        object: self,
-                                                                        userInfo: ["old": self.value, "new": value])
-                                    }
-                                }
-                                else {
-                                    Defaults[self.key] = VC.valueToAnyObject(self.value)
-                                }
-        })
     }
-    
+
+    func read() {
+        if let value = VC.anyObjectToValue(Defaults.object(forKey: self.key) as AnyObject?) {
+            if self.value != value {
+                print("-- setting \(self.key) changed - old: \(self.value) new: \(value)")
+                self.value = value
+                NotificationCenter.default.post(name: self.changedNotification,
+                                                object: self,
+                                                userInfo: ["old": self.value, "new": value])
+            }
+        }
+        else {
+            Defaults[self.key] = VC.valueToAnyObject(self.value)
+        }
+    }
+
+    func write() {
+        Defaults[self.key] = VC.valueToAnyObject(self.value)
+    }
+
     /// Pretty-printed representation for the setting
     var description: String { return "<BRHSetting: '\(key)' '\(value)'>" }
     /// Debugger representation for the setting
@@ -241,60 +199,166 @@ typealias IntSetting = Setting<Int, IntValueConverter>
 typealias DoubleSetting = Setting<Double, DoubleValueConverter>
 typealias BoolSetting = Setting<Bool, BoolValueConverter>
 
+protocol UserSettingsInterface {
+    var notificationDriver: String { get set }
+    var emitInterval: Int { get set }
+    var maxHistogramBin: Int { get set }
+    var dropboxLinkButtonText: String { get set }
+    var uploadAutomatically: Bool { get set }
+    var remoteServerName: String { get set }
+    var remoteServerPort: Int { get set }
+    var resendUntilFetched: Bool { get set }
+    var apnsProdCertFileName: String { get set }
+    var apnsProdCertPassword: String { get set }
+    var apnsDevCertFileName: String { get set }
+    var apnsDevCertPassword: String { get set }
+
+    func read()
+    func write()
+}
+
 /**
  Collection of all user settings.
  */
-final class UserSettings {
-    static let singleton: UserSettings = UserSettings()
+final class UserSettings: UserSettingsInterface {
+
+    private var defaults: [String:AnyObject] = [:]
+    private var settings: [SettingInterface] = []
+
+    /**
+     Remove all previously-registered user settings.
+     */
+    func reset() {
+        defaults = [:]
+        settings = []
+    }
+
     static let updatedNotification = Notification.Name(rawValue: "UserSettings.updatedNotification")
 
-    var notificationDriver: StringSetting
-    var emitInterval: IntSetting
-    var maxHistogramBin: IntSetting
-    var dropboxLinkButtonText: StringSetting
-    var uploadAutomatically: BoolSetting
-    var remoteServerName: StringSetting
-    var remoteServerPort: IntSetting
-    var resendUntilFetched: BoolSetting
-    var apnsProdCertFileName: StringSetting
-    var apnsProdCertPassword: StringSetting
-    var apnsDevCertFileName: StringSetting
-    var apnsDevCertPassword: StringSetting
+    private var _notificationDriver: StringSetting
+    private var _emitInterval: IntSetting
+    private var _maxHistogramBin: IntSetting
+    private var _dropboxLinkButtonText: StringSetting
+    private var _uploadAutomatically: BoolSetting
+    private var _remoteServerName: StringSetting
+    private var _remoteServerPort: IntSetting
+    private var _resendUntilFetched: BoolSetting
+    private var _apnsProdCertFileName: StringSetting
+    private var _apnsProdCertPassword: StringSetting
+    private var _apnsDevCertFileName: StringSetting
+    private var _apnsDevCertPassword: StringSetting
+
+    var notificationDriver: String {
+        get { return self._notificationDriver.value }
+        set { self._notificationDriver.value = newValue }
+    }
+
+    var emitInterval: Int {
+        get { return self._emitInterval.value }
+        set { self._emitInterval.value = newValue }
+    }
+
+    var maxHistogramBin: Int {
+        get { return self._maxHistogramBin.value }
+        set { self._maxHistogramBin.value = newValue }
+    }
+
+    var dropboxLinkButtonText: String {
+        get { return self._dropboxLinkButtonText.value }
+        set { self._dropboxLinkButtonText.value = newValue }
+    }
+
+    var uploadAutomatically: Bool {
+        get { return self._uploadAutomatically.value }
+        set { self._uploadAutomatically.value = newValue }
+    }
+
+    var remoteServerName: String {
+        get { return self._remoteServerName.value }
+        set { self._remoteServerName.value = newValue }
+    }
+
+    var remoteServerPort: Int {
+        get { return self._remoteServerPort.value }
+        set { self._remoteServerPort.value = newValue }
+    }
+
+    var resendUntilFetched: Bool {
+        get { return self._resendUntilFetched.value }
+        set { self._resendUntilFetched.value = newValue }
+    }
+
+    var apnsProdCertFileName: String {
+        get { return self._apnsProdCertFileName.value }
+        set { self._apnsProdCertFileName.value = newValue }
+    }
+
+    var apnsProdCertPassword: String {
+        get { return self._apnsProdCertPassword.value }
+        set { self._apnsProdCertPassword.value = newValue }
+    }
+
+    var apnsDevCertFileName: String {
+        get { return self._apnsProdCertFileName.value }
+        set { self._apnsProdCertFileName.value = newValue }
+    }
+
+    var apnsDevCertPassword: String {
+        get { return self._apnsDevCertPassword.value }
+        set { self._apnsDevCertPassword.value = newValue }
+    }
 
     /**
      Initialize user settings collection. Sets up default values in NSUserDefaults.
      */
-    private init() {
-        SettingBase.reset()
-        notificationDriver = StringSetting(tag: .notificationDriver, value: "remote")
-        emitInterval = IntSetting(tag: .emitInterval, value: 120)
-        maxHistogramBin = IntSetting(tag: .maxHistogramBin, value: 30)
-        dropboxLinkButtonText = StringSetting(tag: .dropboxLinkButtonText, value: "Link")
-        uploadAutomatically = BoolSetting(tag: .uploadAutomatically, value: true)
-        remoteServerName = StringSetting(tag: .remoteServerName, value: "brhemitter.azurewebsites.net")
-        remoteServerPort = IntSetting(tag: .remoteServerPort, value: 80)
-        resendUntilFetched = BoolSetting(tag: .resendUntilFetched, value: true)
-        apnsProdCertFileName = StringSetting(tag: .apnsProdCertFileName, value: "apn-nhtest-prod.p12")
-        apnsProdCertPassword = StringSetting(tag: .apnsProdCertPassword, value: "")
-        apnsDevCertFileName = StringSetting(tag: .apnsDevCertFileName, value: "apn-nhtest-dev.p12")
-        apnsDevCertPassword = StringSetting(tag: .apnsDevCertPassword, value: "")
-        Defaults.register(defaults: SettingBase.defaults)
+    init() {
+        _notificationDriver = StringSetting(tag: .notificationDriver, value: "remote")
+        _emitInterval = IntSetting(tag: .emitInterval, value: 120)
+        _maxHistogramBin = IntSetting(tag: .maxHistogramBin, value: 30)
+        _dropboxLinkButtonText = StringSetting(tag: .dropboxLinkButtonText, value: "Link")
+        _uploadAutomatically = BoolSetting(tag: .uploadAutomatically, value: true)
+        _remoteServerName = StringSetting(tag: .remoteServerName, value: "brhemitter.azurewebsites.net")
+        _remoteServerPort = IntSetting(tag: .remoteServerPort, value: 80)
+        _resendUntilFetched = BoolSetting(tag: .resendUntilFetched, value: true)
+        _apnsProdCertFileName = StringSetting(tag: .apnsProdCertFileName, value: "apn-nhtest-prod.p12")
+        _apnsProdCertPassword = StringSetting(tag: .apnsProdCertPassword, value: "")
+        _apnsDevCertFileName = StringSetting(tag: .apnsDevCertFileName, value: "apn-nhtest-dev.p12")
+        _apnsDevCertPassword = StringSetting(tag: .apnsDevCertPassword, value: "")
+
+        register(_notificationDriver)
+        register(_emitInterval)
+        register(_maxHistogramBin)
+        register(_dropboxLinkButtonText)
+        register(_uploadAutomatically)
+        register(_remoteServerName)
+        register(_remoteServerPort)
+        register(_resendUntilFetched)
+        register(_apnsProdCertFileName)
+        register(_apnsProdCertPassword)
+        register(_apnsDevCertFileName)
+        register(_apnsDevCertPassword)
+
         read()
         dump()
+    }
+
+    func register(_ setting: SettingInterface) {
+        defaults[setting.key] = setting.valueObject
+        settings.append(setting)
     }
 
     /**
      Update NSUserDefaults using the internal values
      */
     func write() {
-        SettingBase.write()
+        settings.forEach { $0.write() }
     }
 
     /**
      Update the internal values using contents from NSUserDefaults.
      */
     func read() {
-        SettingBase.read()
+        settings.forEach { $0.read() }
         NotificationCenter.default.post(name: UserSettings.updatedNotification, object: self, userInfo: nil)
         dump()
     }
@@ -303,24 +367,6 @@ final class UserSettings {
      Print out the current application settings.
      */
     func dump() {
-        SettingBase.settings.forEach { print($0.settingDescription) }
+        settings.forEach { print("\($0)") }
     }
-}
-
-/** 
- Create shortcuts in the UserSettings class so we don't have to type '.singleton'
- */
-extension UserSettings {
-    static var notificationDriver: String { return singleton.notificationDriver.value }
-    static var emitInterval: Int { return singleton.emitInterval.value }
-    static var maxHistogramBin: Int { return singleton.maxHistogramBin.value }
-    static var dropboxLinkButtonText: String { return singleton.dropboxLinkButtonText.value }
-    static var uploadAutomatically: Bool { return singleton.uploadAutomatically.value }
-    static var remoteServerName: String { return singleton.remoteServerName.value }
-    static var remoteServerPort: Int { return singleton.remoteServerPort.value }
-    static var resendUntilFetched: Bool { return singleton.resendUntilFetched.value }
-    static var apnsProdCertFileName: String { return singleton.apnsDevCertFileName.value }
-    static var apnsProdCertPassword: String { return singleton.apnsProdCertPassword.value }
-    static var apnsDevCertFileName: String { return singleton.apnsDevCertFileName.value }
-    static var apnsDevCertPassword: String { return singleton.apnsDevCertPassword.value }
 }

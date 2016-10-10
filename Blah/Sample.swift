@@ -19,13 +19,40 @@ private enum Tag: String {
  Extension of NSCoder to support above Tags enumeration
  */
 private extension NSCoder {
-    func encode<T>(_ value: T, forTag: Tag) { encode(value, forKey: forTag.rawValue) }
     func decodeObject(forTag: Tag) -> Any? { return decodeObject(forKey: forTag.rawValue) }
     func decodeInteger(forTag: Tag) -> Int { return decodeInteger(forKey: forTag.rawValue) }
     func decodeDouble(forTag: Tag) -> Double { return decodeDouble(forKey: forTag.rawValue) }
 }
 
-final class Sample: NSObject, NSCoding, Comparable {
+protocol SampleInterface: Comparable, CustomStringConvertible {
+    var identifier: Int { get }
+    var latency: Double { get }
+    var emissionTime: Date { get }
+    var arrivalTime: Date { get }
+    var medianLatency: Double { get }
+    var averageLatency: Double { get }
+    var missingCount: Int { get }
+    var description: String { get }
+}
+
+/**
+ Enable Equatable protocol for SampleInterface objects, comparing identifiers which should be unique in a run
+ */
+func ==<T: SampleInterface>(x: T, y: T) -> Bool { return x.identifier == y.identifier }
+
+/**
+ Enable Comparable protocol for SampleInterface objects, ordering by increasing latency value
+ */
+func < <T: SampleInterface>(x: T, y: T) -> Bool { return x.latency < y.latency }
+
+/**
+ Determine difference between two SampleInterface arrival times. If LHS < RHS the result will be negative.
+ */
+func - <T: SampleInterface>(lhs: T, rhs: T) -> TimeInterval {
+    return lhs.arrivalTime.timeIntervalSince(rhs.arrivalTime)
+}
+
+final class Sample: NSObject, NSCoding, SampleInterface {
 
     let identifier: Int
     let latency: Double
@@ -59,35 +86,14 @@ final class Sample: NSObject, NSCoding, Comparable {
     }
 
     func encode(with encoder: NSCoder) {
-        encoder.encode(self.identifier, forTag: .identifier)
-        encoder.encode(self.latency, forTag: .latency)
-        encoder.encode(self.emissionTime, forTag: .emissionTime)
-        encoder.encode(self.arrivalTime, forTag: .arrivalTime)
-        encoder.encode(self.medianLatency, forTag: .medianLatency)
-        encoder.encode(self.averageLatency, forTag: .averageLatency)
-        encoder.encode(self.missingCount, forTag: .missingCount)
+        encoder.encode(self.identifier, forKey: Tag.identifier.rawValue)
+        encoder.encode(self.latency, forKey: Tag.latency.rawValue)
+        encoder.encode(self.emissionTime, forKey: Tag.emissionTime.rawValue)
+        encoder.encode(self.arrivalTime, forKey: Tag.arrivalTime.rawValue)
+        encoder.encode(self.medianLatency, forKey: Tag.medianLatency.rawValue)
+        encoder.encode(self.averageLatency, forKey: Tag.averageLatency.rawValue)
+        encoder.encode(self.missingCount, forKey: Tag.missingCount.rawValue)
     }
 
-    override var description: String {
-        get {
-            return ("\(self.identifier), \(self.latency)")
-        }
-    }
-}
-
-/**
- Enable Equatable protocol for Sample objects, comparing identifiers which should be unique in a run
- */
-func ==(x: Sample, y: Sample) -> Bool { return x.identifier == y.identifier }
-
-/**
- Enable Comparable protocol for Sample objects, ordering by increasing latency value
- */
-func <(x: Sample, y: Sample) -> Bool { return x.latency < y.latency }
-
-/**
- Determine difference between two Sample arrival times. If LHS < RHS the result will be negative.
- */
-func -(lhs: Sample, rhs: Sample) -> TimeInterval {
-    return lhs.arrivalTime.timeIntervalSince(rhs.arrivalTime)
+    override var description: String { return ("\(self.identifier), \(self.latency)") }
 }

@@ -17,19 +17,37 @@ private enum Tag: String { case name, startTime, samples, missing, emitInterval,
  Extension of NSCoder to support above Tags enumeration
  */
 private extension NSCoder {
-    func encode<T>(_ value: T, forTag: Tag) { encode(value, forKey: forTag.rawValue) }
-
     func decodeObject(forTag: Tag) -> Any? { return decodeObject(forKey: forTag.rawValue) }
     func decodeInteger(forTag: Tag) -> Int { return decodeInteger(forKey: forTag.rawValue) }
     func decodeDouble(forTag: Tag) -> Double { return decodeDouble(forKey: forTag.rawValue) }
+}
 
-    func containsValue(forTag: Tag) -> Bool { return containsValue(forKey: forTag.rawValue) }
+protocol RunDataInterface {
+
+    static func MakeRunData(userSettings: UserSettingsInterface) -> RunDataInterface
+
+    var name: String { get set }
+    var startTime: Date { get set }
+
+    var samples: [Sample] { get }
+    var missing: [Sample] { get }
+    var orderedSamples: OrderedArray<Sample> { get }
+    var histogram: Histogram { get }
+
+    var emitInterval: Int { get }
+    var estArrivalInterval: Double { get }
+
+    var minSample: Sample? { get }
+    var maxSample: Sample? { get }
+
+    func orderedSampleAt(index: Int) -> Sample?
+    func recordLatency(sample: Sample)
 }
 
 /**
  Container for runtime data collected during a run.
  */
-final class RunData : NSObject, NSCoding {
+final class RunData : NSObject, NSCoding, RunDataInterface {
 
     var name: String
     var startTime: Date
@@ -41,6 +59,13 @@ final class RunData : NSObject, NSCoding {
     private(set) var emitInterval: Int
     private(set) var estArrivalInterval: Double
 
+    var minSample: Sample? { return orderedSamples.first }
+    var maxSample: Sample? { return orderedSamples.last }
+
+    static func MakeRunData(userSettings: UserSettingsInterface) -> RunDataInterface {
+        return RunData(userSettings: userSettings)
+    }
+
     override init() {
         self.name = "Untitled"
         self.startTime = Date()
@@ -48,22 +73,27 @@ final class RunData : NSObject, NSCoding {
         samples = []
         missing = []
         orderedSamples = OrderedArray(predicate: (<))
-        histogram = Histogram(size: UserSettings.maxHistogramBin)
-        emitInterval = UserSettings.emitInterval
+        histogram = Histogram(size: 1)
+        self.emitInterval = 0
         estArrivalInterval = Double(emitInterval)
 
         super.init()
     }
 
+    convenience init(userSettings: UserSettingsInterface) {
+        self.init()
+        histogram = Histogram(size: userSettings.maxHistogramBin + 1)
+        self.emitInterval = userSettings.emitInterval
+        estArrivalInterval = Double(emitInterval)
+    }
+
     required convenience init?(coder decoder: NSCoder) {
         self.init()
-
         samples = decoder.decodeObject(forTag: .samples) as! [Sample]
         missing = decoder.decodeObject(forTag: .missing) as! [Sample]
         emitInterval = decoder.decodeInteger(forTag: .emitInterval)
         estArrivalInterval = decoder.decodeDouble(forTag: .estArrivalInterval)
         histogram = Histogram(size: decoder.decodeInteger(forTag: .binsCount))
-
         samples.forEach {
             orderedSamples.add(value: $0)
             histogram.add(value: $0.latency)
@@ -71,20 +101,12 @@ final class RunData : NSObject, NSCoding {
     }
 
     func encode(with encoder: NSCoder) {
-        encoder.encode(samples, forTag: .samples)
-        encoder.encode(missing, forTag: .missing)
-        encoder.encode(emitInterval, forTag: .emitInterval)
-        encoder.encode(estArrivalInterval, forTag: .estArrivalInterval)
-        encoder.encode(histogram.bins.count, forTag: .binsCount)
+        encoder.encode(samples, forKey: Tag.samples.rawValue)
+        encoder.encode(missing, forKey: Tag.missing.rawValue)
+        encoder.encode(emitInterval, forKey: Tag.emitInterval.rawValue)
+        encoder.encode(estArrivalInterval, forKey: Tag.estArrivalInterval.rawValue)
+        encoder.encode(histogram.bins.count, forKey: Tag.binsCount.rawValue)
     }
-
-    func begin(startTime: Date) {
-        self.startTime = startTime
-        name = startTime.description
-    }
-
-    func minSample() -> Sample? { return orderedSamples.first }
-    func maxSample() -> Sample? { return orderedSamples.last }
 
     func orderedSampleAt(index: Int) -> Sample? {
         return index >= 0 && index < orderedSamples.count ? orderedSamples[index] : nil

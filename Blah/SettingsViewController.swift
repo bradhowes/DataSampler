@@ -9,13 +9,25 @@
 import UIKit
 import InAppSettingsKit
 
-final class SettingsViewController : IASKAppSettingsViewController, IASKSettingsDelegate {
+/** 
+ Controller for the settings view. Does little more than present the view and update user settings.
+ */
+final class SettingsViewController : IASKAppSettingsViewController {
 
+    private var userSettings: UserSettingsInterface!
+
+    /**
+     Customization point for view/controller after construction from storyboard
+     */
     override func viewDidLoad() {
         self.delegate = self
+        userSettings = PassiveDependencyInjector.singleton.userSettings
         super.viewDidLoad()
     }
 
+    /**
+     Notification from system that memory is tight. Drop any data we can recreate elsewhere.
+     */
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
     }
@@ -26,7 +38,7 @@ final class SettingsViewController : IASKAppSettingsViewController, IASKSettings
      */
     override func viewWillAppear(_ animated: Bool) {
         // Just in case the settings changed since we last presented this view -- say from the iOS Settings app
-        UserSettings.singleton.read()
+        userSettings.read()
         super.viewWillAppear(animated)
 
         // - NOTE: for some reason, we need this to remove ugly "jump" of the title when the appearance of the view
@@ -41,11 +53,7 @@ final class SettingsViewController : IASKAppSettingsViewController, IASKSettings
      */
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        UserSettings.singleton.read()
-    }
-
-    func settingsViewControllerDidEnd(_ sender: IASKAppSettingsViewController) {
-        print("-- settingsViewControllerDidEnd")
+        userSettings.read()
     }
 }
 

@@ -34,7 +34,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 }
             }
 
-            PassiveDependencyInjector.singleton.recordingsStore = self.recordingsStore
+            let pdi = PassiveDependencyInjector.singleton
+            pdi.recordingsStore = recordingsStore
+            pdi.recordingActivityLogic = RecordingActivityLogic(store: recordingsStore, demoDriver: DemoDriver())
+            pdi.userSettings = UserSettings()
+            pdi.runDataGenerator = RunData.MakeRunData
         }
         return true
     }

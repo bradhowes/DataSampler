@@ -80,7 +80,7 @@ struct RunDataNewSampleNotification {
      Post a newSample notification containing property values
      - parameter sender: the RunData instance responsible for the notification
      */
-    private func post(sender: RunData) {
+    private func post(sender: RunDataInterface) {
         let notif = Notification(name: RunDataNewSampleNotification.newSample, object: sender,
                                  userInfo: ["sample": sample, "index": NSNumber(value: index)])
         NotificationCenter.default.post(notif)
@@ -92,7 +92,7 @@ struct RunDataNewSampleNotification {
      - parameter sample: the sample to send
      - parameter index: the index of the sample being sent
      */
-    static func post(sender: RunData, sample: Sample, index: Int) {
+    static func post(sender: RunDataInterface, sample: Sample, index: Int) {
         RunDataNewSampleNotification(sample: sample, index: index).post(sender: sender)
     }
 
@@ -102,7 +102,7 @@ struct RunDataNewSampleNotification {
      - parameter observer: the object to notify when a newSample notification fires
      - parameter selector: the observer's method to call to process the notification
      */
-    static func observe(from: RunData, observer: AnyObject, selector: Selector) {
+    static func observe(from: RunDataInterface, observer: AnyObject, selector: Selector) {
         NotificationCenter.default.addObserver(observer, selector: selector, name: newSample, object: from)
     }
 
@@ -111,7 +111,7 @@ struct RunDataNewSampleNotification {
      - parameter from: the RunData instance that was being observed
      - parameter observer: the object that was observing
      */
-    static func unobserve(from: RunData, observer: AnyObject) {
+    static func unobserve(from: RunDataInterface, observer: AnyObject) {
         NotificationCenter.default.removeObserver(observer, name: newSample, object: from)
     }
 }

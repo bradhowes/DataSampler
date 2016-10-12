@@ -12,14 +12,14 @@ import Dip
 import SwiftyDropbox
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
     var deviceToken: Data? = nil
 
     private var userSettings: UserSettings!
     private var dropboxController: DropboxController!
-    private let recordingsStore: RecordingsStoreInterface = RecordingsStore()
+    private var recordingsStore: RecordingsStoreInterface!
     private let container = PassiveDependencyInjector.singleton
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions
@@ -38,6 +38,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
 
             self.userSettings = UserSettings()
+            self.recordingsStore = RecordingsStore(userSettings: userSettings, runDataFactory: RunData.MakeRunData)
             self.dropboxController = DropboxController(userSettings: userSettings, recordingsStore: recordingsStore)
 
             let pdi = PassiveDependencyInjector.singleton
@@ -46,6 +47,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             pdi.userSettings = self.userSettings
             pdi.dropboxController = self.dropboxController
             pdi.runDataGenerator = RunData.MakeRunData
+
+            
         }
         return true
     }

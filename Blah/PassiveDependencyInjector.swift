@@ -8,7 +8,7 @@
 
 import Foundation
 
-class PassiveDependencyInjector: NSObject {
+final class PassiveDependencyInjector: NSObject {
     static var singleton: PassiveDependencyInjector = PassiveDependencyInjector()
 
     var recordingsStore: RecordingsStoreInterface!

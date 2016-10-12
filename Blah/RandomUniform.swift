@@ -10,7 +10,7 @@ import Foundation
 import GameKit
 
 /// Uniform random number generator. Provides methods for generating numbers in ranges.
-class BRHRandomUniform {
+final class BRHRandomUniform {
     
     /// Random number source
     private(set) var randomSource: GKARC4RandomSource

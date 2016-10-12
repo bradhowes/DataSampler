@@ -9,7 +9,7 @@
 import Foundation
 @testable import Blah
 
-class FixedTimestampGenerator: NSObject, TimestampGeneratorInterface {
+final class FixedTimestampGenerator: NSObject, TimestampGeneratorInterface {
 
     var value: String {
         counter += 1.1

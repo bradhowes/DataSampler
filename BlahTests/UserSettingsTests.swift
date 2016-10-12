@@ -13,10 +13,10 @@ import Foundation
 
 class UserSettingsTests: XCTestCase {
 
-    let userSettings = UserSettings.singleton
+    let userSettings = UserSettings()
 
     override func setUp() {
-        userSettings.emitInterval.value = 120
+        userSettings.emitInterval = 120
         userSettings.write()
         super.setUp()
     }
@@ -26,13 +26,13 @@ class UserSettingsTests: XCTestCase {
     }
 
     func testInitialState() {
-        XCTAssertEqual(SettingBase.defaults.count, 12)
+        XCTAssertEqual(userSettings.defaults.count, 12)
     }
 
     func testDelayedUpdate() {
-        XCTAssertEqual(userSettings.emitInterval.value, 120)
-        userSettings.emitInterval.value = 100
-        XCTAssertEqual(userSettings.emitInterval.value, 100)
+        XCTAssertEqual(userSettings.emitInterval, 120)
+        userSettings.emitInterval = 100
+        XCTAssertEqual(userSettings.emitInterval, 100)
 
         var ei = UserDefaults.standard.string(forKey: "emitInterval")
         XCTAssertNotNil(ei)
@@ -41,17 +41,17 @@ class UserSettingsTests: XCTestCase {
         userSettings.write()
         CFPreferencesAppSynchronize(kCFPreferencesCurrentApplication)
         
-        XCTAssertEqual(userSettings.emitInterval.value, 100)
+        XCTAssertEqual(userSettings.emitInterval, 100)
         ei = UserDefaults.standard.string(forKey: "emitInterval")
         XCTAssertNotNil(ei)
         XCTAssertEqual(ei!, "100")
     }
     
     func testInvalidIntValueUpdate() {
-        XCTAssertEqual(userSettings.emitInterval.value, 120)
+        XCTAssertEqual(userSettings.emitInterval, 120)
         UserDefaults.standard.set("", forKey: "emitInteval")
         userSettings.read()
-        XCTAssertEqual(userSettings.emitInterval.value, 120)
+        XCTAssertEqual(userSettings.emitInterval, 120)
     }
 
     func testPerformanceExample() {

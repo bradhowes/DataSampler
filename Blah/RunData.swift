@@ -27,6 +27,8 @@ private extension NSCoder {
  */
 protocol RunDataInterface {
 
+    typealias FactoryType = (UserSettingsInterface) -> RunDataInterface
+
     /**
      Factory method which will create a new RunDataInterface instance
      - parameter userSettings: the UserSettings collection to use for configuration settings
@@ -79,6 +81,13 @@ final class RunData : NSObject, NSCoding, RunDataInterface {
         return RunData(userSettings: userSettings)
     }
 
+    func updateHistogramBinCount(notification: Notification) {
+        let notif = UserSettingsChangedNotificationWith<Int>(notification: notification)
+        if notif.name == UserSettingName.maxHistogramBin {
+            histogram.resize(size: notif.newValue + 1)
+        }
+    }
+
     /**
      Default construction. Create an empty container.
      */
@@ -94,7 +103,10 @@ final class RunData : NSObject, NSCoding, RunDataInterface {
         estArrivalInterval = Double(emitInterval)
 
         super.init()
-    }
+
+        UserSettingsChangedNotification.observe(observer: self, selector: #selector(updateHistogramBinCount),
+                                                setting: UserSettingName.maxHistogramBin)
+   }
 
     /**
      Construction using configuration settings.

@@ -31,7 +31,7 @@ class LoggerTests: XCTestCase {
         XCTAssertEqual("01:00:02.200 this is 2 test\n", Logger.log("this", "is", 2, "test"))
 
         log.save(to: directory) { (count: Int64) in
-            XCTAssertEqual(count, 156)
+            XCTAssertEqual(count, 163)
             let s = String(log.logText)
             print(s)
             XCTAssertTrue(s.contains("01:00:01.100 this is 1 test\n"))

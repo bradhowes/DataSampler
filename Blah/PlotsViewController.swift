@@ -8,6 +8,16 @@
 
 import UIKit
 
+/** 
+ The main view controller for the app. The view is split in two, with the upper-half showing an XY scatter plot and the
+ lower-half showing one of three views:
+ 
+ * histogram of sample values
+ * log view
+ * events view
+
+ */
+
 final class PlotsViewController: UIViewController {
 
     @IBOutlet private weak var toolbar: UIToolbar!
@@ -17,18 +27,16 @@ final class PlotsViewController: UIViewController {
     @IBOutlet private weak var logButton: UIBarButtonItem!
     @IBOutlet private weak var eventsButton: UIBarButtonItem!
 
-    @IBOutlet private weak var plotView: GraphLatencyByTime!
-    @IBOutlet private weak var histogramView: GraphLatencyHistogram!
+    @IBOutlet private(set) weak var plotView: GraphLatencyByTime!
+    @IBOutlet private(set) weak var histogramView: GraphLatencyHistogram!
     @IBOutlet private weak var logView: UITextView!
     @IBOutlet private weak var eventsView: UITextView!
 
+    /// Current recording being shown in the display
     private var viewedRecording: Recording?
 
-    private var recordingsStore: RecordingsStoreInterface!
+    /// Injected dependency for managing recordings
     private var recordingActivityLogic: RecordingActivityLogicInterface!
-    private var userSettings: UserSettingsInterface!
-
-    private var runDataGenerator: ((UserSettingsInterface) -> RunDataInterface)!
 
     /// Show the status bar with white text
     override var preferredStatusBarStyle : UIStatusBarStyle {
@@ -38,13 +46,14 @@ final class PlotsViewController: UIViewController {
     /// The manager controlling the lower views
     private var lowerViewManager = LowerViewManager()
 
+    /**
+     Instance's view is ready and linked with the controller. Setup management of the lower views.
+     */
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        self.recordingsStore = PassiveDependencyInjector.singleton.recordingsStore
         self.recordingActivityLogic = PassiveDependencyInjector.singleton.recordingActivityLogic
-        self.userSettings = PassiveDependencyInjector.singleton.userSettings
-        self.runDataGenerator = PassiveDependencyInjector.singleton.runDataGenerator
+        self.recordingActivityLogic.visualizer = self
 
         histogramButton.accessibilityLabel = "Histogram"
         logButton.accessibilityLabel = "Log"
@@ -70,24 +79,27 @@ final class PlotsViewController: UIViewController {
         // Attach the Logger and EventLog to their respective text views
         //
         Logger.singleton.textView = logView
-        Logger.log("Hello world!")
         EventLog.singleton.textView = eventsView
-        EventLog.log("Hello", "world!")
 
         // Be a delegate for the tab bar in order to show a UIView transition when switching tabs
         //
         tabBarController!.delegate = self
-
-        // Begin observing notifications from the RecordingsTableViewController
-        //
-        observeRecordingsTableNotifications()
-
-        clear()
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+
+    /**
+     Change the toolbar to show the right start/stop button
+     - parameter button: the button to show
+     */
+    private func setStartStopButton(_ button: UIBarButtonItem) {
+        if var items = toolbar.items {
+            items[0] = button
+            toolbar.setItems(items, animated: true)
+        }
     }
 
     /**
@@ -105,11 +117,7 @@ final class PlotsViewController: UIViewController {
      */
     @IBAction func startButtonPressed(_ button:UIBarButtonItem) {
         setStartStopButton(stopButton)
-
-        let runData = self.runDataGenerator(userSettings)
-        viewedRecording = recordingActivityLogic.startRecording(userSettings: userSettings, runData: runData)
-        plotView.source = viewedRecording!.runData
-        histogramView.source = viewedRecording!.runData.histogram
+        recordingActivityLogic.startRecording()
     }
 
     /**
@@ -120,60 +128,12 @@ final class PlotsViewController: UIViewController {
         setStartStopButton(startButton)
         recordingActivityLogic.stopRecording()
     }
+}
 
-    /**
-     Change the toolbar to show the right start/stop button
-     - parameter button: the button to show
-     */
-    private func setStartStopButton(_ button: UIBarButtonItem) {
-        if var items = toolbar.items {
-            items[0] = button
-            toolbar.setItems(items, animated: true)
-        }
-    }
-
-    /**
-     Begin watching for notifications from the RecordingsTableViewController
-     */
-    private func observeRecordingsTableNotifications() {
-        RecordingsTableNotification.observe(kind: .recordingSelected, observer: self,
-                                            selector: #selector(recordingSelected))
-        RecordingsTableNotification.observe(kind: .recordingDeleted, observer: self,
-                                            selector: #selector(recordingDeleted))
-    }
-
-    /**
-     Handle the `recordingSelected` notification. Switch various views to show the selected Recording instance.
-     - parameter notification: received notification
-     */
-    func recordingSelected(notification: Notification) {
-        let recording = RecordingsTableNotification(notification: notification).recording
-        if recording !== viewedRecording {
-            viewedRecording = recording
-            plotView.source = recording.runData
-            histogramView.source = recording.runData.histogram
-            recordingActivityLogic.select(recording: recording)
-        }
-    }
-
-    /**
-     Handle the `recordingDeleted` notification. If the Recording being deleted is what is currently installed, then
-     install an empty RunData.
-     - parameter notification: received notification
-     */
-    func recordingDeleted(notification: Notification) {
-        let recording = RecordingsTableNotification(notification: notification).recording
-        if recording === viewedRecording {
-            viewedRecording = nil
-            clear()
-            recordingActivityLogic.delete(recording: recording)
-        }
-    }
-
-    private func clear() {
-        let runData = self.runDataGenerator(userSettings)
-        plotView.source = runData
-        histogramView.source = runData.histogram
+extension PlotsViewController: VisualizerInterface {
+    func visualize(dataSource: RunDataInterface) {
+        self.plotView.source = dataSource
+        self.histogramView.source = dataSource.histogram
     }
 }
 
@@ -197,6 +157,5 @@ extension PlotsViewController: UITabBarControllerDelegate {
 
         return true
     }
-
 }
 

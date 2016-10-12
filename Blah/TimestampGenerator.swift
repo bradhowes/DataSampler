@@ -16,7 +16,7 @@ protocol TimestampGeneratorInterface {
     var value: Timestamp { get }
 }
 
-class TimestampGenerator: NSObject, TimestampGeneratorInterface {
+final class TimestampGenerator: NSObject, TimestampGeneratorInterface {
 
     var value: TimestampGeneratorInterface.Timestamp {
         get {

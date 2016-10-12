@@ -44,7 +44,7 @@ final class Histogram : NSObject {
         if bins[index] > bins[maxBinIndex] {
             maxBinIndex = index
         }
-        
+
         HistogramBinChangedNotification.post(sender: self, index: index)
     }
 }

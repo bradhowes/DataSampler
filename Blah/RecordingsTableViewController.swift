@@ -18,7 +18,6 @@ final class RecordingsTableViewController: UITableViewController, NSFetchedResul
 
     private var recordingsStore: RecordingsStoreInterface!
     private var fetcher: NSFetchedResultsController<Recording>!
-    private var dropboxController: DropboxController!
 
     private var selectedRecording: Recording? = nil
     private var selectedRecordingIndex: IndexPath? = nil
@@ -35,10 +34,6 @@ final class RecordingsTableViewController: UITableViewController, NSFetchedResul
         if recordingsStore.isReady {
             fetchRecordings()
         }
-    }
-
-    func updateDuration(notification: Notification) {
-        
     }
 
     func storeIsReady(notification: Notification) {
@@ -67,7 +62,9 @@ final class RecordingsTableViewController: UITableViewController, NSFetchedResul
     }
 
     override func viewWillDisappear(_ animated: Bool) {
-        setEditing(false, animated: false)
+        if tableView.isEditing {
+            setEditing(false, animated: false)
+        }
     }
 
     /**
@@ -78,6 +75,7 @@ final class RecordingsTableViewController: UITableViewController, NSFetchedResul
     override func setEditing(_ editing: Bool, animated: Bool) {
         super.setEditing(editing, animated: animated)
         tableView.setEditing(editing, animated: animated)
+        updateEditButton()
     }
 
     // MARK: Table view data source
@@ -89,41 +87,8 @@ final class RecordingsTableViewController: UITableViewController, NSFetchedResul
      */
     private func configureCell(_ cell: UITableViewCell, atIndexPath indexPath: IndexPath) {
         guard let recording = fetcher?.object(at: indexPath) else { return }
-
-        cell.textLabel?.text = recording.displayName
-
-        var status = ""
-        var color = UIColor.blue
-        if recording.isRecording {
-            status = "Recording"
-            color = UIColor.red
-        }
-        else if recording.uploaded {
-            status = "Uploaded"
-            color = UIColor(colorLiteralRed: 0.0, green: 0.5, blue: 0.0, alpha: 1.0)
-        }
-        else if recording.awaitingUpload {
-            status = "Awaiting upload"
-        }
-        else {
-            status = "Not uploaded"
-        }
-
-        cell.detailTextLabel?.textColor = color
-
-        let size = ByteCountFormatter.string(fromByteCount: recording.size, countStyle: .file)
-        cell.detailTextLabel?.text = "\(recording.duration) • \(size) - \(status)"
-
-        if recording.uploading {
-            if cell.accessoryView == nil {
-                cell.accessoryView = CircleProgressView(frame: CGRect(x: 0.0, y: 0.0, width: 25.0, height: 25.0))
-            }
-            (cell.accessoryView as! CircleProgressView).progress = recording.progress
-        }
-        else {
-            cell.accessoryView = nil
-        }
-
+        guard let cell = cell as? RecordingTableViewCell else { return }
+        cell.configure(dataSource: recording)
         cell.accessoryType = recording == selectedRecording ? .checkmark : .none
     }
 
@@ -145,11 +110,6 @@ final class RecordingsTableViewController: UITableViewController, NSFetchedResul
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         guard section == 0 else { return 0 }
         let count = fetcher?.fetchedObjects?.count ?? 0
-
-        if count == 0 && tableView.isEditing {
-            setEditing(false, animated: true)
-        }
-
         return count
     }
 
@@ -164,11 +124,43 @@ final class RecordingsTableViewController: UITableViewController, NSFetchedResul
             canEdit = true
         }
 
-        self.navigationItem.rightBarButtonItem = canEdit ? self.editButtonItem : nil
+        if canEdit {
+            if tableView.isEditing {
+                self.navigationItem.leftBarButtonItem =
+                    UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(doCancel))
+                let count = tableView.indexPathsForSelectedRows?.count ?? 0
+                if count > 0 {
+                    self.navigationItem.rightBarButtonItem =
+                        UIBarButtonItem(barButtonSystemItem: .trash, target: self, action: #selector(doDelete))
+                    self.navigationItem.rightBarButtonItem?.tintColor = UIColor.red
+                }
+                else {
+                    self.navigationItem.rightBarButtonItem = nil
+                }
+            }
+            else {
+                self.navigationItem.leftBarButtonItem = nil
+                self.navigationItem.rightBarButtonItem = self.editButtonItem
+            }
+        }
+        else {
+            self.navigationItem.leftBarButtonItem = nil
+            self.navigationItem.rightBarButtonItem = nil
+        }
 
         if !canEdit && tableView.isEditing {
             setEditing(false, animated: true)
         }
+    }
+
+    func doDelete(sender: UIBarButtonItem) {
+        guard let items = tableView.indexPathsForSelectedRows else { return }
+        items.map { fetcher.object(at: $0) }.forEach { $0.delete() }
+        setEditing(false, animated: true)
+    }
+
+    func doCancel(sender: UIBarButtonItem) {
+        setEditing(false, animated: true)
     }
 
     /**
@@ -189,6 +181,14 @@ final class RecordingsTableViewController: UITableViewController, NSFetchedResul
      - parameter indexPath: the index of the row that was selected
      */
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+
+        if tableView.isEditing {
+
+            // We support multiple selections. If there is at least one, add a 'Delete' button
+            //
+            updateEditButton()
+            return
+        }
 
         // Deselect the row per Apple's guidelines
         //
@@ -216,6 +216,15 @@ final class RecordingsTableViewController: UITableViewController, NSFetchedResul
         // Move to the main view
         //
         self.tabBarController?.selectedIndex = 0
+    }
+
+    override func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
+        if tableView.isEditing {
+
+            // We support multiple selections. If there is at least one, add a 'Delete' button
+            //
+            updateEditButton()
+        }
     }
 
     // MARK: Table view delegate

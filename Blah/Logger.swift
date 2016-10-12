@@ -23,7 +23,7 @@ protocol LoggerInterface {
  A `Logger` instance collects log statements for saving to a file and displaying in a UITextView.
  - SeeAlso: `TextRecorder`
  */
-class Logger : TextRecorder, LoggerInterface {
+final class Logger : TextRecorder, LoggerInterface {
 
     /// The sole instance available for logging.
     static let singleton = Logger()

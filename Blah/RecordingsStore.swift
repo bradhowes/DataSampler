@@ -15,7 +15,8 @@ protocol RecordingsStoreInterface {
     var isReady: Bool { get }
 
     func cannedFetchRequest(name: String) -> NSFetchedResultsController<Recording>?
-    func newRecording(userSettings: UserSettingsInterface, runData: RunDataInterface) -> Recording?
+    func newRunData() -> RunDataInterface
+    func newRecording() -> Recording?
     func save()
 }
 
@@ -24,10 +25,14 @@ protocol RecordingsStoreInterface {
  */
 final class RecordingsStore : NSObject, RecordingsStoreInterface {
 
+    private let userSettings: UserSettingsInterface
+    private let runDataFactory: RunDataInterface.FactoryType
     private(set) var stack: CoreDataStack?
     private(set) var isReady: Bool
 
-    override init() {
+    init(userSettings: UserSettingsInterface, runDataFactory: @escaping RunDataInterface.FactoryType) {
+        self.userSettings = userSettings
+        self.runDataFactory = runDataFactory
         self.isReady = false
 
         super.init()
@@ -55,24 +60,24 @@ final class RecordingsStore : NSObject, RecordingsStoreInterface {
             return nil
         }
 
-//        @nonobjc public class func fetchRequest() -> NSFetchRequest<Recording> {
-//            return NSFetchRequest<Recording>(entityName: "Recording");
-//        }
-
-        let fetcher = NSFetchedResultsController(fetchRequest: Recording.fetchRequest, managedObjectContext: mainContext,
+        let fetcher = NSFetchedResultsController(fetchRequest: Recording.fetchRequest,
+                                                 managedObjectContext: mainContext,
                                                  sectionNameKeyPath: nil, cacheName: nil)
-
         Logger.log("fetcher: \(fetcher)")
         return fetcher
     }
 
-    func newRecording(userSettings: UserSettingsInterface, runData: RunDataInterface) -> Recording? {
+    func newRunData() -> RunDataInterface {
+        return runDataFactory(userSettings)
+    }
+
+    func newRecording() -> Recording? {
         Logger.log("creating new recording")
         guard let mainContext = stack?.mainContext else {
             Logger.log("*** RecordingsStore.newRecording: nil stack")
             return nil
         }
-        return Recording(context: mainContext, userSettings: userSettings, runData: runData)
+        return Recording(context: mainContext, userSettings: userSettings, runData: newRunData())
     }
 
     func save() {

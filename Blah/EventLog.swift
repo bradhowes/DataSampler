@@ -23,7 +23,7 @@ protocol EventLogInterface {
  and shown in a UITextView.
  - SeeAlso: `TextRecorder`
  */
-class EventLog : TextRecorder, EventLogInterface {
+final class EventLog : TextRecorder, EventLogInterface {
 
     /// The sole instance available for logging.
     static let singleton = EventLog()

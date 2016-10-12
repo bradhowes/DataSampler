@@ -29,7 +29,7 @@ class EventLogTests: XCTestCase {
         EventLog.log("this", "is", "a", "test")
         EventLog.log(1, 2, 3, 4.0, "hello", 5.0)
         log.save(to: directory) { (count: Int64) in
-            XCTAssertEqual(count, 21)
+            XCTAssertEqual(count, 15)
             let s = String(log.logText)
             print(s)
             XCTAssertTrue(s.contains(",this,is,a,test"))

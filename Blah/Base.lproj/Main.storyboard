@@ -166,12 +166,12 @@
         <scene sceneID="FmE-Dy-1dy">
             <objects>
                 <tableViewController title="Recordings" id="8cy-gV-jCf" customClass="RecordingsTableViewController" customModule="Blah" customModuleProvider="target" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" id="iy0-HU-r0C">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" allowsSelectionDuringEditing="YES" allowsMultipleSelectionDuringEditing="YES" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" id="iy0-HU-r0C">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="blue" indentationWidth="10" reuseIdentifier="recordingCell" textLabel="n0f-lR-HE1" detailTextLabel="SwH-GN-JE1" style="IBUITableViewCellStyleSubtitle" id="B6n-zy-lbF">
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="blue" indentationWidth="10" reuseIdentifier="recordingCell" textLabel="n0f-lR-HE1" detailTextLabel="SwH-GN-JE1" style="IBUITableViewCellStyleSubtitle" id="B6n-zy-lbF" customClass="RecordingTableViewCell" customModule="Blah" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="92" width="375" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="B6n-zy-lbF" id="6FZ-Ch-fGj">

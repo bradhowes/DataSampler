@@ -54,7 +54,7 @@ final class Recording : NSManagedObject, CoreDataEntityProtocol {
 
     var duration: String {
         let duration = isRecording ? Date().timeIntervalSince(dateFrom(interval: startTime)) : endTime - startTime
-        return Recording.durationFormatter.string(for: duration)
+        return Recording.durationFormatter.string(double: duration)
     }
 
     lazy var folder: URL = {

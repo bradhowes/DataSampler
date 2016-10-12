@@ -10,7 +10,7 @@ import UIKit
 import SwiftyDropbox
 import CoreData
 
-class DropboxController: NSObject {
+final class DropboxController: NSObject {
 
     private var userSettings: UserSettingsInterface
     private var recordingsStore: RecordingsStoreInterface
@@ -31,6 +31,16 @@ class DropboxController: NSObject {
             makeClient()
         }
 
+        RecordingActivityLogicNotification.observe(observer: self, selector: #selector(maybeUpload))
+    }
+
+    func maybeUpload(notification: Notification) {
+        if recording == nil {
+            recording = RecordingActivityLogicNotification(notification: notification).recording
+            DispatchQueue.main.async {
+                self.startUpload()
+            }
+        }
     }
 
     func storeIsReady(notification: Notification) {
@@ -88,12 +98,14 @@ class DropboxController: NSObject {
         client.files.createFolder(path: destFolder).response { (response, error) in
             if let response = response {
                 print(response)
-                rec.progress = 0.2
+                rec.progress = 1.0 / 3.0
                 self.uploadLog(for: rec, into: destFolder)
             }
             else if let error = error {
-                rec.uploading = false
                 print(error)
+                // If the error was 'directory already exists', then we should continue on.
+                //
+                self.uploadLog(for: rec, into: destFolder)
             }
         }
     }
@@ -107,10 +119,10 @@ class DropboxController: NSObject {
                 self.uploadEvents(for: rec, into: destFolder)
             }
             else if let error = error {
-                rec.progress = 0.0
-                rec.uploading = false
                 print(error)
             }
+        }.progress { (progress) in
+            rec.progress = 1.0 / 3.0 + progress.fractionCompleted / 3.0
         }
     }
 
@@ -126,15 +138,17 @@ class DropboxController: NSObject {
                 rec.uploaded = true
                 rec.awaitingUpload = false
                 rec.save()
+
+                self.recording = nil
                 DispatchQueue.main.async {
                     self.checkForUploads()
                 }
             }
             else if let error = error {
-                rec.progress = 0.0
-                rec.uploading = false
                 print(error)
             }
+        }.progress { (progress) in
+            rec.progress = 2.0 + progress.fractionCompleted / 3.0
         }
     }
 

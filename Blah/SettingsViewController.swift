@@ -24,13 +24,17 @@ final class SettingsViewController : IASKAppSettingsViewController, IASKSettings
         self.delegate = self
         userSettings = PassiveDependencyInjector.singleton.userSettings
         dropboxController = PassiveDependencyInjector.singleton.dropboxController
-        UserDefaults.standard["dropboxLinkButtonText"] = userSettings.useDropbox ? "Unlink" : "Link"
-        UserSettingsChangedNotification.observe(observer: self, selector: #selector(doUpdateLinkButtonText))
+
+        updateLinkButtonText()
+
+        UserSettingsChangedNotification.observe(observer: self, selector: #selector(doUpdateLinkButtonText),
+                                                setting: UserSettingName.useDropbox)
         super.viewDidLoad()
     }
 
     func updateLinkButtonText() {
         UserDefaults.standard["dropboxLinkButtonText"] = userSettings.useDropbox ? "Unlink" : "Link"
+        UserDefaults.standard.synchronize()
     }
 
     func doUpdateLinkButtonText(notification: NSNotification) {

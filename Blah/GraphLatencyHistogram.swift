@@ -144,6 +144,18 @@ final class GraphLatencyHistogram : CPTGraphHostingView, CPTPlotDataSource, CPTB
         
         graph.add(plot, to: barPlotSpace)
         updateBounds()
+
+        UserSettingsChangedNotification.observe(observer: self, selector: #selector(checkMaxBinSetting),
+                                                setting: UserSettingName.maxHistogramBin)
+    }
+
+    func checkMaxBinSetting(notification: Notification) {
+        let notif = UserSettingsChangedNotificationWith<Int>(notification: notification)
+        if notif.name == UserSettingName.maxHistogramBin {
+            if self.hostedGraph != nil {
+                reload()
+            }
+        }
     }
 
     override func layoutSubviews() {

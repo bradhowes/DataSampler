@@ -12,7 +12,7 @@ import SwiftyUserDefaults
 /**
  Enumeration of string constants that will be used as keys into UserDefaults. Minimizes typos.
  */
-private enum Tags: String {
+public enum UserSettingName: String {
     case notificationDriver, emitInterval, maxHistogramBin, useDropbox, uploadAutomatically
     case remoteServerName, remoteServerPort, resendUntilFetched
     case apnsProdCertFileName, apnsProdCertPassword
@@ -23,7 +23,7 @@ private enum Tags: String {
  Allow the use of a `Tag` enum to initialize a `DefaultsKey` instance.
  */
 private extension DefaultsKey {
-    convenience init(tag: Tags) {
+    convenience init(tag: UserSettingName) {
         self.init(tag.rawValue)
     }
 }
@@ -128,7 +128,7 @@ struct BoolValueConverter : ValueConverter {
  */
 protocol SettingInterface {
 
-    var key: String { get }
+    var name: UserSettingName { get }
     var defaultValue: AnyObject { get }
     var settingDescription: String { get }
 
@@ -143,14 +143,15 @@ protocol SettingInterface {
 final class Setting<ValueType, VC: ValueConverter>: SettingInterface, CustomDebugStringConvertible where
 ValueType: Equatable, ValueType == VC.ValueType {
 
-    var key: String
+    var name: UserSettingName
     var value: ValueType {
         didSet {
-            let notification = UserSettingsChangedNotification(name: key, oldValue: oldValue, newValue: value)
-            print("didSet: \(key) old: \(oldValue) new: \(value)")
+            let notification = UserSettingsChangedNotificationWith<ValueType>(name: name, oldValue: oldValue, newValue: value)
+            print("didSet: \(name) old: \(oldValue) new: \(value)")
             notification.post(sender: self)
         }
     }
+
     var defaultValue: AnyObject
 
     /**
@@ -159,29 +160,29 @@ ValueType: Equatable, ValueType == VC.ValueType {
      - parameter key: the NSUserDefaults key for the user setting
      - parameter value: the initial value for the user setting if not present in NSUserDefaults
      */
-    fileprivate init(tag: Tags, defaultValue: ValueType) {
-        self.key = tag.rawValue
-        self.value = VC.anyObjectToValue(Defaults.object(forKey: key) as AnyObject?) ?? defaultValue
-        self.defaultValue =  VC.valueToAnyObject(defaultValue)
+    fileprivate init(name: UserSettingName, defaultValue: ValueType) {
+        self.name = name
+        self.value = VC.anyObjectToValue(Defaults.object(forKey: name.rawValue) as AnyObject?) ?? defaultValue
+        self.defaultValue = VC.valueToAnyObject(defaultValue)
     }
 
     func read() {
-        if let value = VC.anyObjectToValue(Defaults.object(forKey: self.key) as AnyObject?) {
+        if let value = VC.anyObjectToValue(Defaults.object(forKey: name.rawValue) as AnyObject?) {
             if self.value != value {
                 self.value = value
             }
         }
         else {
-            Defaults[self.key] = defaultValue
+            Defaults[name.rawValue] = defaultValue
         }
     }
 
     func write() {
-        Defaults[self.key] = VC.valueToAnyObject(self.value)
+        Defaults[name.rawValue] = VC.valueToAnyObject(self.value)
     }
 
     /// Pretty-printed representation for the setting
-    var description: String { return "<BRHSetting: '\(key)' '\(value)'>" }
+    var description: String { return "<BRHSetting: '\(name)' '\(value)'>" }
     /// Debugger representation for the setting
     var debugDescription: String { return description }
     /// Internal representation for the setting
@@ -217,7 +218,7 @@ protocol UserSettingsInterface {
  */
 final class UserSettings: UserSettingsInterface {
 
-    private var defaults: [String:AnyObject] = [:]
+    private(set) var defaults: [String:AnyObject] = [:]
     private(set) var settings: [String:SettingInterface] = [:]
 
     /**
@@ -305,18 +306,18 @@ final class UserSettings: UserSettingsInterface {
      Initialize user settings collection. Sets up default values in NSUserDefaults.
      */
     init() {
-        _notificationDriver = StringSetting(tag: .notificationDriver, defaultValue: "remote")
-        _emitInterval = IntSetting(tag: .emitInterval, defaultValue: 120)
-        _maxHistogramBin = IntSetting(tag: .maxHistogramBin, defaultValue: 30)
-        _useDropbox = BoolSetting(tag: .useDropbox, defaultValue: false)
-        _uploadAutomatically = BoolSetting(tag: .uploadAutomatically, defaultValue: true)
-        _remoteServerName = StringSetting(tag: .remoteServerName, defaultValue: "brhemitter.azurewebsites.net")
-        _remoteServerPort = IntSetting(tag: .remoteServerPort, defaultValue: 80)
-        _resendUntilFetched = BoolSetting(tag: .resendUntilFetched, defaultValue: true)
-        _apnsProdCertFileName = StringSetting(tag: .apnsProdCertFileName, defaultValue: "apn-nhtest-prod.p12")
-        _apnsProdCertPassword = StringSetting(tag: .apnsProdCertPassword, defaultValue: "")
-        _apnsDevCertFileName = StringSetting(tag: .apnsDevCertFileName, defaultValue: "apn-nhtest-dev.p12")
-        _apnsDevCertPassword = StringSetting(tag: .apnsDevCertPassword, defaultValue: "")
+        _notificationDriver = StringSetting(name: .notificationDriver, defaultValue: "remote")
+        _emitInterval = IntSetting(name: .emitInterval, defaultValue: 120)
+        _maxHistogramBin = IntSetting(name: .maxHistogramBin, defaultValue: 30)
+        _useDropbox = BoolSetting(name: .useDropbox, defaultValue: false)
+        _uploadAutomatically = BoolSetting(name: .uploadAutomatically, defaultValue: true)
+        _remoteServerName = StringSetting(name: .remoteServerName, defaultValue: "brhemitter.azurewebsites.net")
+        _remoteServerPort = IntSetting(name: .remoteServerPort, defaultValue: 80)
+        _resendUntilFetched = BoolSetting(name: .resendUntilFetched, defaultValue: true)
+        _apnsProdCertFileName = StringSetting(name: .apnsProdCertFileName, defaultValue: "apn-nhtest-prod.p12")
+        _apnsProdCertPassword = StringSetting(name: .apnsProdCertPassword, defaultValue: "")
+        _apnsDevCertFileName = StringSetting(name: .apnsDevCertFileName, defaultValue: "apn-nhtest-dev.p12")
+        _apnsDevCertPassword = StringSetting(name: .apnsDevCertPassword, defaultValue: "")
 
         register(_notificationDriver)
         register(_emitInterval)
@@ -338,8 +339,8 @@ final class UserSettings: UserSettingsInterface {
     }
 
     func register(_ setting: SettingInterface) {
-        defaults[setting.key] = setting.defaultValue
-        settings[setting.key] = setting
+        defaults[setting.name.rawValue] = setting.defaultValue
+        settings[setting.name.rawValue] = setting
     }
 
     /**

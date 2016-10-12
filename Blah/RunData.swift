@@ -22,8 +22,16 @@ private extension NSCoder {
     func decodeDouble(forTag: Tag) -> Double { return decodeDouble(forKey: forTag.rawValue) }
 }
 
+/** 
+ Interface for recorded run data.
+ */
 protocol RunDataInterface {
 
+    /**
+     Factory method which will create a new RunDataInterface instance
+     - parameter userSettings: the UserSettings collection to use for configuration settings
+     - returns: new RunData instance
+     */
     static func MakeRunData(userSettings: UserSettingsInterface) -> RunDataInterface
 
     var name: String { get set }
@@ -62,10 +70,18 @@ final class RunData : NSObject, NSCoding, RunDataInterface {
     var minSample: Sample? { return orderedSamples.first }
     var maxSample: Sample? { return orderedSamples.last }
 
+    /**
+     Factory method to create a new RunData instance
+     - parameter userSettings: the UserSettings collection to use for configuration settings
+     - returns: new RunData instance
+     */
     static func MakeRunData(userSettings: UserSettingsInterface) -> RunDataInterface {
         return RunData(userSettings: userSettings)
     }
 
+    /**
+     Default construction. Create an empty container.
+     */
     override init() {
         self.name = "Untitled"
         self.startTime = Date()
@@ -80,6 +96,10 @@ final class RunData : NSObject, NSCoding, RunDataInterface {
         super.init()
     }
 
+    /**
+     Construction using configuration settings.
+     - parameter userSettings: the user settings to use
+     */
     convenience init(userSettings: UserSettingsInterface) {
         self.init()
         histogram = Histogram(size: userSettings.maxHistogramBin + 1)
@@ -87,6 +107,10 @@ final class RunData : NSObject, NSCoding, RunDataInterface {
         estArrivalInterval = Double(emitInterval)
     }
 
+    /**
+     Reconstitute a previous instance from data in an NSCoder object
+     - parameter decoder: the NSCoder object to use for data
+     */
     required convenience init?(coder decoder: NSCoder) {
         self.init()
         samples = decoder.decodeObject(forTag: .samples) as! [Sample]
@@ -100,6 +124,10 @@ final class RunData : NSObject, NSCoding, RunDataInterface {
         }
     }
 
+    /**
+     Encode the current state in an NSCoder object.
+     - parameter encoder: the NSCoder object to write to
+     */
     func encode(with encoder: NSCoder) {
         encoder.encode(samples, forKey: Tag.samples.rawValue)
         encoder.encode(missing, forKey: Tag.missing.rawValue)
@@ -108,6 +136,11 @@ final class RunData : NSObject, NSCoding, RunDataInterface {
         encoder.encode(histogram.bins.count, forKey: Tag.binsCount.rawValue)
     }
 
+    /**
+     Obtain the ordered sample at a given index
+     - parameter index: where to fetch from
+     - returns: the sample found at the position. May be nil
+     */
     func orderedSampleAt(index: Int) -> Sample? {
         return index >= 0 && index < orderedSamples.count ? orderedSamples[index] : nil
     }
@@ -145,7 +178,8 @@ final class RunData : NSObject, NSCoding, RunDataInterface {
                 estArrivalInterval = sample - prev
             }
             else {
-                estArrivalInterval = min(estArrivalInterval, ((sample - prev) + estArrivalInterval * (denom - 1.0)) / denom)
+                estArrivalInterval = min(estArrivalInterval, ((sample - prev) +
+                    estArrivalInterval * (denom - 1.0)) / denom)
             }
 
             sample.averageLatency = (sample.latency + prev.averageLatency * denom) / (denom + 1.0)

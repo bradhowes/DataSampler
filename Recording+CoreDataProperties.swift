@@ -1,9 +1,10 @@
 //
 //  Recording+CoreDataProperties.swift
-//  Blah
+//  
 //
-//  Created by Brad Howes on 10/12/16.
-//  Copyright © 2016 Brad Howes. All rights reserved.
+//  Created by Brad Howes on 10/11/16.
+//
+//  This file was automatically generated and should not be edited.
 //
 
 import Foundation
@@ -19,11 +20,11 @@ extension Recording {
     @NSManaged public var awaitingUpload: Bool
     @NSManaged public var driver: String?
     @NSManaged public var emitInterval: Int32
-    @NSManaged public var endTime: TimeInterval
-    @NSManaged public var size: Int64
-    @NSManaged public var startTime: TimeInterval
+    @NSManaged public var endTime: NSDate?
+    @NSManaged public var size: String?
+    @NSManaged public var startTime: NSDate?
     @NSManaged public var uploaded: Bool
     @NSManaged public var progress: Double
-    @NSManaged public var uploading: Bool
+    @NSManaged public var blah: Bool
 
 }

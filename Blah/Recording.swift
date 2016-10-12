@@ -14,6 +14,8 @@ final class Recording : NSManagedObject, CoreDataEntityProtocol {
 
     static let defaultSortDescriptors = [NSSortDescriptor(key: "startTime", ascending: false)]
 
+    private static var durationFormatter = { PlotTimeFormatter() }()
+
     private static var directoryNameDateFormatter: DateFormatter = {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd HH.mm.ss"
@@ -35,13 +37,24 @@ final class Recording : NSManagedObject, CoreDataEntityProtocol {
     private class func displayName(from date: Date) -> String {
         return Recording.displayNameDateFormatter.string(from: date)
     }
-    
+
+    private func dateFrom(interval: TimeInterval) -> Date {
+        return Date(timeIntervalSinceReferenceDate: interval)
+    }
+
+    private var updateTimer: Timer?
+
     var displayName: String {
-        return Recording.displayName(from: self.startTime as! Date)
+        return Recording.displayName(from: dateFrom(interval: startTime))
     }
 
     var directoryName: String {
-        return Recording.directoryName(from: self.startTime as! Date)
+        return Recording.directoryName(from: dateFrom(interval: startTime))
+    }
+
+    var duration: String {
+        let duration = isRecording ? Date().timeIntervalSince(dateFrom(interval: startTime)) : endTime - startTime
+        return Recording.durationFormatter.string(for: duration)
     }
 
     lazy var folder: URL = {
@@ -56,7 +69,7 @@ final class Recording : NSManagedObject, CoreDataEntityProtocol {
             let archiveData = try Data(contentsOf: archivePath)
             Logger.log("archiveData size: \(archiveData.count)")
             if let obj = NSKeyedUnarchiver.unarchiveObject(with: archiveData) as? RunData {
-                obj.startTime = self.startTime! as Date
+                obj.startTime = self.dateFrom(interval: self.startTime)
                 obj.name = self.displayName
                 return obj
             }
@@ -66,6 +79,8 @@ final class Recording : NSManagedObject, CoreDataEntityProtocol {
 
         return RunData()
     }()
+
+    var isRecording: Bool { return startTime == endTime }
 
     override func willSave() {
         super.willSave()
@@ -79,13 +94,20 @@ final class Recording : NSManagedObject, CoreDataEntityProtocol {
         self.runData = runData
         self.runData.startTime = now
         self.runData.name = now.description
-        self.startTime = now as NSDate?
+        self.startTime = now.timeIntervalSinceReferenceDate
         self.endTime = self.startTime
-        self.size = "Recording"
+        self.size = 0
         self.awaitingUpload = false
         self.uploaded = false
         self.emitInterval = Int32(userSettings.emitInterval)
         self.driver = userSettings.notificationDriver
+
+        self.progress = 0.0
+        self.uploading = false
+
+        self.updateTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { (timer: Timer) in
+            self.progress += 1.0
+        }
     }
 
     @objc
@@ -104,8 +126,11 @@ final class Recording : NSManagedObject, CoreDataEntityProtocol {
     func finished() {
         Logger.log("Recording.finished")
 
+        self.updateTimer?.invalidate()
+        self.updateTimer = nil
+
         let now = Date()
-        endTime = now as NSDate?
+        endTime = now.timeIntervalSinceReferenceDate
 
         // Create folder to hold the recording data
         //
@@ -133,8 +158,8 @@ final class Recording : NSManagedObject, CoreDataEntityProtocol {
             EventLog.save(to: self.folder) { bytes += $0 }
 
             Logger.log("+ size: \(bytes)")
-            self.size = ByteCountFormatter.string(fromByteCount: bytes, countStyle: .file)
-
+            self.size = bytes
+            self.awaitingUpload = true
             self.save()
         }
     }

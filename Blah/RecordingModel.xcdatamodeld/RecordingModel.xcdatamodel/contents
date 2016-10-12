@@ -2,15 +2,16 @@
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="11232" systemVersion="15G1004" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="Recording" representedClassName=".Recording" syncable="YES">
         <attribute name="awaitingUpload" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES" syncable="YES"/>
-        <attribute name="driver" attributeType="String" syncable="YES"/>
+        <attribute name="driver" attributeType="String" defaultValueString="&quot;?&quot;" syncable="YES"/>
         <attribute name="emitInterval" attributeType="Integer 32" usesScalarValueType="YES" syncable="YES"/>
-        <attribute name="endTime" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
-        <attribute name="size" attributeType="String" syncable="YES"/>
-        <attribute name="startTime" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="endTime" attributeType="Date" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="progress" transient="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="size" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="startTime" attributeType="Date" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="uploaded" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="uploading" transient="YES" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES" syncable="YES"/>
     </entity>
-    <fetchRequest name="recordings" entity="Recording"/>
     <elements>
-        <element name="Recording" positionX="-63" positionY="-18" width="128" height="150"/>
+        <element name="Recording" positionX="-63" positionY="-18" width="128" height="180"/>
     </elements>
 </model>

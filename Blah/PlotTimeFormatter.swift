@@ -21,7 +21,10 @@ final class PlotTimeFormatter : NumberFormatter {
     override func string(for obj: Any?) -> String? {
         guard let obj = obj as? NSNumber else { return nil }
         var dvalue = obj.doubleValue
-        dvalue.round(.toNearestOrEven)
+        return string(for: dvalue.round(.toNearestOrEven))
+    }
+
+    func string(for dvalue: Double) -> String {
         var value = Int(dvalue)
         let hours = value >= 3600 ? value / 3600 : 0
         value = value - hours * 3600

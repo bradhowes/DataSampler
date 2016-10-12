@@ -9,6 +9,7 @@
 import UIKit
 import UserNotifications
 import Dip
+import SwiftyDropbox
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -16,7 +17,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
     var deviceToken: Data? = nil
 
-    private var recordingsStore: RecordingsStoreInterface = RecordingsStore()
+    private var userSettings: UserSettings!
+    private var dropboxController: DropboxController!
+    private let recordingsStore: RecordingsStoreInterface = RecordingsStore()
     private let container = PassiveDependencyInjector.singleton
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions
@@ -34,12 +37,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 }
             }
 
+            self.userSettings = UserSettings()
+            self.dropboxController = DropboxController(userSettings: userSettings, recordingsStore: recordingsStore)
+
             let pdi = PassiveDependencyInjector.singleton
             pdi.recordingsStore = recordingsStore
             pdi.recordingActivityLogic = RecordingActivityLogic(store: recordingsStore, demoDriver: DemoDriver())
-            pdi.userSettings = UserSettings()
+            pdi.userSettings = self.userSettings
+            pdi.dropboxController = self.dropboxController
             pdi.runDataGenerator = RunData.MakeRunData
         }
+        return true
+    }
+
+    func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool {
+        self.dropboxController.handleRedirect(url: url)
         return true
     }
 

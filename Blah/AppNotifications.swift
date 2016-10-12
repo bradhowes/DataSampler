@@ -8,6 +8,33 @@
 
 import Foundation
 
+struct RecordingsStoreNotification {
+    static let ready = Notification.Name("RecordingsStore.ready")
+
+    let recordingsStore: RecordingsStoreInterface
+    init(recordingsStore: RecordingsStoreInterface) {
+        self.recordingsStore = recordingsStore
+    }
+
+    init(notification: Notification) {
+        self.recordingsStore = notification.object as! RecordingsStoreInterface
+    }
+
+    private func post() {
+        let notif = Notification(name: RecordingsStoreNotification.ready, object: self.recordingsStore)
+        NotificationCenter.default.post(notif)
+    }
+
+    static func post(recordingStore: RecordingsStoreInterface) {
+        RecordingsStoreNotification(recordingsStore: recordingStore).post()
+    }
+
+    static func observe(observer: AnyObject, selector: Selector, recordingStore: RecordingsStoreInterface) {
+        NotificationCenter.default.addObserver(observer, selector: selector, name: RecordingsStoreNotification.ready,
+                                               object: recordingStore)
+    }
+}
+
 struct RecordingsTableNotification {
 
     enum Kind: String {
@@ -146,5 +173,42 @@ struct HistogramBinChangedNotification {
 
     static func unobserve(from: Histogram, observer: AnyObject) {
         NotificationCenter.default.removeObserver(observer, name: binChanged, object: from)
+    }
+}
+
+struct UserSettingsChangedNotification {
+
+    static let settingChanged = Notification.Name("UserSettings.settingChanged")
+
+    let name: String
+    let oldValue: Any
+    let newValue: Any
+
+    init(name: String, oldValue: Any, newValue: Any) {
+        self.name = name
+        self.oldValue = oldValue
+        self.newValue = newValue
+    }
+
+    init(notification: Notification) {
+        self.name = notification.userInfo!["name"] as! String
+        self.oldValue = notification.userInfo!["oldValue"]
+        self.newValue = notification.userInfo!["newValue"]
+    }
+
+    func post(sender: SettingInterface) {
+        let notif = Notification(name: UserSettingsChangedNotification.settingChanged, object: sender,
+                                 userInfo: ["oldValue": oldValue, "newValue": newValue, "name": sender.key])
+        NotificationCenter.default.post(notif)
+    }
+
+    static func observe(observer: AnyObject, selector: Selector) {
+        NotificationCenter.default.addObserver(observer, selector: selector,
+                                               name: UserSettingsChangedNotification.settingChanged, object: nil)
+    }
+
+    static func unobserve(observer: AnyObject) {
+        NotificationCenter.default.removeObserver(observer, name: UserSettingsChangedNotification.settingChanged,
+                                                  object: nil)
     }
 }

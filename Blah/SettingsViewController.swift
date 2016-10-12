@@ -12,9 +12,10 @@ import InAppSettingsKit
 /** 
  Controller for the settings view. Does little more than present the view and update user settings.
  */
-final class SettingsViewController : IASKAppSettingsViewController {
+final class SettingsViewController : IASKAppSettingsViewController, IASKSettingsDelegate {
 
     private var userSettings: UserSettingsInterface!
+    private var dropboxController: DropboxController!
 
     /**
      Customization point for view/controller after construction from storyboard
@@ -22,7 +23,18 @@ final class SettingsViewController : IASKAppSettingsViewController {
     override func viewDidLoad() {
         self.delegate = self
         userSettings = PassiveDependencyInjector.singleton.userSettings
+        dropboxController = PassiveDependencyInjector.singleton.dropboxController
+        UserDefaults.standard["dropboxLinkButtonText"] = userSettings.useDropbox ? "Unlink" : "Link"
+        UserSettingsChangedNotification.observe(observer: self, selector: #selector(doUpdateLinkButtonText))
         super.viewDidLoad()
+    }
+
+    func updateLinkButtonText() {
+        UserDefaults.standard["dropboxLinkButtonText"] = userSettings.useDropbox ? "Unlink" : "Link"
+    }
+
+    func doUpdateLinkButtonText(notification: NSNotification) {
+        updateLinkButtonText()
     }
 
     /**
@@ -38,7 +50,7 @@ final class SettingsViewController : IASKAppSettingsViewController {
      */
     override func viewWillAppear(_ animated: Bool) {
         // Just in case the settings changed since we last presented this view -- say from the iOS Settings app
-        userSettings.read()
+        // userSettings.read()
         super.viewWillAppear(animated)
 
         // - NOTE: for some reason, we need this to remove ugly "jump" of the title when the appearance of the view
@@ -54,6 +66,24 @@ final class SettingsViewController : IASKAppSettingsViewController {
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         userSettings.read()
+        userSettings.dump()
+    }
+
+    func settingsViewControllerDidEnd(_ sender: IASKAppSettingsViewController) {
+        userSettings.read()
+        userSettings.dump()
+    }
+
+    override func synchronizeSettings() {
+        super.synchronizeSettings()
+        userSettings.read()
+        updateLinkButtonText()
+        tableView.reloadData()
+    }
+
+    func settingsViewController(_ sender: IASKAppSettingsViewController, buttonTappedFor specifier: IASKSpecifier) {
+        if specifier.key() == "dropboxLinkButtonText" {
+            dropboxController.toggle(viewController: self)
+        }
     }
 }
-

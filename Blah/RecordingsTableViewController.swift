@@ -9,6 +9,7 @@
 import UIKit
 import CoreData
 import JSQCoreDataKit
+import CircleProgressView
 
 /**
  Manages a view of recordings
@@ -17,6 +18,7 @@ final class RecordingsTableViewController: UITableViewController, NSFetchedResul
 
     private var recordingsStore: RecordingsStoreInterface!
     private var fetcher: NSFetchedResultsController<Recording>!
+    private var dropboxController: DropboxController!
 
     private var selectedRecording: Recording? = nil
     private var selectedRecordingIndex: IndexPath? = nil
@@ -28,11 +30,24 @@ final class RecordingsTableViewController: UITableViewController, NSFetchedResul
         super.viewDidLoad()
 
         recordingsStore = PassiveDependencyInjector.singleton.recordingsStore
-        fetcher = recordingsStore.recordingsFetcher()
-        fetcher?.delegate = self
+        RecordingsStoreNotification.observe(observer: self, selector: #selector(storeIsReady),
+                                            recordingStore: recordingsStore)
+        if recordingsStore.isReady {
+            fetchRecordings()
+        }
+    }
 
-        // Fetch recordings.
-        //
+    func updateDuration(notification: Notification) {
+        
+    }
+
+    func storeIsReady(notification: Notification) {
+        fetchRecordings()
+    }
+
+    func fetchRecordings() {
+        fetcher = recordingsStore.cannedFetchRequest(name: "recordings")
+        fetcher.delegate = self
         do {
             try fetcher?.performFetch()
             tableView.reloadData()
@@ -48,6 +63,7 @@ final class RecordingsTableViewController: UITableViewController, NSFetchedResul
         // is controlled by a transition animation
         //
         navigationController?.navigationBar.layer.removeAllAnimations()
+        updateEditButton()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -73,9 +89,41 @@ final class RecordingsTableViewController: UITableViewController, NSFetchedResul
      */
     private func configureCell(_ cell: UITableViewCell, atIndexPath indexPath: IndexPath) {
         guard let recording = fetcher?.object(at: indexPath) else { return }
+
         cell.textLabel?.text = recording.displayName
-        cell.detailTextLabel?.text = recording.size
-        cell.detailTextLabel?.textColor = recording.size == "Recording" ? UIColor.red : UIColor.darkGray
+
+        var status = ""
+        var color = UIColor.blue
+        if recording.isRecording {
+            status = "Recording"
+            color = UIColor.red
+        }
+        else if recording.uploaded {
+            status = "Uploaded"
+            color = UIColor(colorLiteralRed: 0.0, green: 0.5, blue: 0.0, alpha: 1.0)
+        }
+        else if recording.awaitingUpload {
+            status = "Awaiting upload"
+        }
+        else {
+            status = "Not uploaded"
+        }
+
+        cell.detailTextLabel?.textColor = color
+
+        let size = ByteCountFormatter.string(fromByteCount: recording.size, countStyle: .file)
+        cell.detailTextLabel?.text = "\(recording.duration) • \(size) - \(status)"
+
+        if recording.uploading {
+            if cell.accessoryView == nil {
+                cell.accessoryView = CircleProgressView(frame: CGRect(x: 0.0, y: 0.0, width: 25.0, height: 25.0))
+            }
+            (cell.accessoryView as! CircleProgressView).progress = recording.progress
+        }
+        else {
+            cell.accessoryView = nil
+        }
+
         cell.accessoryType = recording == selectedRecording ? .checkmark : .none
     }
 
@@ -102,10 +150,25 @@ final class RecordingsTableViewController: UITableViewController, NSFetchedResul
             setEditing(false, animated: true)
         }
 
-        // Don't allow editing if the table is empty.
-        //
-        self.navigationItem.rightBarButtonItem = count > 0 ? self.editButtonItem : nil
         return count
+    }
+
+    private func updateEditButton() {
+        var canEdit = false
+        let numRows = tableView.numberOfRows(inSection: 0)
+        if numRows == 1 {
+            let recording = fetcher?.object(at: IndexPath(row: 0, section: 0))
+            canEdit = !(recording!.isRecording)
+        }
+        else if numRows > 1 {
+            canEdit = true
+        }
+
+        self.navigationItem.rightBarButtonItem = canEdit ? self.editButtonItem : nil
+
+        if !canEdit && tableView.isEditing {
+            setEditing(false, animated: true)
+        }
     }
 
     /**
@@ -165,7 +228,7 @@ final class RecordingsTableViewController: UITableViewController, NSFetchedResul
      */
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         guard let recording = fetcher?.object(at: indexPath) else { return false }
-        return true || recording.size! != "Recording"
+        return !recording.isRecording
     }
 
     /**
@@ -283,5 +346,6 @@ final class RecordingsTableViewController: UITableViewController, NSFetchedResul
      */
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         tableView.endUpdates()
+        updateEditButton()
     }
 }

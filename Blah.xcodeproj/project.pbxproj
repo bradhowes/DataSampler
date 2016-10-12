@@ -64,6 +64,8 @@
 		BD75649F1D99B0B700CE455F /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD75649E1D99B0B700CE455F /* Logger.swift */; };
 		BD7564A11D99B67E00CE455F /* EventLogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD7564A01D99B67E00CE455F /* EventLogTests.swift */; };
 		BD7564A31D99C72600CE455F /* EventLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD7564A21D99C72600CE455F /* EventLog.swift */; };
+		BD85088F1DACCBBC00BE3B53 /* DropboxController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD85088E1DACCBBC00BE3B53 /* DropboxController.swift */; };
+		BD8508911DAD153700BE3B53 /* Recording+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD8508901DAD153700BE3B53 /* Recording+CoreDataProperties.swift */; };
 		BD87F5991D8A2AD1007A6F99 /* PlotsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD87F5981D8A2AD1007A6F99 /* PlotsViewController.swift */; };
 		BD87F59D1D8A2AFE007A6F99 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD87F59B1D8A2AFE007A6F99 /* SettingsViewController.swift */; };
 		BD87F59F1D8AAAD1007A6F99 /* GraphLatencyByTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD87F59E1D8AAAD1007A6F99 /* GraphLatencyByTime.swift */; };
@@ -73,7 +75,6 @@
 		BDBB025B1DA45942000838E0 /* LowerViewManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBB025A1DA45942000838E0 /* LowerViewManager.swift */; };
 		BDBB025D1DA45983000838E0 /* LowerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBB025C1DA45983000838E0 /* LowerView.swift */; };
 		BDBB025F1DA476F2000838E0 /* RecordingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBB025E1DA476F2000838E0 /* RecordingsStore.swift */; };
-		BDBB02671DA4FCE8000838E0 /* Recording+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBB02641DA4FBC7000838E0 /* Recording+CoreDataProperties.swift */; };
 		BDBCEF411DA7898300B09DC9 /* AppNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBCEF401DA7898300B09DC9 /* AppNotifications.swift */; };
 		BDBCEF4E1DA8F9A800B09DC9 /* BlahUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBCEF4D1DA8F9A800B09DC9 /* BlahUITests.swift */; };
 		BDBCEF561DA9CC5400B09DC9 /* CriticalSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBCEF551DA9CC5400B09DC9 /* CriticalSection.swift */; };
@@ -167,6 +168,9 @@
 		BD75649E1D99B0B700CE455F /* Logger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		BD7564A01D99B67E00CE455F /* EventLogTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventLogTests.swift; sourceTree = "<group>"; };
 		BD7564A21D99C72600CE455F /* EventLog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventLog.swift; sourceTree = "<group>"; };
+		BD85088D1DAC27A200BE3B53 /* Blah.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Blah.entitlements; sourceTree = "<group>"; };
+		BD85088E1DACCBBC00BE3B53 /* DropboxController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DropboxController.swift; sourceTree = "<group>"; };
+		BD8508901DAD153700BE3B53 /* Recording+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Recording+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		BD87F5981D8A2AD1007A6F99 /* PlotsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlotsViewController.swift; sourceTree = "<group>"; };
 		BD87F59B1D8A2AFE007A6F99 /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		BD87F59E1D8AAAD1007A6F99 /* GraphLatencyByTime.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GraphLatencyByTime.swift; sourceTree = "<group>"; };
@@ -177,7 +181,6 @@
 		BDBB025A1DA45942000838E0 /* LowerViewManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LowerViewManager.swift; sourceTree = "<group>"; };
 		BDBB025C1DA45983000838E0 /* LowerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LowerView.swift; sourceTree = "<group>"; };
 		BDBB025E1DA476F2000838E0 /* RecordingsStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RecordingsStore.swift; sourceTree = "<group>"; };
-		BDBB02641DA4FBC7000838E0 /* Recording+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Recording+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		BDBCEF401DA7898300B09DC9 /* AppNotifications.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppNotifications.swift; sourceTree = "<group>"; };
 		BDBCEF4B1DA8F9A800B09DC9 /* BlahUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BlahUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BDBCEF4D1DA8F9A800B09DC9 /* BlahUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlahUITests.swift; sourceTree = "<group>"; };
@@ -257,8 +260,8 @@
 				BDBCEF571DA9CE3D00B09DC9 /* PassiveDependencyInjector.swift */,
 				BD4948461D89F23000C50DE2 /* AppDelegate.swift */,
 				BDBCEF401DA7898300B09DC9 /* AppNotifications.swift */,
+				BD85088E1DACCBBC00BE3B53 /* DropboxController.swift */,
 				BD49484C1D89F23000C50DE2 /* Main.storyboard */,
-				BD73D3601DAB6E5000845EEF /* RecordingActivityLogic.swift */,
 				BD73D3621DAB706100845EEF /* DemoDriver.swift */,
 				BDBB02541DA44EDE000838E0 /* Plots */,
 				BDBB02531DA44EA0000838E0 /* Recordings */,
@@ -267,6 +270,7 @@
 				BDBB02551DA44F2E000838E0 /* Logs */,
 				BDBB02581DA44FDC000838E0 /* Utils */,
 				BD49484F1D89F23000C50DE2 /* Assets.xcassets */,
+				BD85088D1DAC27A200BE3B53 /* Blah.entitlements */,
 				BD4948541D89F23000C50DE2 /* Info.plist */,
 				BD4948511D89F23000C50DE2 /* LaunchScreen.storyboard */,
 				BD17D0581D8F42D500A18062 /* Settings.bundle */,
@@ -282,6 +286,7 @@
 				BD75649A1D99321500CE455F /* Collection+AdditionsTests.swift */,
 				BD17D0521D8EDA9800A18062 /* Date+AdditionsTests.swift */,
 				BD7564A01D99B67E00CE455F /* EventLogTests.swift */,
+				BDD553DE1DABAB1100D2167E /* FixedTimestampGenerator.swift */,
 				BDA9CA8B1D8BFADF0028991F /* HistorgramTests.swift */,
 				BD15E0AA1D929D72005B709D /* HistogramBinFormatterTests.swift */,
 				BD0246361D9C119E008AEC26 /* LoggerTests.swift */,
@@ -289,7 +294,6 @@
 				BD58DDBD1D97CB7D007765E3 /* PlotTimeFormatterTests.swift */,
 				BD4C0B071D91217000C0611F /* UserSettingsTests.swift */,
 				BD49485F1D89F23000C50DE2 /* Info.plist */,
-				BDD553DE1DABAB1100D2167E /* FixedTimestampGenerator.swift */,
 			);
 			path = BlahTests;
 			sourceTree = "<group>";
@@ -330,11 +334,12 @@
 		BDBB02531DA44EA0000838E0 /* Recordings */ = {
 			isa = PBXGroup;
 			children = (
-				BD6539F71DA448EC008C32C6 /* RecordingsTableViewController.swift */,
-				BDBB025E1DA476F2000838E0 /* RecordingsStore.swift */,
-				BD6539EE1DA3F6EE008C32C6 /* Recording.swift */,
-				BDBB02641DA4FBC7000838E0 /* Recording+CoreDataProperties.swift */,
 				BD6539F01DA3F71B008C32C6 /* RecordingModel.xcdatamodeld */,
+				BD6539EE1DA3F6EE008C32C6 /* Recording.swift */,
+				BDBB025E1DA476F2000838E0 /* RecordingsStore.swift */,
+				BD6539F71DA448EC008C32C6 /* RecordingsTableViewController.swift */,
+				BD73D3601DAB6E5000845EEF /* RecordingActivityLogic.swift */,
+				BD8508901DAD153700BE3B53 /* Recording+CoreDataProperties.swift */,
 			);
 			name = Recordings;
 			sourceTree = "<group>";
@@ -498,6 +503,11 @@
 						CreatedOnToolsVersion = 7.3.1;
 						DevelopmentTeam = Z7R62JH5A8;
 						LastSwiftMigration = 0800;
+						SystemCapabilities = {
+							com.apple.Keychain = {
+								enabled = 1;
+							};
+						};
 					};
 					BD4948581D89F23000C50DE2 = {
 						CreatedOnToolsVersion = 7.3.1;
@@ -702,12 +712,13 @@
 				BD75649D1D99703900CE455F /* TextRecorder.swift in Sources */,
 				BD6539EF1DA3F6EE008C32C6 /* Recording.swift in Sources */,
 				BD87F59D1D8A2AFE007A6F99 /* SettingsViewController.swift in Sources */,
+				BD85088F1DACCBBC00BE3B53 /* DropboxController.swift in Sources */,
 				BD17D04D1D8E8BC200A18062 /* RunData.swift in Sources */,
-				BDBB02671DA4FCE8000838E0 /* Recording+CoreDataProperties.swift in Sources */,
 				BD75649F1D99B0B700CE455F /* Logger.swift in Sources */,
 				BD73D3611DAB6E5000845EEF /* RecordingActivityLogic.swift in Sources */,
 				BDDC9D781D8AFC4100C36430 /* GraphLatencyHistogram.swift in Sources */,
 				BDBB025B1DA45942000838E0 /* LowerViewManager.swift in Sources */,
+				BD8508911DAD153700BE3B53 /* Recording+CoreDataProperties.swift in Sources */,
 				BD7564991D9931A800CE455F /* Date+Additions.swift in Sources */,
 				BDBB025F1DA476F2000838E0 /* RecordingsStore.swift in Sources */,
 				BD87F5A31D8AC829007A6F99 /* Sample.swift in Sources */,
@@ -877,6 +888,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Blah/Blah.entitlements;
 				DEVELOPMENT_TEAM = Z7R62JH5A8;
 				INFOPLIST_FILE = Blah/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -894,6 +906,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Blah/Blah.entitlements;
 				DEVELOPMENT_TEAM = Z7R62JH5A8;
 				INFOPLIST_FILE = Blah/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

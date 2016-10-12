@@ -50,7 +50,7 @@
 			<key>Key</key>
 			<string>emitInterval</string>
 			<key>DefaultValue</key>
-			<string>15</string>
+			<integer>15</integer>
 			<key>KeyboardType</key>
 			<string>NumberPad</string>
 		</dict>
@@ -68,7 +68,7 @@
 			<key>Key</key>
 			<string>maxHistogramBin</string>
 			<key>DefaultValue</key>
-			<string>30</string>
+			<integer>30</integer>
 			<key>KeyboardType</key>
 			<string>NumberPad</string>
 		</dict>
@@ -90,16 +90,16 @@
 			<key>Key</key>
 			<string>dropboxLinkButtonText</string>
 		</dict>
-                <dict>
-                    <key>Type</key>
-                    <string>PSToggleSwitchSpecifier</string>
-                    <key>Key</key>
-                    <string>uploadAutomatically</string>
-                    <key>Title</key>
-                    <string>Upload automatically</string>
-                    <key>DefaultValue</key>
-                    <false/>
-                </dict>
+		<dict>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
+			<key>Key</key>
+			<string>uploadAutomatically</string>
+			<key>Title</key>
+			<string>Upload automatically</string>
+			<key>DefaultValue</key>
+			<false/>
+		</dict>
 		<dict>
 			<key>Type</key>
 			<string>PSGroupSpecifier</string>
@@ -130,7 +130,7 @@
 			<key>Title</key>
 			<string>Port</string>
 			<key>DefaultValue</key>
-			<string>80</string>
+                        <integer>80</integer>
 			<key>KeyboardType</key>
 			<string>NumberPad</string>
 		</dict>

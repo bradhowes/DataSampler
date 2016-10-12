@@ -15,6 +15,7 @@ class PassiveDependencyInjector: NSObject {
     var recordingActivityLogic: RecordingActivityLogicInterface!
     var userSettings: UserSettingsInterface!
     var runDataGenerator: ((UserSettingsInterface) -> RunDataInterface)!
+    var dropboxController: DropboxController!
 
     private override init() {
         super.init()

@@ -10,8 +10,12 @@ import CoreData
 import JSQCoreDataKit
 
 protocol RecordingsStoreInterface {
+    var stack: CoreDataStack? { get }
+
+    var isReady: Bool { get }
+
+    func cannedFetchRequest(name: String) -> NSFetchedResultsController<Recording>?
     func newRecording(userSettings: UserSettingsInterface, runData: RunDataInterface) -> Recording?
-    func recordingsFetcher() -> NSFetchedResultsController<Recording>?
     func save()
 }
 
@@ -21,9 +25,11 @@ protocol RecordingsStoreInterface {
 final class RecordingsStore : NSObject, RecordingsStoreInterface {
 
     private(set) var stack: CoreDataStack?
-    private(set) var fetcher: NSFetchedResultsController<Recording>?
+    private(set) var isReady: Bool
 
     override init() {
+        self.isReady = false
+
         super.init()
         Logger.log("RecordingsStore.init")
         let model = CoreDataModel(name: "RecordingModel")
@@ -33,21 +39,31 @@ final class RecordingsStore : NSObject, RecordingsStoreInterface {
             case .success(let stack):
                 Logger.log("created Core Data stack")
                 self.stack = stack
-                guard let mainContext = self.stack?.mainContext else {
-                    Logger.log("*** RecordingsStore.init: nil stack")
-                    return
-                }
-                self.fetcher = NSFetchedResultsController(fetchRequest: Recording.fetchRequest,
-                                                          managedObjectContext: mainContext,
-                                                          sectionNameKeyPath: nil, cacheName: nil)
-
-                Logger.log("fetcher: \(self.fetcher)")
+                self.isReady = true
+                RecordingsStoreNotification.post(recordingStore: self)
 
             case .failure(let err):
                 Logger.log("*** failed to create Core Data stack: \(err)")
                 assertionFailure("Error creating stack: \(err)")
             }
         }
+    }
+
+    func cannedFetchRequest(name: String) -> NSFetchedResultsController<Recording>? {
+        guard let mainContext = self.stack?.mainContext else {
+            Logger.log("*** RecordingsStore.init: nil stack")
+            return nil
+        }
+
+//        @nonobjc public class func fetchRequest() -> NSFetchRequest<Recording> {
+//            return NSFetchRequest<Recording>(entityName: "Recording");
+//        }
+
+        let fetcher = NSFetchedResultsController(fetchRequest: Recording.fetchRequest, managedObjectContext: mainContext,
+                                                 sectionNameKeyPath: nil, cacheName: nil)
+
+        Logger.log("fetcher: \(fetcher)")
+        return fetcher
     }
 
     func newRecording(userSettings: UserSettingsInterface, runData: RunDataInterface) -> Recording? {
@@ -57,10 +73,6 @@ final class RecordingsStore : NSObject, RecordingsStoreInterface {
             return nil
         }
         return Recording(context: mainContext, userSettings: userSettings, runData: runData)
-    }
-
-    func recordingsFetcher() -> NSFetchedResultsController<Recording>? {
-        return fetcher
     }
 
     func save() {

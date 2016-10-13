@@ -16,7 +16,6 @@ target 'Blah' do
   # Swift 3
   pod 'CorePlot', '~> 2.0'
   pod 'InAppSettingsKit', '~> 2.0'
-  pod 'SwiftyUserDefaults', '~> 3.0'
   pod 'JSQCoreDataKit', '~> 6.0'
   pod 'Dip-UI', '~> 1.0'
   pod 'SwiftyDropbox', '~> 4.0'

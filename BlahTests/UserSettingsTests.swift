@@ -26,7 +26,7 @@ class UserSettingsTests: XCTestCase {
     }
 
     func testInitialState() {
-        XCTAssertEqual(userSettings.defaults.count, 13)
+        XCTAssertEqual(userSettings.count, 13)
     }
 
     func testDelayedUpdate() {

@@ -8,7 +8,10 @@
 
 import Foundation
 
-protocol UserSettingsInterface {
+/** 
+ Interface for container of user settings.
+ */
+public protocol UserSettingsInterface {
     var notificationDriver: String { get set }
     var emitInterval: Int { get set }
     var maxHistogramBin: Int { get set }
@@ -23,13 +26,15 @@ protocol UserSettingsInterface {
     var apnsDevCertFileName: String { get set }
     var apnsDevCertPassword: String { get set }
 
+    var count: Int { get }
+
     func dump()
     func read()
     func write()
 }
 
 /**
- Enumeration of string constants that will be used as keys into UserDefaults. Minimizes typos.
+ Enumeration of user setting names.
  */
 public enum UserSettingName: String {
     case notificationDriver, emitInterval, maxHistogramBin, useDropbox, dropboxLinkButtonText, uploadAutomatically
@@ -39,24 +44,33 @@ public enum UserSettingName: String {
 }
 
 /**
- Protocol for a user setting. Registers a default value for when a setting does not yet exist in
- UserDefaults.
+ Protocol for a user setting. Note that the interface has no means of returning a value, though we can get the 
+ default value.
  */
-protocol SettingInterface {
+public protocol SettingInterface {
 
     /// The name of the user setting
     var name: UserSettingName { get }
+    /// The default value to use if not found in UserDefaults
     var defaultValue: Any { get }
+    // A printable description of the setting
     var settingDescription: String { get }
 
+    /**
+     Read the value from UserDefaults and use it
+     */
     func read()
+
+    /**
+     Write the held value to UserDefaults
+     */
     func write()
 }
 
 /**
  Define converters between a Swift native type and one used for UserDefaults
  */
-protocol ValueConverterInterface {
+private protocol ValueConverterInterface {
 
     /** 
      The native Swift type we wish to work in (eg `Int` or `String`)
@@ -64,69 +78,25 @@ protocol ValueConverterInterface {
     associatedtype ValueType
 
     /**
-     Convert a Swift native type value to NSObject-based type
+     Convert a Swift native type value to Any type
      - parameter value: the value to convert
      - returns: the converted value
      */
     static func valueToAny(_ value: ValueType) -> Any
 
     /**
-     Convert an NSObject-based type to a Swift native type.
+     Convert Any type to a Swift native type.
      - parameter value: the value to convert
-     - returns: the converted value
+     - returns: the converted value or nil if unable to convert
      */
     static func anyToValue(_ value: Any?) -> ValueType?
 }
 
-/**
- Define Int<->NSNumber converters
- */
-struct IntValueConverter : ValueConverterInterface {
-    static func valueToAny(_ value: Int) -> Any { return NSNumber(value: value) }
-    static func anyToValue(_ value: Any?) -> Int? {
-        switch value {
-        case let z as NSNumber: return z.intValue
-        case let z as NSString: return Int(z as String)
-        default: return nil
-        }
-    }
-}
-
-/**
- Double<->NSNumber converters
- */
-struct DoubleValueConverter : ValueConverterInterface {
-    static func valueToAny(_ value: Double) -> Any { return NSNumber(value: value) }
-    static func anyToValue(_ value: Any?) -> Double? {
-        switch value {
-        case let z as NSNumber: return z.doubleValue
-        case let z as NSString: return Double(z as String)
-        default: return nil
-        }
-    }
-}
-
-/**
- String<->String converters (no-op)
- */
-struct StringValueConverter : ValueConverterInterface {
-    static func valueToAny(_ value: String) -> Any { return NSString(utf8String: value)! }
-    static func anyToValue(_ value: Any?) -> String? {
-        return value != nil ? (value as! String) : nil
-    }
-}
-
-/**
- Bool<->NSNumber converters
- */
-struct BoolValueConverter : ValueConverterInterface {
-    static func valueToAny(_ value: Bool) -> Any { return NSNumber(value: value) }
-    static func anyToValue(_ value: Any?) -> Bool? {
-        return value != nil ? (value as! NSNumber).boolValue : nil
-    }
-}
-
 extension UserDefaults {
+
+    /**
+     Allow indexing into UserDefaults via UserSettingName enumeration
+     */
     subscript(key: UserSettingName) -> Any? {
         get { return object(forKey: key.rawValue) }
         set { set(newValue, forKey: key.rawValue) }
@@ -135,13 +105,20 @@ extension UserDefaults {
 
 /**
  Define a user setting that knows how to convert between a natural type (eg. Int or Double) and the type used to
- hold the value in the NSUserDefaults database.
+ hold the value in the UserDefaults database.
  */
-final class Setting<ValueType, VC: ValueConverterInterface>: SettingInterface, CustomDebugStringConvertible
-    where ValueType: Equatable, ValueType == VC.ValueType {
+private final class Setting<ValueType, VC: ValueConverterInterface>: SettingInterface, CustomDebugStringConvertible
+where ValueType: Equatable, ValueType == VC.ValueType {
 
+    /// The name of the setting
     var name: UserSettingName
+
+    /// The current value of the setting
     var value: ValueType {
+
+        /** 
+         Emit a notification when the setting value changes
+         */
         didSet {
             let notification = UserSettingsChangedNotificationWith<ValueType>(name: name, oldValue: oldValue,
                                                                               newValue: value)
@@ -150,13 +127,20 @@ final class Setting<ValueType, VC: ValueConverterInterface>: SettingInterface, C
         }
     }
 
+    /// Default value to use if the setting does not exist in UserDefaults
     var defaultValue: Any
+    /// Pretty-printed representation for the setting
+    var description: String { return "<Setting: '\(name)' '\(value)'>" }
+    /// Debugger representation for the setting
+    var debugDescription: String { return description }
+    /// Internal representation for the setting
+    var settingDescription: String { return description }
 
     /**
      Initialize new instance
 
-     - parameter key: the NSUserDefaults key for the user setting
-     - parameter value: the initial value for the user setting if not present in NSUserDefaults
+     - parameter name: the name of the user setting
+     - parameter defaultValue: the value for the setting if not present in UserDefaults
      */
     fileprivate init(name: UserSettingName, defaultValue: ValueType) {
         self.name = name
@@ -164,7 +148,10 @@ final class Setting<ValueType, VC: ValueConverterInterface>: SettingInterface, C
         self.defaultValue = VC.valueToAny(defaultValue)
     }
 
-    func read() {
+    /**
+     Update held setting with value from UserDefaults
+     */
+    fileprivate func read() {
         if let value = VC.anyToValue(UserDefaults.standard[name]) {
             if self.value != value {
                 self.value = value
@@ -175,52 +162,18 @@ final class Setting<ValueType, VC: ValueConverterInterface>: SettingInterface, C
         }
     }
 
-    func write() {
+    /** 
+     Update UserDefaults with the currently-held value
+     */
+    fileprivate func write() {
         UserDefaults.standard[name] = VC.valueToAny(self.value)
     }
-
-    /// Pretty-printed representation for the setting
-    var description: String { return "<BRHSetting: '\(name)' '\(value)'>" }
-    /// Debugger representation for the setting
-    var debugDescription: String { return description }
-    /// Internal representation for the setting
-    var settingDescription: String { return description }
 }
-
-typealias StringSetting = Setting<String, StringValueConverter>
-typealias IntSetting = Setting<Int, IntValueConverter>
-typealias DoubleSetting = Setting<Double, DoubleValueConverter>
-typealias BoolSetting = Setting<Bool, BoolValueConverter>
 
 /**
  Collection of all user settings.
  */
 final class UserSettings: UserSettingsInterface {
-
-    private(set) var defaults: [String:Any] = [:]
-    private(set) var settings: [String:SettingInterface] = [:]
-
-    /**
-     Remove all previously-registered user settings.
-     */
-    func reset() {
-        defaults = [:]
-        settings = [:]
-    }
-
-    private var _notificationDriver: StringSetting
-    private var _emitInterval: IntSetting
-    private var _maxHistogramBin: IntSetting
-    private var _useDropbox: BoolSetting
-    private var _dropboxLinkButtonText: StringSetting
-    private var _uploadAutomatically: BoolSetting
-    private var _remoteServerName: StringSetting
-    private var _remoteServerPort: IntSetting
-    private var _resendUntilFetched: BoolSetting
-    private var _apnsProdCertFileName: StringSetting
-    private var _apnsProdCertPassword: StringSetting
-    private var _apnsDevCertFileName: StringSetting
-    private var _apnsDevCertPassword: StringSetting
 
     var notificationDriver: String {
         get { return self._notificationDriver.value }
@@ -287,6 +240,8 @@ final class UserSettings: UserSettingsInterface {
         set { self._apnsDevCertPassword.value = newValue }
     }
 
+    var count: Int { return settings.count }
+
     /**
      Initialize user settings collection. Sets up default values in NSUserDefaults.
      */
@@ -305,43 +260,40 @@ final class UserSettings: UserSettingsInterface {
         _apnsDevCertFileName = StringSetting(name: .apnsDevCertFileName, defaultValue: "apn-nhtest-dev.p12")
         _apnsDevCertPassword = StringSetting(name: .apnsDevCertPassword, defaultValue: "")
 
-        register(_notificationDriver)
-        register(_emitInterval)
-        register(_maxHistogramBin)
-        register(_useDropbox)
-        register(_dropboxLinkButtonText)
-        register(_uploadAutomatically)
-        register(_remoteServerName)
-        register(_remoteServerPort)
-        register(_resendUntilFetched)
-        register(_apnsProdCertFileName)
-        register(_apnsProdCertPassword)
-        register(_apnsDevCertFileName)
-        register(_apnsDevCertPassword)
+        settings.append(_notificationDriver)
+        settings.append(_emitInterval)
+        settings.append(_maxHistogramBin)
+        settings.append(_useDropbox)
+        settings.append(_dropboxLinkButtonText)
+        settings.append(_uploadAutomatically)
+        settings.append(_remoteServerName)
+        settings.append(_remoteServerPort)
+        settings.append(_resendUntilFetched)
+        settings.append(_apnsProdCertFileName)
+        settings.append(_apnsProdCertPassword)
+        settings.append(_apnsDevCertFileName)
+        settings.append(_apnsDevCertPassword)
 
+        var defaults = [String:Any]()
+        settings.forEach { defaults[$0.name.rawValue] = $0.defaultValue }
         UserDefaults.standard.register(defaults: defaults)
 
         read()
         dump()
     }
 
-    func register(_ setting: SettingInterface) {
-        defaults[setting.name.rawValue] = setting.defaultValue
-        settings[setting.name.rawValue] = setting
-    }
-
     /**
      Update NSUserDefaults using the internal values
      */
     func write() {
-        settings.forEach { $1.write() }
+        settings.forEach { $0.write() }
     }
 
     /**
      Update the internal values using contents from NSUserDefaults.
      */
     func read() {
-        settings.forEach { $1.read() }
+        settings.forEach { $0.read() }
         dump()
     }
 
@@ -351,4 +303,74 @@ final class UserSettings: UserSettingsInterface {
     func dump() {
         settings.forEach { print("\($0)") }
     }
+
+    private var settings: [SettingInterface] = []
+
+    private typealias StringSetting = Setting<String, StringValueConverter>
+    private typealias IntSetting = Setting<Int, IntValueConverter>
+    private typealias DoubleSetting = Setting<Double, DoubleValueConverter>
+    private typealias BoolSetting = Setting<Bool, BoolValueConverter>
+    
+    /**
+     Define Int<->NSNumber converter
+     */
+    private struct IntValueConverter : ValueConverterInterface {
+        static func valueToAny(_ value: Int) -> Any { return NSNumber(value: value) }
+        static func anyToValue(_ value: Any?) -> Int? {
+            switch value {
+            case let z as NSNumber: return z.intValue
+            case let z as NSString: return Int(z as String)
+            default: return nil
+            }
+        }
+    }
+
+    /**
+     Double<->NSNumber converter
+     */
+    private struct DoubleValueConverter : ValueConverterInterface {
+        static func valueToAny(_ value: Double) -> Any { return NSNumber(value: value) }
+        static func anyToValue(_ value: Any?) -> Double? {
+            switch value {
+            case let z as NSNumber: return z.doubleValue
+            case let z as NSString: return Double(z as String)
+            default: return nil
+            }
+        }
+    }
+
+    /**
+     String<->String converter (no-op)
+     */
+    private struct StringValueConverter : ValueConverterInterface {
+        static func valueToAny(_ value: String) -> Any { return NSString(utf8String: value)! }
+        static func anyToValue(_ value: Any?) -> String? {
+            return value != nil ? (value as! String) : nil
+        }
+    }
+
+    /**
+     Bool<->NSNumber converter
+     */
+    private struct BoolValueConverter : ValueConverterInterface {
+        static func valueToAny(_ value: Bool) -> Any { return NSNumber(value: value) }
+        static func anyToValue(_ value: Any?) -> Bool? {
+            return value != nil ? (value as! NSNumber).boolValue : nil
+        }
+    }
+
+    private var _notificationDriver: StringSetting
+    private var _emitInterval: IntSetting
+    private var _maxHistogramBin: IntSetting
+    private var _useDropbox: BoolSetting
+    private var _dropboxLinkButtonText: StringSetting
+    private var _uploadAutomatically: BoolSetting
+    private var _remoteServerName: StringSetting
+    private var _remoteServerPort: IntSetting
+    private var _resendUntilFetched: BoolSetting
+    private var _apnsProdCertFileName: StringSetting
+    private var _apnsProdCertPassword: StringSetting
+    private var _apnsDevCertFileName: StringSetting
+    private var _apnsDevCertPassword: StringSetting
+
 }

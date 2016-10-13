@@ -33,8 +33,8 @@ final class SettingsViewController : IASKAppSettingsViewController, IASKSettings
     }
 
     func updateLinkButtonText() {
-        UserDefaults.standard["dropboxLinkButtonText"] = userSettings.useDropbox ? "Unlink" : "Link"
-        UserDefaults.standard.synchronize()
+//        userSettings.dropboxLinkButtonText = userSettings.useDropbox ? "Unlink" : "Link"
+//        userSettings.write()
     }
 
     func doUpdateLinkButtonText(notification: NSNotification) {

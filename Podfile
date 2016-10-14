@@ -14,12 +14,12 @@ target 'Blah' do
   # pod 'SwiftyUserDefaults', '~> 2.2.1'
 
   # Swift 3
+  pod 'CircleProgressView', '~> 1.0'
   pod 'CorePlot', '~> 2.0'
+
   pod 'InAppSettingsKit', '~> 2.0'
   pod 'JSQCoreDataKit', '~> 6.0'
-  pod 'Dip-UI', '~> 1.0'
   pod 'SwiftyDropbox', '~> 4.0'
-  pod 'CircleProgressView', '~> 1.0'
 
   target 'BlahTests' do
     inherit! :search_paths

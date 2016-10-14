@@ -14,11 +14,23 @@ import CircleProgressView
 /**
  Manages a view of recordings
  */
-final class RecordingsTableViewController: UITableViewController, NSFetchedResultsControllerDelegate {
+final class RecordingsTableViewController: UITableViewController, NSFetchedResultsControllerDelegate,
+RecordingsStoreDependent {
 
-    private var recordingsStore: RecordingsStoreInterface!
+    /// Source for recordings. The Core Data stack may not be ready when we receive this dependency so be careful
+     var recordingsStore: RecordingsStoreInterface! {
+        didSet {
+            if recordingsStore.isReady {
+                storeIsReady()
+            }
+            else {
+                RecordingsStoreNotification.observe(observer: self, selector: #selector(storeIsReady),
+                                                    recordingStore: recordingsStore)
+            }
+        }
+    }
+
     private var fetcher: NSFetchedResultsController<Recording>!
-
     private var selectedRecording: Recording? = nil
     private var selectedRecordingIndex: IndexPath? = nil
 
@@ -27,41 +39,52 @@ final class RecordingsTableViewController: UITableViewController, NSFetchedResul
      */
     override func viewDidLoad() {
         super.viewDidLoad()
+        guard recordingsStore.isReady else { return }
 
-        recordingsStore = PassiveDependencyInjector.singleton.recordingsStore
-        RecordingsStoreNotification.observe(observer: self, selector: #selector(storeIsReady),
-                                            recordingStore: recordingsStore)
-        if recordingsStore.isReady {
-            fetchRecordings()
+        tableView.delegate = self
+        if fetcher == nil {
+            storeIsReady()
         }
-    }
 
-    func storeIsReady(notification: Notification) {
         fetchRecordings()
+        tableView.reloadData()
     }
 
-    func fetchRecordings() {
-        fetcher = recordingsStore.cannedFetchRequest(name: "recordings")
+    /**
+     Notification handler invoked when RecordingsStore reports that is ready.
+     - parameter notification: the notification from the store
+     */
+    func storeIsReady(notification: Notification? = nil) {
+        fetcher = recordingsStore.cannedFetchRequest(name: "blah")
         fetcher.delegate = self
+    }
+
+    /**
+     Fetch recordings from the store.
+     */
+    func fetchRecordings() {
         do {
             try fetcher?.performFetch()
-            tableView.reloadData()
         } catch {
             assertionFailure("Failed to fetch: \(error)")
         }
     }
 
+    /**
+     The view is about to be shown. Make sure our edit state is in the right configuration.
+     - parameter animated: true if animating
+     */
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-
-        // - NOTE: for some reason, we need this to remove ugly "jump" of the title when the appearance of the view
-        // is controlled by a transition animation
-        //
-        navigationController?.navigationBar.layer.removeAllAnimations()
-        updateEditButton()
+        updateEditButtons()
     }
 
+    /**
+     The view is about to disappear. Turn off editing.
+     - parameter animated: true if animating
+     */
     override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
         if tableView.isEditing {
             setEditing(false, animated: false)
         }
@@ -75,7 +98,7 @@ final class RecordingsTableViewController: UITableViewController, NSFetchedResul
     override func setEditing(_ editing: Bool, animated: Bool) {
         super.setEditing(editing, animated: animated)
         tableView.setEditing(editing, animated: animated)
-        updateEditButton()
+        updateEditButtons()
     }
 
     // MARK: Table view data source
@@ -87,7 +110,7 @@ final class RecordingsTableViewController: UITableViewController, NSFetchedResul
      */
     private func configureCell(_ cell: UITableViewCell, atIndexPath indexPath: IndexPath) {
         guard let recording = fetcher?.object(at: indexPath) else { return }
-        guard let cell = cell as? RecordingTableViewCell else { return }
+        guard let cell = cell as? RecordingTableViewCell else { fatalError("unexpected UITableViewCell") }
         cell.configure(dataSource: recording)
         cell.accessoryType = recording == selectedRecording ? .checkmark : .none
     }
@@ -113,7 +136,18 @@ final class RecordingsTableViewController: UITableViewController, NSFetchedResul
         return count
     }
 
-    private func updateEditButton() {
+    /**
+     Update the buttons involved in editing the rows. Here are the rules.
+     
+     If not editing:
+     - No rows, no 'Edit'
+     - One row currently recording, no 'Edit'
+     - Otherwise, show 'Edit'
+     If editing, then:
+     - Show 'Cancel' button on left
+     - Show 'Trash' button on right but only if there is at least one row selected
+     */
+    private func updateEditButtons() {
         var canEdit = false
         let numRows = tableView.numberOfRows(inSection: 0)
         if numRows == 1 {
@@ -153,12 +187,20 @@ final class RecordingsTableViewController: UITableViewController, NSFetchedResul
         }
     }
 
+    /**
+     Event handler for the trash can button. Delete all of the selected `Recording` objects
+     - parameter sender: the button that was touched
+     */
     func doDelete(sender: UIBarButtonItem) {
         guard let items = tableView.indexPathsForSelectedRows else { return }
-        items.map { fetcher.object(at: $0) }.forEach { $0.delete() }
+        items.forEach { fetcher?.object(at: $0).delete() }
         setEditing(false, animated: true)
     }
 
+    /**
+     Event handler for the 'Cancel' button. End edit mode.
+     - parameter sender: the button that was touched
+     */
     func doCancel(sender: UIBarButtonItem) {
         setEditing(false, animated: true)
     }
@@ -186,7 +228,7 @@ final class RecordingsTableViewController: UITableViewController, NSFetchedResul
 
             // We support multiple selections. If there is at least one, add a 'Delete' button
             //
-            updateEditButton()
+            updateEditButtons()
             return
         }
 
@@ -206,24 +248,26 @@ final class RecordingsTableViewController: UITableViewController, NSFetchedResul
         selectedRecording = fetcher?.object(at: indexPath)
         selectedRecordingIndex = indexPath
 
-        // Mark the selected row and show recorded info main view
+        // Mark the selected row and show recorded info in main view
         //
         let cell = tableView.cellForRow(at: selectedRecordingIndex!)
         cell? .accessoryType = .checkmark
-
         RecordingsTableNotification.post(kind: .recordingSelected, recording: selectedRecording!)
 
         // Move to the main view
         //
-        self.tabBarController?.selectedIndex = 0
+        tabBarController?.selectedIndex = 0
     }
 
+    /**
+     Notification that user deselected a row. We only care about this while in edit mode so we can update the edit
+     buttons based on the number of selected rows.
+     - parameter tableView: the view being edited
+     - parameter indexPath: the row that was deselected
+     */
     override func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
         if tableView.isEditing {
-
-            // We support multiple selections. If there is at least one, add a 'Delete' button
-            //
-            updateEditButton()
+            updateEditButtons()
         }
     }
 
@@ -249,10 +293,8 @@ final class RecordingsTableViewController: UITableViewController, NSFetchedResul
      */
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            DispatchQueue.global().async {
-                guard let obj = self.fetcher?.object(at: indexPath) else { return }
-                obj.delete()
-            }
+            guard let obj = self.fetcher?.object(at: indexPath) else { return }
+            obj.delete()
         }
     }
 
@@ -355,6 +397,6 @@ final class RecordingsTableViewController: UITableViewController, NSFetchedResul
      */
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         tableView.endUpdates()
-        updateEditButton()
+        updateEditButtons()
     }
 }

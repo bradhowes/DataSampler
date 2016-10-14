@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 import CircleProgressView
 
-class RecordingTableViewCell: UITableViewCell {
+final class RecordingTableViewCell: UITableViewCell {
     @IBOutlet weak var title: UITextView!
     @IBOutlet weak var detail: UITextView!
 }
@@ -26,6 +26,7 @@ extension RecordingTableViewCell: ConfigurableCell {
         if recording.isRecording {
             status = "Recording"
             color = UIColor.red
+            accessoryType = .checkmark
         }
         else if recording.uploaded {
             status = "Uploaded"

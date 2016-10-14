@@ -9,21 +9,12 @@
 import CoreData
 import JSQCoreDataKit
 
-protocol RecordingsStoreInterface {
-    var stack: CoreDataStack? { get }
-
-    var isReady: Bool { get }
-
-    func cannedFetchRequest(name: String) -> NSFetchedResultsController<Recording>?
-    func newRunData() -> RunDataInterface
-    func newRecording() -> Recording?
-    func save()
-}
-
 /** 
  Manager of the Core Data stack for recordings.
  */
 final class RecordingsStore : NSObject, RecordingsStoreInterface {
+
+    internal var dependentType: Any.Type { return RecordingsStoreDependent.self }
 
     private let userSettings: UserSettingsInterface
     private let runDataFactory: RunDataInterface.FactoryType
@@ -54,10 +45,9 @@ final class RecordingsStore : NSObject, RecordingsStoreInterface {
         }
     }
 
-    func cannedFetchRequest(name: String) -> NSFetchedResultsController<Recording>? {
+    func cannedFetchRequest(name: String) -> NSFetchedResultsController<Recording> {
         guard let mainContext = self.stack?.mainContext else {
-            Logger.log("*** RecordingsStore.init: nil stack")
-            return nil
+            fatalError("invalid context")
         }
 
         let fetcher = NSFetchedResultsController(fetchRequest: Recording.fetchRequest,

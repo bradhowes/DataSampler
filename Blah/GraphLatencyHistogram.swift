@@ -10,16 +10,16 @@ import Foundation
 import UIKit
 import CorePlot
 
-final class GraphLatencyHistogram : CPTGraphHostingView, CPTPlotDataSource, CPTBarPlotDelegate, CPTAxisDelegate {
+final class GraphLatencyHistogram : CPTGraphHostingView, CPTPlotDataSource, CPTBarPlotDelegate, CPTAxisDelegate, HistogramObserver {
 
     var source: Histogram! {
         willSet {
             if source != nil {
-                HistogramBinChangedNotification.unobserve(from: source, observer: self)
+                source.observer = nil
             }
         }
         didSet {
-            HistogramBinChangedNotification.observe(from: source, observer: self, selector: #selector(binChanged))
+            source.observer = self
             if hostedGraph == nil {
                 makeGraph()
             }
@@ -32,9 +32,8 @@ final class GraphLatencyHistogram : CPTGraphHostingView, CPTPlotDataSource, CPTB
     private var binCount: Int { return source.bins.count }
     private var maxValue: Int { return source.bins[source.maxBinIndex] }
 
-    func binChanged(notification: Notification) {
-        let notif = HistogramBinChangedNotification(notification: notification)
-        hostedGraph?.allPlots().last!.reloadData(inIndexRange: NSMakeRange(notif.index, 1))
+    func histogramBinChanged(_ histogram: Histogram, index: Int) {
+        hostedGraph?.allPlots().last!.reloadData(inIndexRange: NSMakeRange(index, 1))
         if Thread.isMainThread {
             self.updateBounds()
         }

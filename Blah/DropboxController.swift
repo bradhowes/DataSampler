@@ -10,7 +10,11 @@ import UIKit
 import SwiftyDropbox
 import CoreData
 
-final class DropboxController: NSObject {
+public class Dependency<DependentClass>: NSObject {
+    static func isDependentType(object: AnyObject) -> Bool { return object is DependentClass }
+}
+
+final public class DropboxController: Dependency<DropboxControllerDependent>, DropboxControllerInterface {
 
     private var userSettings: UserSettingsInterface
     private var recordingsStore: RecordingsStoreInterface
@@ -47,7 +51,7 @@ final class DropboxController: NSObject {
         makeClient()
     }
 
-    func nextRecordingToUpload() -> Recording? {
+    private func nextRecordingToUpload() -> Recording? {
         return fetcher?.fetchedObjects?.first(where: { (recording) -> Bool in
             if recording.uploaded == true { return false }
             if recording.isRecording == true { return false }
@@ -55,7 +59,7 @@ final class DropboxController: NSObject {
         })
     }
 
-    func makeClient() {
+    private func makeClient() {
 
         self.fetcher = recordingsStore.cannedFetchRequest(name: "uploadable")
         if fetcher?.fetchedObjects == nil {
@@ -74,7 +78,7 @@ final class DropboxController: NSObject {
         }
     }
 
-    func checkForUploads() {
+    private func checkForUploads() {
         if recording == nil {
             recording = nextRecordingToUpload()
             if recording != nil {
@@ -83,13 +87,13 @@ final class DropboxController: NSObject {
         }
     }
 
-    func sanitizeFolderName(_ name: String) -> String {
+    private func sanitizeFolderName(_ name: String) -> String {
         let chars = CharacterSet(charactersIn: "- .")
         let bits = name.components(separatedBy: chars)
         return bits.joined()
     }
 
-    func startUpload() {
+    private func startUpload() {
         guard let rec = self.recording else { return }
         guard let client = self.client else { return }
         let destFolder = sanitizeFolderName("/" + rec.directoryName)
@@ -110,7 +114,7 @@ final class DropboxController: NSObject {
         }
     }
 
-    func uploadLog(for rec: Recording, into destFolder: String) {
+    private func uploadLog(for rec: Recording, into destFolder: String) {
         let dest = destFolder + "/" + Logger.singleton.fileName
         let source = rec.folder.appendingPathComponent(Logger.singleton.fileName)
         self.client?.files.upload(path: dest, input: source).response { (response, error) in
@@ -126,7 +130,7 @@ final class DropboxController: NSObject {
         }
     }
 
-    func uploadEvents(for rec: Recording, into destFolder: String) {
+    private func uploadEvents(for rec: Recording, into destFolder: String) {
         let dest = destFolder + "/" + EventLog.singleton.fileName
         let source = rec.folder.appendingPathComponent(EventLog.singleton.fileName)
         rec.progress = 0.5
@@ -168,7 +172,7 @@ final class DropboxController: NSObject {
         }
     }
 
-    func toggle(viewController: SettingsViewController) {
+    public func toggleAccountLinking(viewController: UIViewController) {
         if userSettings.useDropbox {
             disable(viewController: viewController)
         }
@@ -177,13 +181,13 @@ final class DropboxController: NSObject {
         }
     }
 
-    func enable(viewController: SettingsViewController) {
+    private func enable(viewController: UIViewController) {
         DropboxClientsManager.authorizeFromController(UIApplication.shared,
                                                       controller: viewController,
                                                       openURL: { (url: URL) -> Void in UIApplication.shared.open(url) })
     }
 
-    func disable(viewController: SettingsViewController) {
+    private func disable(viewController: UIViewController) {
         let title = "Dropbox"
         let msg = "Are you sure you want to unlink from Dropbox? This will prevent the app from saving future recordings to your Dropbox folder"
         let alert = UIAlertController(title: title, message: msg, preferredStyle: .alert)

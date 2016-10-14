@@ -10,9 +10,9 @@ import Foundation
 import CoreData
 import JSQCoreDataKit
 
-final class Recording : NSManagedObject, CoreDataEntityProtocol {
+public final class Recording : NSManagedObject, CoreDataEntityProtocol {
 
-    static let defaultSortDescriptors = [NSSortDescriptor(key: "startTime", ascending: false)]
+    public static let defaultSortDescriptors = [NSSortDescriptor(key: "startTime", ascending: false)]
 
     private static var durationFormatter = { PlotTimeFormatter() }()
 
@@ -82,7 +82,7 @@ final class Recording : NSManagedObject, CoreDataEntityProtocol {
 
     var isRecording: Bool { return startTime == endTime }
 
-    override func willSave() {
+    override public func willSave() {
         super.willSave()
         Logger.log("Recording.willSave - \(startTime) updated: \(isUpdated) deleted: \(isDeleted)")
     }

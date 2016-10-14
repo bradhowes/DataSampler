@@ -9,17 +9,17 @@
 import Foundation
 
 /**
- @brief Add insertionIndexOf method to Collection protocol.
+ Add insertionIndexOf method to Collection protocol.
  */
 extension Collection {
 
     typealias OrderPredicate = (Iterator.Element, Iterator.Element) -> Bool
     
     /**
-     @brief Locate the proper location to insert a given value into an ordered collection.
-     @param value - the value to insert
-     @param predicate - a closure that determines whether one element comes before or after another
-     @return Index value which falls in range [0,N] where N is the number of elements in the container. If N is
+     Locate the proper location to insert a given value into an ordered collection.
+     - parameter value: the value to insert
+     - parameter predicate: a closure that determines whether one element comes before or after another
+     - returns: index value which falls in range [0,N] where N is the number of elements in the container. If N is
      returned, the given value is ordered after all others in the container
      */
     func insertionIndexOf(value: Iterator.Element, predicate: OrderPredicate) -> Index {
@@ -39,15 +39,15 @@ extension Collection {
 }
 
 /**
- @brief Add binarySearchFor method to Collection protocol
+ Add binarySearchFor method to Collection protocol
  */
 extension Collection where Iterator.Element: Equatable {
     
     /**
-     @brief Quickly search for a given value in an ordered collection.
-     @param value - the value to locate
-     @param predicate - a closure that determines whether one element comes before/after another
-     @return true if the given value was found, false otherwise
+     Quickly search for a given value in an ordered collection.
+     - parameter value: the value to locate
+     - parameter predicate: a closure that determines whether one element comes before/after another
+     - returns: true if the given value was found, false otherwise
      */
     func binarySearchFor(value: Iterator.Element, predicate: OrderPredicate) -> Bool {
         let pos = insertionIndexOf(value: value, predicate: predicate)
@@ -55,8 +55,15 @@ extension Collection where Iterator.Element: Equatable {
     }
 }
 
+/** 
+ Add a minMax method to collections with comparable elements. Returns both min and max values found in the collection.
+ */
 extension Collection where Iterator.Element: Comparable {
 
+    /**
+     Locate min and max values within a collection.
+     - returns: 2-tuple containint the found values, or nil for an empty container
+     */
     func minMax() -> (min: Iterator.Element, max: Iterator.Element)? {
         guard let value = self.first else { return nil }
         var min = value

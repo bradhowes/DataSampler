@@ -8,43 +8,43 @@
 
 import Foundation
 
-struct OrderedArray<Element:Comparable> : Collection, CustomDebugStringConvertible {
+public struct OrderedArray<Element:Comparable> : Collection, CustomDebugStringConvertible {
 
-    typealias Predicate = (Element, Element) -> Bool
+    public typealias Predicate = (Element, Element) -> Bool
 
     private(set) var items: [Element]
     private let predicate: Predicate
 
-    var startIndex: Int { get { return 0 } }
-    var endIndex: Int { get { return items.count } }
-    var count: Int { get { return items.count } }
+    public var startIndex: Int { get { return 0 } }
+    public var endIndex: Int { get { return items.count } }
+    public var count: Int { get { return items.count } }
 
-    var last: Element { get { return items[endIndex - 1] } }
+    public var last: Element { get { return items[endIndex - 1] } }
 
-    var debugDescription: String { get { return "OrderedArray: \(items)" } }
-    var description: String { get { return "OrderedArray: \(items)" } }
+    public var debugDescription: String { get { return "OrderedArray: \(items)" } }
+    public var description: String { get { return "OrderedArray: \(items)" } }
 
-    init(predicate: @escaping Predicate = (<)) {
+    public init(predicate: @escaping Predicate = (<)) {
         self.items = []
         self.predicate = predicate
     }
 
-    init(items: [Element], predicate: @escaping Predicate = (<)) {
+    public init(items: [Element], predicate: @escaping Predicate = (<)) {
         self.items = items
         self.predicate = predicate
         self.items.sort(by: predicate)
     }
 
-    init(count: Int, repeatedValue: Element, predicate: @escaping Predicate = (<)) {
+    public init(count: Int, repeatedValue: Element, predicate: @escaping Predicate = (<)) {
         self.items = Array(repeating: repeatedValue, count: count)
         self.predicate = predicate
     }
 
-    mutating func reserveCapacity(_ minimumCapacity: Int) {
+    public mutating func reserveCapacity(_ minimumCapacity: Int) {
         items.reserveCapacity(minimumCapacity)
     }
 
-    mutating func add(value: Element) {
+    public mutating func add(value: Element) {
         let pos = items.insertionIndexOf(value: value, predicate: predicate)
         if pos == items.count {
             items.append(value)
@@ -54,13 +54,14 @@ struct OrderedArray<Element:Comparable> : Collection, CustomDebugStringConvertib
         }
     }
 
-    func index(after pos: Int) -> Int { return pos + 1 }
+    public func index(after pos: Int) -> Int { return pos + 1 }
 
-    mutating func removeAll() { items.removeAll() }
+    public subscript(index: Int) -> Element { return items[index] }
 
-    mutating func popLast() -> Element? { return items.popLast() }
+    public mutating func removeAll() { items.removeAll() }
 
-    mutating func removeLast() -> Element { return items.removeLast() }
+    public mutating func popLast() -> Element? { return items.popLast() }
 
-    subscript(index: Int) -> Element { return items[index] }
+    public mutating func removeLast() -> Element { return items.removeLast() }
+
 }

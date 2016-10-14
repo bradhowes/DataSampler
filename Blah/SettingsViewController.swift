@@ -12,82 +12,36 @@ import InAppSettingsKit
 /** 
  Controller for the settings view. Does little more than present the view and update user settings.
  */
-final class SettingsViewController : IASKAppSettingsViewController, IASKSettingsDelegate {
+final class SettingsViewController : IASKAppSettingsViewController, IASKSettingsDelegate, DropboxControllerDependent, UserSettingsDependent {
 
-    private var userSettings: UserSettingsInterface!
-    private var dropboxController: DropboxController!
+    var dropboxController: DropboxControllerInterface!
+    var userSettings: UserSettingsInterface!
 
     /**
      Customization point for view/controller after construction from storyboard
      */
     override func viewDidLoad() {
         self.delegate = self
-        userSettings = PassiveDependencyInjector.singleton.userSettings
-        dropboxController = PassiveDependencyInjector.singleton.dropboxController
-
-        updateLinkButtonText()
-
-        UserSettingsChangedNotification.observe(observer: self, selector: #selector(doUpdateLinkButtonText),
-                                                setting: UserSettingName.useDropbox)
         super.viewDidLoad()
     }
 
-    func updateLinkButtonText() {
-//        userSettings.dropboxLinkButtonText = userSettings.useDropbox ? "Unlink" : "Link"
-//        userSettings.write()
-    }
-
-    func doUpdateLinkButtonText(notification: NSNotification) {
-        updateLinkButtonText()
-    }
-
-    /**
-     Notification from system that memory is tight. Drop any data we can recreate elsewhere.
-     */
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-    }
-
-    /**
-     Update NSUserDefaults values using values from Parameters class
-     - parameter animated: true if the view should animate its appearance
-     */
-    override func viewWillAppear(_ animated: Bool) {
-        // Just in case the settings changed since we last presented this view -- say from the iOS Settings app
-        // userSettings.read()
-        super.viewWillAppear(animated)
-
-        // - NOTE: for some reason, we need this to remove ugly "jump" of the title when the appearance of the view
-        // is controlled by a transition animation
-        //
-        navigationController?.navigationBar.layer.removeAllAnimations()
-    }
-
-    /**
-     Update the Parameters class instances using values from NSUserDefaults
-     - parameter animated: true if the view snould animate its disappearance
-     */
-    override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(animated)
+    override func viewWillDisappear(_ animated: Bool) {
         userSettings.read()
-        userSettings.dump()
     }
 
     func settingsViewControllerDidEnd(_ sender: IASKAppSettingsViewController) {
-        userSettings.read()
-        userSettings.dump()
+        print("heool")
     }
 
     override func synchronizeSettings() {
         super.synchronizeSettings()
         userSettings.read()
-        updateLinkButtonText()
-        tableView.reloadData()
+        // tableView.reloadData()
     }
 
     func settingsViewController(_ sender: IASKAppSettingsViewController, buttonTappedFor specifier: IASKSpecifier) {
         if specifier.key() == "dropboxLinkButtonText" {
-            dropboxController.toggle(viewController: self)
+            dropboxController.toggleAccountLinking(viewController: self)
         }
     }
 }

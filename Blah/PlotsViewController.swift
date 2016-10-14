@@ -17,8 +17,7 @@ import UIKit
  * events view
 
  */
-
-final class PlotsViewController: UIViewController {
+final class PlotsViewController: UIViewController, RecordingActivityLogicDependent {
 
     @IBOutlet private weak var toolbar: UIToolbar!
     @IBOutlet private var startButton: UIBarButtonItem!
@@ -36,7 +35,7 @@ final class PlotsViewController: UIViewController {
     private var viewedRecording: Recording?
 
     /// Injected dependency for managing recordings
-    private var recordingActivityLogic: RecordingActivityLogicInterface!
+    var recordingActivityLogic: RecordingActivityLogicInterface!
 
     /// Show the status bar with white text
     override var preferredStatusBarStyle : UIStatusBarStyle {
@@ -52,8 +51,7 @@ final class PlotsViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        self.recordingActivityLogic = PassiveDependencyInjector.singleton.recordingActivityLogic
-        self.recordingActivityLogic.visualizer = self
+        recordingActivityLogic.visualizer = self
 
         histogramButton.accessibilityLabel = "Histogram"
         logButton.accessibilityLabel = "Log"
@@ -80,10 +78,6 @@ final class PlotsViewController: UIViewController {
         //
         Logger.singleton.textView = logView
         EventLog.singleton.textView = eventsView
-
-        // Be a delegate for the tab bar in order to show a UIView transition when switching tabs
-        //
-        tabBarController!.delegate = self
     }
 
     override func didReceiveMemoryWarning() {
@@ -136,26 +130,3 @@ extension PlotsViewController: VisualizerInterface {
         self.histogramView.source = dataSource.histogram
     }
 }
-
-extension PlotsViewController: UITabBarControllerDelegate {
-
-    /**
-     Switching to another tab. Use a transition animation between the views.
-     - parameter tabBarController: the UITabBarController to work with
-     - parameter viewController: the UIViewController that will become active
-     - returns: true to switch to the new view
-     */
-    public func tabBarController(_ tabBarController: UITabBarController,
-                                 shouldSelect viewController: UIViewController) -> Bool {
-
-        let fromView: UIView = tabBarController.selectedViewController!.view
-        let toView: UIView = viewController.view
-        guard fromView != toView else { return false }
-        UIView.transition(from: fromView, to: toView, duration: 0.25, options: [.transitionCrossDissolve]) {
-            (finished: Bool) in
-        }
-
-        return true
-    }
-}
-

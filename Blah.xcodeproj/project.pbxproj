@@ -71,9 +71,10 @@
 		BD87F59F1D8AAAD1007A6F99 /* GraphLatencyByTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD87F59E1D8AAAD1007A6F99 /* GraphLatencyByTime.swift */; };
 		BD87F5A31D8AC829007A6F99 /* Sample.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD87F5A21D8AC829007A6F99 /* Sample.swift */; };
 		BD87F5A51D8ADDE0007A6F99 /* Histogram.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD87F5A41D8ADDE0007A6F99 /* Histogram.swift */; };
+		BD981C5F1DAFAC0F00F18078 /* TabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD981C5E1DAFAC0F00F18078 /* TabBarController.swift */; };
+		BD981C631DB133F900F18078 /* SampleInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD981C621DB133F900F18078 /* SampleInterface.swift */; };
 		BD9AA0811DAE67FB00C8F7BD /* ConfigurableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD9AA0801DAE67FB00C8F7BD /* ConfigurableCell.swift */; };
 		BD9AA0831DAE687300C8F7BD /* RecordingTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD9AA0821DAE687300C8F7BD /* RecordingTableViewCell.swift */; };
-		BD9AA0851DAE6D3B00C8F7BD /* Visualizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD9AA0841DAE6D3B00C8F7BD /* Visualizer.swift */; };
 		BDA9CA881D8BF1CB0028991F /* HistogramBinFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDA9CA871D8BF1CB0028991F /* HistogramBinFormatter.swift */; };
 		BDBB025B1DA45942000838E0 /* LowerViewManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBB025A1DA45942000838E0 /* LowerViewManager.swift */; };
 		BDBB025D1DA45983000838E0 /* LowerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBB025C1DA45983000838E0 /* LowerView.swift */; };
@@ -81,7 +82,7 @@
 		BDBCEF411DA7898300B09DC9 /* AppNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBCEF401DA7898300B09DC9 /* AppNotifications.swift */; };
 		BDBCEF4E1DA8F9A800B09DC9 /* BlahUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBCEF4D1DA8F9A800B09DC9 /* BlahUITests.swift */; };
 		BDBCEF561DA9CC5400B09DC9 /* CriticalSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBCEF551DA9CC5400B09DC9 /* CriticalSection.swift */; };
-		BDBCEF581DA9CE3D00B09DC9 /* PassiveDependencyInjector.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBCEF571DA9CE3D00B09DC9 /* PassiveDependencyInjector.swift */; };
+		BDBCEF581DA9CE3D00B09DC9 /* Dependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBCEF571DA9CE3D00B09DC9 /* Dependencies.swift */; };
 		BDD553DF1DABAB1100D2167E /* FixedTimestampGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDD553DE1DABAB1100D2167E /* FixedTimestampGenerator.swift */; };
 		BDDC9D781D8AFC4100C36430 /* GraphLatencyHistogram.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDDC9D771D8AFC4100C36430 /* GraphLatencyHistogram.swift */; };
 		BDFEEC3B1D91D0DC003E8555 /* NewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD49485D1D89F23000C50DE2 /* NewTests.swift */; };
@@ -179,9 +180,10 @@
 		BD87F59E1D8AAAD1007A6F99 /* GraphLatencyByTime.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GraphLatencyByTime.swift; sourceTree = "<group>"; };
 		BD87F5A21D8AC829007A6F99 /* Sample.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sample.swift; sourceTree = "<group>"; };
 		BD87F5A41D8ADDE0007A6F99 /* Histogram.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Histogram.swift; sourceTree = "<group>"; };
+		BD981C5E1DAFAC0F00F18078 /* TabBarController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TabBarController.swift; sourceTree = "<group>"; };
+		BD981C621DB133F900F18078 /* SampleInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SampleInterface.swift; path = Interfaces/SampleInterface.swift; sourceTree = "<group>"; };
 		BD9AA0801DAE67FB00C8F7BD /* ConfigurableCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConfigurableCell.swift; sourceTree = "<group>"; };
 		BD9AA0821DAE687300C8F7BD /* RecordingTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RecordingTableViewCell.swift; sourceTree = "<group>"; };
-		BD9AA0841DAE6D3B00C8F7BD /* Visualizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Visualizer.swift; sourceTree = "<group>"; };
 		BDA9CA871D8BF1CB0028991F /* HistogramBinFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HistogramBinFormatter.swift; sourceTree = "<group>"; };
 		BDA9CA8B1D8BFADF0028991F /* HistorgramTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HistorgramTests.swift; sourceTree = "<group>"; };
 		BDBB025A1DA45942000838E0 /* LowerViewManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LowerViewManager.swift; sourceTree = "<group>"; };
@@ -192,7 +194,7 @@
 		BDBCEF4D1DA8F9A800B09DC9 /* BlahUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlahUITests.swift; sourceTree = "<group>"; };
 		BDBCEF4F1DA8F9A800B09DC9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BDBCEF551DA9CC5400B09DC9 /* CriticalSection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CriticalSection.swift; sourceTree = "<group>"; };
-		BDBCEF571DA9CE3D00B09DC9 /* PassiveDependencyInjector.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PassiveDependencyInjector.swift; sourceTree = "<group>"; };
+		BDBCEF571DA9CE3D00B09DC9 /* Dependencies.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Dependencies.swift; sourceTree = "<group>"; };
 		BDD553DE1DABAB1100D2167E /* FixedTimestampGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FixedTimestampGenerator.swift; sourceTree = "<group>"; };
 		BDDC9D771D8AFC4100C36430 /* GraphLatencyHistogram.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GraphLatencyHistogram.swift; sourceTree = "<group>"; };
 		F34C4E5F49323E86C7948436 /* Pods-BlahTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BlahTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-BlahTests/Pods-BlahTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -263,7 +265,10 @@
 		BD4948451D89F23000C50DE2 /* Blah */ = {
 			isa = PBXGroup;
 			children = (
-				BDBCEF571DA9CE3D00B09DC9 /* PassiveDependencyInjector.swift */,
+				BD981C611DB132D100F18078 /* Interfaces */,
+				BD981C601DB132C100F18078 /* Models */,
+				BD981C5E1DAFAC0F00F18078 /* TabBarController.swift */,
+				BDBCEF571DA9CE3D00B09DC9 /* Dependencies.swift */,
 				BD4948461D89F23000C50DE2 /* AppDelegate.swift */,
 				BDBCEF401DA7898300B09DC9 /* AppNotifications.swift */,
 				BD85088E1DACCBBC00BE3B53 /* DropboxController.swift */,
@@ -272,7 +277,6 @@
 				BDBB02541DA44EDE000838E0 /* Plots */,
 				BDBB02531DA44EA0000838E0 /* Recordings */,
 				BDBB02561DA44F3E000838E0 /* Settings */,
-				BDBB02571DA44FC0000838E0 /* Data */,
 				BDBB02551DA44F2E000838E0 /* Logs */,
 				BDBB02581DA44FDC000838E0 /* Utils */,
 				BD49484F1D89F23000C50DE2 /* Assets.xcassets */,
@@ -337,11 +341,29 @@
 			name = Images;
 			sourceTree = "<group>";
 		};
+		BD981C601DB132C100F18078 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				BD6539EE1DA3F6EE008C32C6 /* Recording.swift */,
+				BD5605351D8FC2F200CFE29B /* UserSettings.swift */,
+				BD87F5A21D8AC829007A6F99 /* Sample.swift */,
+				BD17D04C1D8E8BC200A18062 /* RunData.swift */,
+			);
+			name = Models;
+			sourceTree = "<group>";
+		};
+		BD981C611DB132D100F18078 /* Interfaces */ = {
+			isa = PBXGroup;
+			children = (
+				BD981C621DB133F900F18078 /* SampleInterface.swift */,
+			);
+			name = Interfaces;
+			sourceTree = "<group>";
+		};
 		BDBB02531DA44EA0000838E0 /* Recordings */ = {
 			isa = PBXGroup;
 			children = (
 				BD6539F01DA3F71B008C32C6 /* RecordingModel.xcdatamodeld */,
-				BD6539EE1DA3F6EE008C32C6 /* Recording.swift */,
 				BDBB025E1DA476F2000838E0 /* RecordingsStore.swift */,
 				BD6539F71DA448EC008C32C6 /* RecordingsTableViewController.swift */,
 				BD73D3601DAB6E5000845EEF /* RecordingActivityLogic.swift */,
@@ -355,7 +377,6 @@
 			isa = PBXGroup;
 			children = (
 				BD87F5981D8A2AD1007A6F99 /* PlotsViewController.swift */,
-				BD9AA0841DAE6D3B00C8F7BD /* Visualizer.swift */,
 				BD9AA0801DAE67FB00C8F7BD /* ConfigurableCell.swift */,
 				BDBB025C1DA45983000838E0 /* LowerView.swift */,
 				BDBB025A1DA45942000838E0 /* LowerViewManager.swift */,
@@ -381,24 +402,14 @@
 			isa = PBXGroup;
 			children = (
 				BD87F59B1D8A2AFE007A6F99 /* SettingsViewController.swift */,
-				BD5605351D8FC2F200CFE29B /* UserSettings.swift */,
 			);
 			name = Settings;
-			sourceTree = "<group>";
-		};
-		BDBB02571DA44FC0000838E0 /* Data */ = {
-			isa = PBXGroup;
-			children = (
-				BD87F5A41D8ADDE0007A6F99 /* Histogram.swift */,
-				BD87F5A21D8AC829007A6F99 /* Sample.swift */,
-				BD17D04C1D8E8BC200A18062 /* RunData.swift */,
-			);
-			name = Data;
 			sourceTree = "<group>";
 		};
 		BDBB02581DA44FDC000838E0 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				BD87F5A41D8ADDE0007A6F99 /* Histogram.swift */,
 				BD17D0501D8ED9EE00A18062 /* Collection+Additions.swift */,
 				BD7564981D9931A800CE455F /* Date+Additions.swift */,
 				BD17D0551D8EE67C00A18062 /* OrderedArray.swift */,
@@ -708,14 +719,13 @@
 				BD87F59F1D8AAAD1007A6F99 /* GraphLatencyByTime.swift in Sources */,
 				BDFEEC3C1D91E875003E8555 /* UserSettings.swift in Sources */,
 				BDBB025D1DA45983000838E0 /* LowerView.swift in Sources */,
-				BD9AA0851DAE6D3B00C8F7BD /* Visualizer.swift in Sources */,
 				BDBCEF561DA9CC5400B09DC9 /* CriticalSection.swift in Sources */,
 				BD9AA0831DAE687300C8F7BD /* RecordingTableViewCell.swift in Sources */,
 				BD58DDBC1D97C476007765E3 /* PlotTimeFormatter.swift in Sources */,
 				BD17D0561D8EE67C00A18062 /* OrderedArray.swift in Sources */,
 				BD6539F81DA448EC008C32C6 /* RecordingsTableViewController.swift in Sources */,
 				BD15E0B01D934486005B709D /* RandomUniform.swift in Sources */,
-				BDBCEF581DA9CE3D00B09DC9 /* PassiveDependencyInjector.swift in Sources */,
+				BDBCEF581DA9CE3D00B09DC9 /* Dependencies.swift in Sources */,
 				BDBCEF411DA7898300B09DC9 /* AppNotifications.swift in Sources */,
 				BD87F5991D8A2AD1007A6F99 /* PlotsViewController.swift in Sources */,
 				BD6539F21DA3F71B008C32C6 /* RecordingModel.xcdatamodeld in Sources */,
@@ -731,10 +741,12 @@
 				BDBB025B1DA45942000838E0 /* LowerViewManager.swift in Sources */,
 				BD9AA0811DAE67FB00C8F7BD /* ConfigurableCell.swift in Sources */,
 				BD8508911DAD153700BE3B53 /* Recording+CoreDataProperties.swift in Sources */,
+				BD981C5F1DAFAC0F00F18078 /* TabBarController.swift in Sources */,
 				BD7564991D9931A800CE455F /* Date+Additions.swift in Sources */,
 				BDBB025F1DA476F2000838E0 /* RecordingsStore.swift in Sources */,
 				BD87F5A31D8AC829007A6F99 /* Sample.swift in Sources */,
 				BDA9CA881D8BF1CB0028991F /* HistogramBinFormatter.swift in Sources */,
+				BD981C631DB133F900F18078 /* SampleInterface.swift in Sources */,
 				BD7564A31D99C72600CE455F /* EventLog.swift in Sources */,
 				BD87F5A51D8ADDE0007A6F99 /* Histogram.swift in Sources */,
 				BD7564951D99171000CE455F /* PlotLatencyFormatter.swift in Sources */,

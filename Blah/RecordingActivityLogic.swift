@@ -8,19 +8,11 @@
 
 import Foundation
 
-protocol RecordingActivityLogicInterface {
-
-    var visualizer: VisualizerInterface? { get set }
-
-    func startRecording()
-    func stopRecording()
-    func delete(recording: Recording)
-    func select(recording: Recording)
-}
-
 final class RecordingActivityLogic: NSObject, RecordingActivityLogicInterface {
 
-    var visualizer: VisualizerInterface? {
+    private(set) var dependentType: Any.Type = RecordingActivityLogicDependent.self
+
+    weak var visualizer: VisualizerInterface? {
         didSet {
             visualizer?.visualize(dataSource: newRunData())
         }

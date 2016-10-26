@@ -8,9 +8,10 @@
 
 import UIKit
 import CorePlot
+import PDFGenerator
 
 final class GraphLatencyByTime: CPTGraphHostingView {
-    
+
     static let kLatencyPlotId = NSString(string: "Latency")
     static let kAveragePlotId = NSString(string: "Avg")
     static let kMedianPlotId = NSString(string: "Median")
@@ -62,7 +63,33 @@ final class GraphLatencyByTime: CPTGraphHostingView {
 
     var targetYMax: Double?
 
-    fileprivate func makeGraph() {
+    fileprivate lazy var labelStyle: CPTMutableTextStyle = {
+        let labelStyle = CPTMutableTextStyle()
+        labelStyle.color = CPTColor(componentRed: 0.0, green: 1.0, blue: 1.0, alpha: 0.75)
+        labelStyle.fontSize = 12.0
+        return labelStyle
+    }()
+
+    fileprivate var annotation: CPTPlotSpaceAnnotation? = nil
+    fileprivate var annotationIndex: Int = 0
+
+    fileprivate lazy var annotationStyle: CPTMutableTextStyle = {
+        let annotationStyle = CPTMutableTextStyle()
+        annotationStyle.color = self.labelStyle.color
+        annotationStyle.fontSize = 12.0
+        return annotationStyle
+    }()
+
+    fileprivate lazy var titleStyle: CPTMutableTextStyle = {
+        let titleStyle = CPTMutableTextStyle()
+        titleStyle.color = CPTColor(genericGray: 0.75)
+        titleStyle.fontSize = 11.0
+        return titleStyle
+    }()
+
+    fileprivate let latencyFormatter = PlotLatencyFormatter()
+
+    private func makeGraph() {
 
         let graph = CPTXYGraph(frame: self.frame)
         hostedGraph = graph
@@ -91,14 +118,6 @@ final class GraphLatencyByTime: CPTGraphHostingView {
         let tickLineStyle = CPTMutableLineStyle()
         tickLineStyle.lineWidth = 0.75
         tickLineStyle.lineColor = CPTColor(genericGray: 0.25)
-        
-        let labelStyle = CPTMutableTextStyle()
-        labelStyle.color = CPTColor(componentRed: 0.0, green: 1.0, blue: 1.0, alpha: 0.75)
-        labelStyle.fontSize = 12.0
-        
-        let titleStyle = CPTMutableTextStyle()
-        titleStyle.color = CPTColor(genericGray: 0.75)
-        titleStyle.fontSize = 11.0
         
         let plotSpace = CPTXYPlotSpace()
         graph.add(plotSpace)
@@ -156,7 +175,7 @@ final class GraphLatencyByTime: CPTGraphHostingView {
         y.axisConstraints = CPTConstraints(lowerOffset: 0.0)
 
         y.labelingPolicy = .locationsProvided
-        y.labelFormatter = PlotLatencyFormatter()
+        y.labelFormatter = latencyFormatter
 
         y.majorGridLineStyle = gridLineStyle
         y.minorGridLineStyle = nil
@@ -178,7 +197,7 @@ final class GraphLatencyByTime: CPTGraphHostingView {
         updateBounds()
     }
 
-    func makeLegend(graph: CPTXYGraph) {
+    private func makeLegend(graph: CPTXYGraph) {
         let legend = CPTLegend(graph: graph)
 
         graph.legend = legend
@@ -187,9 +206,6 @@ final class GraphLatencyByTime: CPTGraphHostingView {
         legend.isHidden = true
         legend.fill = CPTFill(color: CPTColor.darkGray().withAlphaComponent(0.5))
 
-        let titleStyle = CPTMutableTextStyle()
-        titleStyle.color = CPTColor(genericGray: 0.75)
-        titleStyle.fontSize = 11.0
         legend.textStyle = titleStyle;
 
         let lineStyle = CPTMutableLineStyle()
@@ -215,7 +231,7 @@ final class GraphLatencyByTime: CPTGraphHostingView {
         legend.isHidden = !legend.isHidden
     }
     
-    func makeLatencyPlot(graph: CPTXYGraph, plotSpace: CPTXYPlotSpace) {
+    private func makeLatencyPlot(graph: CPTXYGraph, plotSpace: CPTXYPlotSpace) {
 
         let plot = CPTScatterPlot()
         plot.identifier = GraphLatencyByTime.kLatencyPlotId
@@ -240,11 +256,13 @@ final class GraphLatencyByTime: CPTGraphHostingView {
         plotSymbol.size = CGSize(width: kPlotSymbolSize, height: kPlotSymbolSize)
         plot.plotSymbol = plotSymbol;
         plot.plotSymbolMarginForHitDetection = CGFloat(kPlotSymbolSize) * CGFloat(1.5)
-        
+
+        plot.delegate = self
+
         graph.add(plot, to: plotSpace)
     }
 
-    func makeAveragePlot(graph: CPTXYGraph, plotSpace: CPTXYPlotSpace) {
+    private func makeAveragePlot(graph: CPTXYGraph, plotSpace: CPTXYPlotSpace) {
         
         let plot = CPTScatterPlot()
         plot.identifier = GraphLatencyByTime.kAveragePlotId
@@ -261,7 +279,7 @@ final class GraphLatencyByTime: CPTGraphHostingView {
         graph.add(plot, to: plotSpace)
     }
     
-    func makeMedianPlot(graph: CPTXYGraph, plotSpace: CPTXYPlotSpace) {
+    private func makeMedianPlot(graph: CPTXYGraph, plotSpace: CPTXYPlotSpace) {
 
         let plot = CPTScatterPlot()
         plot.identifier = GraphLatencyByTime.kMedianPlotId
@@ -278,7 +296,7 @@ final class GraphLatencyByTime: CPTGraphHostingView {
         graph.add(plot, to: plotSpace)
     }
     
-    func makeMissingPlot(graph: CPTXYGraph, plotSpace: CPTXYPlotSpace) {
+    private func makeMissingPlot(graph: CPTXYGraph, plotSpace: CPTXYPlotSpace) {
         
         let plot = CPTScatterPlot()
         plot.identifier = GraphLatencyByTime.kMissingPlotId
@@ -301,7 +319,7 @@ final class GraphLatencyByTime: CPTGraphHostingView {
         updateBounds()
     }
 
-    func updateTitle() {
+    private func updateTitle() {
         guard let axisSet = hostedGraph?.axisSet as? CPTXYAxisSet else { return }
         guard let x = axisSet.xAxis else { return }
 
@@ -327,25 +345,25 @@ final class GraphLatencyByTime: CPTGraphHostingView {
         }
     }
 
-    func calculatePlotWidth() -> Double {
+    private func calculatePlotWidth() -> Double {
         guard let w = hostedGraph?.frame.size.width else { return 10.0 }
         return floor(Double(w) / (kPlotSymbolSize * 1.5))
     }
 
-    func findFirstSampleAtOrBefore(when: TimeInterval) -> Int {
+    private func findFirstSampleAtOrBefore(when: TimeInterval) -> Int {
         let pos = source.samples.map({$0.arrivalTime}).insertionIndexOf(value: source.startTime.addingTimeInterval(when),
                                                                         predicate: {$0 < $1})
         return pos
     }
 
-    func findMinMaxInRange(range: CPTPlotRange) -> (min: Double, max: Double)? {
+    private func findMinMaxInRange(range: CPTPlotRange) -> (min: Double, max: Double)? {
         if source.samples.count == 0 { return nil }
         let x0 = findFirstSampleAtOrBefore(when: range.locationDouble)
         let x1 = findFirstSampleAtOrBefore(when: range.endDouble)
         return source.samples[x0..<x1].map({$0.latency}).minMax()
     }
 
-    func updateBounds() {
+    private func updateBounds() {
         guard let plotSpace = hostedGraph?.allPlotSpaces().last as? CPTXYPlotSpace else { return }
         let plotData = source.samples
         let visiblePoints = calculatePlotWidth() * source.estArrivalInterval
@@ -391,7 +409,7 @@ final class GraphLatencyByTime: CPTGraphHostingView {
         updateYRange()
     }
 
-    func updateYRange(doUpdate: Bool = true) {
+    fileprivate func updateYRange() {
         guard let plotSpace = hostedGraph?.allPlotSpaces().last as? CPTXYPlotSpace else { return }
         guard let axisSet = hostedGraph?.axisSet as? CPTXYAxisSet else { return }
         guard let x = axisSet.xAxis else { return }
@@ -404,7 +422,6 @@ final class GraphLatencyByTime: CPTGraphHostingView {
         if targetYMax != yMax {
             targetYMax = yMax
             let yRange = CPTMutablePlotRange(location: NSNumber(value: 0.0), length: NSNumber(value: yMax))
-
             y.majorTickLocations = Set<NSNumber>([0, yMax / 2, yMax].map { NSNumber(value: $0) })
             y.visibleAxisRange = yRange
             y.visibleRange = yRange
@@ -415,8 +432,6 @@ final class GraphLatencyByTime: CPTGraphHostingView {
             CPTAnimation.animate(plotSpace, property: "yRange", from: oldRange, to: yRange, duration: 0.25)
         }
 
-        x.visibleAxisRange = xRange
-        x.visibleRange = xRange
         y.gridLinesRange = xRange
     }
 }
@@ -489,5 +504,61 @@ extension GraphLatencyByTime: CPTPlotSpaceDelegate {
 extension GraphLatencyByTime: CPTLegendDelegate {
     func legend(_ legend: CPTLegend, legendEntryFor plot: CPTPlot, wasSelectedAt idx: UInt) {
         plot.isHidden = !plot.isHidden
+    }
+}
+
+extension GraphLatencyByTime: CPTScatterPlotDelegate {
+    func scatterPlot(_ plot: CPTScatterPlot, plotSymbolTouchUpAtRecord idx: UInt) {
+        if let annotation = self.annotation {
+            hostedGraph?.plotAreaFrame?.plotArea?.removeAnnotation(annotation)
+            self.annotation = nil
+            if self.annotationIndex == Int(idx) {
+                return
+            }
+        }
+
+        self.annotationIndex = Int(idx)
+
+        let sample = source.samples[self.annotationIndex]
+        let x = sample.arrivalTime.timeIntervalSince(source.startTime)
+        let y = sample.latency
+
+        let tag = latencyFormatter.string(from: NSNumber(value: y)) ?? "???"
+        let textLayer = CPTTextLayer(text: "\(sample.identifier): " + tag, style: annotationStyle)
+        textLayer.fill = CPTFill(color: CPTColor.black().withAlphaComponent(0.6))
+        let pos = [NSNumber(value: x), NSNumber(value: y)]
+        let plotSpace = hostedGraph!.allPlotSpaces().last as! CPTXYPlotSpace
+        self.annotation = CPTPlotSpaceAnnotation(plotSpace: plotSpace, anchorPlotPoint: pos)
+        self.annotation?.contentLayer = textLayer
+
+        let xOffset = (Double(textLayer.frame.width) + kPlotSymbolSize) / 2.0
+        if x < plotSpace.xRange.locationDouble + plotSpace.xRange.lengthDouble / 2.0 {
+            self.annotation?.displacement = CGPoint(x: xOffset, y: 0.0)
+        }
+        else {
+            self.annotation?.displacement = CGPoint(x: -xOffset, y: 0.0)
+        }
+        hostedGraph?.plotAreaFrame?.plotArea?.addAnnotation(self.annotation)
+    }
+}
+
+extension GraphLatencyByTime: PDFRenderable {
+
+    var pdfContent: PDFPage {
+        get {
+            let graph = self.hostedGraph! as! CPTXYGraph
+            let plotSpace = graph.plotSpace(at: 0) as! CPTXYPlotSpace
+            let savedXRange = plotSpace.xRange
+            let savedYRange = plotSpace.yRange
+            plotSpace.xRange = plotSpace.globalXRange!
+            plotSpace.yRange = plotSpace.globalYRange!
+            defer {
+                plotSpace.xRange = savedXRange
+                plotSpace.yRange = savedYRange
+            }
+
+            let data = graph.dataForPDFRepresentationOfLayer()
+            return PDFPage.binary(data)
+        }
     }
 }

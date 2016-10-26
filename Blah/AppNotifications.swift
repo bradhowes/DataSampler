@@ -75,7 +75,7 @@ struct RecordingsStoreNotification {
 struct RecordingsTableNotification {
 
     enum Kind: String {
-        case recordingSelected, recordingDeleted
+        case recordingSelected, recordingDeleted, recordingShared
     }
 
     let recording: Recording
@@ -215,6 +215,7 @@ struct HistogramBinChangedNotification {
 
 struct UserSettingsChangedNotification {
     static let settingChanged = "UserSettings.settingChanged."
+
     static func notificationName(setting: UserSettingName) -> Notification.Name {
         return Notification.Name(settingChanged + setting.rawValue)
     }
@@ -225,8 +226,7 @@ struct UserSettingsChangedNotification {
     }
 
     static func unobserve(observer: AnyObject, setting: UserSettingName) {
-        NotificationCenter.default.removeObserver(observer,
-                                                  name: notificationName(setting: setting),
+        NotificationCenter.default.removeObserver(observer, name: notificationName(setting: setting),
                                                   object: nil)
     }
 }

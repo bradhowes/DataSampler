@@ -82,11 +82,17 @@
 		BDBCEF411DA7898300B09DC9 /* AppNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBCEF401DA7898300B09DC9 /* AppNotifications.swift */; };
 		BDBCEF4E1DA8F9A800B09DC9 /* BlahUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBCEF4D1DA8F9A800B09DC9 /* BlahUITests.swift */; };
 		BDBCEF561DA9CC5400B09DC9 /* CriticalSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBCEF551DA9CC5400B09DC9 /* CriticalSection.swift */; };
-		BDBCEF581DA9CE3D00B09DC9 /* Dependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBCEF571DA9CE3D00B09DC9 /* Dependencies.swift */; };
+		BDBCEF581DA9CE3D00B09DC9 /* RecordingsStoreInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBCEF571DA9CE3D00B09DC9 /* RecordingsStoreInterface.swift */; };
 		BDD553DF1DABAB1100D2167E /* FixedTimestampGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDD553DE1DABAB1100D2167E /* FixedTimestampGenerator.swift */; };
 		BDDC9D781D8AFC4100C36430 /* GraphLatencyHistogram.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDDC9D771D8AFC4100C36430 /* GraphLatencyHistogram.swift */; };
 		BDFEEC3B1D91D0DC003E8555 /* NewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD49485D1D89F23000C50DE2 /* NewTests.swift */; };
 		BDFEEC3C1D91E875003E8555 /* UserSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD5605351D8FC2F200CFE29B /* UserSettings.swift */; };
+		BDFF8ABA1DBF9B5600AB2FA8 /* RunDataInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDFF8AB91DBF9B5600AB2FA8 /* RunDataInterface.swift */; };
+		BDFF8ABC1DBF9B8700AB2FA8 /* DropboxControllerInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDFF8ABB1DBF9B8700AB2FA8 /* DropboxControllerInterface.swift */; };
+		BDFF8ABE1DBF9BB000AB2FA8 /* UserSettingsInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDFF8ABD1DBF9BB000AB2FA8 /* UserSettingsInterface.swift */; };
+		BDFF8AC01DBF9BDA00AB2FA8 /* VisualizerInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDFF8ABF1DBF9BDA00AB2FA8 /* VisualizerInterface.swift */; };
+		BDFF8AC21DBF9BFA00AB2FA8 /* RecordingActivityLogicInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDFF8AC11DBF9BFA00AB2FA8 /* RecordingActivityLogicInterface.swift */; };
+		BDFF8AC41DC0B2B200AB2FA8 /* PDFSharingInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDFF8AC31DC0B2B200AB2FA8 /* PDFSharingInterface.swift */; };
 		CE6535F626638F337BDB06FC /* Pods_Blah.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ACDA023CC4D206794F87C46E /* Pods_Blah.framework */; };
 /* End PBXBuildFile section */
 
@@ -194,9 +200,15 @@
 		BDBCEF4D1DA8F9A800B09DC9 /* BlahUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlahUITests.swift; sourceTree = "<group>"; };
 		BDBCEF4F1DA8F9A800B09DC9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BDBCEF551DA9CC5400B09DC9 /* CriticalSection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CriticalSection.swift; sourceTree = "<group>"; };
-		BDBCEF571DA9CE3D00B09DC9 /* Dependencies.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Dependencies.swift; sourceTree = "<group>"; };
+		BDBCEF571DA9CE3D00B09DC9 /* RecordingsStoreInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RecordingsStoreInterface.swift; sourceTree = "<group>"; };
 		BDD553DE1DABAB1100D2167E /* FixedTimestampGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FixedTimestampGenerator.swift; sourceTree = "<group>"; };
 		BDDC9D771D8AFC4100C36430 /* GraphLatencyHistogram.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GraphLatencyHistogram.swift; sourceTree = "<group>"; };
+		BDFF8AB91DBF9B5600AB2FA8 /* RunDataInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RunDataInterface.swift; sourceTree = "<group>"; };
+		BDFF8ABB1DBF9B8700AB2FA8 /* DropboxControllerInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DropboxControllerInterface.swift; sourceTree = "<group>"; };
+		BDFF8ABD1DBF9BB000AB2FA8 /* UserSettingsInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserSettingsInterface.swift; sourceTree = "<group>"; };
+		BDFF8ABF1DBF9BDA00AB2FA8 /* VisualizerInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VisualizerInterface.swift; sourceTree = "<group>"; };
+		BDFF8AC11DBF9BFA00AB2FA8 /* RecordingActivityLogicInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RecordingActivityLogicInterface.swift; sourceTree = "<group>"; };
+		BDFF8AC31DC0B2B200AB2FA8 /* PDFSharingInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PDFSharingInterface.swift; sourceTree = "<group>"; };
 		F34C4E5F49323E86C7948436 /* Pods-BlahTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BlahTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-BlahTests/Pods-BlahTests.debug.xcconfig"; sourceTree = "<group>"; };
 		F657859C3132944BCAC76486 /* Pods-BlahTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BlahTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-BlahTests/Pods-BlahTests.release.xcconfig"; sourceTree = "<group>"; };
 		FF00F94554101A88F19C9D5D /* Pods-Blah.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Blah.release.xcconfig"; path = "Pods/Target Support Files/Pods-Blah/Pods-Blah.release.xcconfig"; sourceTree = "<group>"; };
@@ -266,9 +278,7 @@
 			isa = PBXGroup;
 			children = (
 				BD981C611DB132D100F18078 /* Interfaces */,
-				BD981C601DB132C100F18078 /* Models */,
 				BD981C5E1DAFAC0F00F18078 /* TabBarController.swift */,
-				BDBCEF571DA9CE3D00B09DC9 /* Dependencies.swift */,
 				BD4948461D89F23000C50DE2 /* AppDelegate.swift */,
 				BDBCEF401DA7898300B09DC9 /* AppNotifications.swift */,
 				BD85088E1DACCBBC00BE3B53 /* DropboxController.swift */,
@@ -341,21 +351,17 @@
 			name = Images;
 			sourceTree = "<group>";
 		};
-		BD981C601DB132C100F18078 /* Models */ = {
-			isa = PBXGroup;
-			children = (
-				BD6539EE1DA3F6EE008C32C6 /* Recording.swift */,
-				BD5605351D8FC2F200CFE29B /* UserSettings.swift */,
-				BD87F5A21D8AC829007A6F99 /* Sample.swift */,
-				BD17D04C1D8E8BC200A18062 /* RunData.swift */,
-			);
-			name = Models;
-			sourceTree = "<group>";
-		};
 		BD981C611DB132D100F18078 /* Interfaces */ = {
 			isa = PBXGroup;
 			children = (
 				BD981C621DB133F900F18078 /* SampleInterface.swift */,
+				BDFF8AB91DBF9B5600AB2FA8 /* RunDataInterface.swift */,
+				BDFF8ABB1DBF9B8700AB2FA8 /* DropboxControllerInterface.swift */,
+				BDFF8ABD1DBF9BB000AB2FA8 /* UserSettingsInterface.swift */,
+				BDFF8ABF1DBF9BDA00AB2FA8 /* VisualizerInterface.swift */,
+				BDFF8AC31DC0B2B200AB2FA8 /* PDFSharingInterface.swift */,
+				BDFF8AC11DBF9BFA00AB2FA8 /* RecordingActivityLogicInterface.swift */,
+				BDBCEF571DA9CE3D00B09DC9 /* RecordingsStoreInterface.swift */,
 			);
 			name = Interfaces;
 			sourceTree = "<group>";
@@ -364,11 +370,14 @@
 			isa = PBXGroup;
 			children = (
 				BD6539F01DA3F71B008C32C6 /* RecordingModel.xcdatamodeld */,
+				BD6539EE1DA3F6EE008C32C6 /* Recording.swift */,
 				BDBB025E1DA476F2000838E0 /* RecordingsStore.swift */,
 				BD6539F71DA448EC008C32C6 /* RecordingsTableViewController.swift */,
 				BD73D3601DAB6E5000845EEF /* RecordingActivityLogic.swift */,
 				BD8508901DAD153700BE3B53 /* Recording+CoreDataProperties.swift */,
 				BD9AA0821DAE687300C8F7BD /* RecordingTableViewCell.swift */,
+				BD17D04C1D8E8BC200A18062 /* RunData.swift */,
+				BD87F5A21D8AC829007A6F99 /* Sample.swift */,
 			);
 			name = Recordings;
 			sourceTree = "<group>";
@@ -402,6 +411,7 @@
 			isa = PBXGroup;
 			children = (
 				BD87F59B1D8A2AFE007A6F99 /* SettingsViewController.swift */,
+				BD5605351D8FC2F200CFE29B /* UserSettings.swift */,
 			);
 			name = Settings;
 			sourceTree = "<group>";
@@ -717,15 +727,18 @@
 				BD4948471D89F23000C50DE2 /* AppDelegate.swift in Sources */,
 				BD73D3631DAB706100845EEF /* DemoDriver.swift in Sources */,
 				BD87F59F1D8AAAD1007A6F99 /* GraphLatencyByTime.swift in Sources */,
+				BDFF8AC21DBF9BFA00AB2FA8 /* RecordingActivityLogicInterface.swift in Sources */,
+				BDFF8AC41DC0B2B200AB2FA8 /* PDFSharingInterface.swift in Sources */,
 				BDFEEC3C1D91E875003E8555 /* UserSettings.swift in Sources */,
 				BDBB025D1DA45983000838E0 /* LowerView.swift in Sources */,
 				BDBCEF561DA9CC5400B09DC9 /* CriticalSection.swift in Sources */,
 				BD9AA0831DAE687300C8F7BD /* RecordingTableViewCell.swift in Sources */,
+				BDFF8ABE1DBF9BB000AB2FA8 /* UserSettingsInterface.swift in Sources */,
 				BD58DDBC1D97C476007765E3 /* PlotTimeFormatter.swift in Sources */,
 				BD17D0561D8EE67C00A18062 /* OrderedArray.swift in Sources */,
 				BD6539F81DA448EC008C32C6 /* RecordingsTableViewController.swift in Sources */,
 				BD15E0B01D934486005B709D /* RandomUniform.swift in Sources */,
-				BDBCEF581DA9CE3D00B09DC9 /* Dependencies.swift in Sources */,
+				BDBCEF581DA9CE3D00B09DC9 /* RecordingsStoreInterface.swift in Sources */,
 				BDBCEF411DA7898300B09DC9 /* AppNotifications.swift in Sources */,
 				BD87F5991D8A2AD1007A6F99 /* PlotsViewController.swift in Sources */,
 				BD6539F21DA3F71B008C32C6 /* RecordingModel.xcdatamodeld in Sources */,
@@ -733,13 +746,16 @@
 				BD75649D1D99703900CE455F /* TextRecorder.swift in Sources */,
 				BD6539EF1DA3F6EE008C32C6 /* Recording.swift in Sources */,
 				BD87F59D1D8A2AFE007A6F99 /* SettingsViewController.swift in Sources */,
+				BDFF8ABA1DBF9B5600AB2FA8 /* RunDataInterface.swift in Sources */,
 				BD85088F1DACCBBC00BE3B53 /* DropboxController.swift in Sources */,
 				BD17D04D1D8E8BC200A18062 /* RunData.swift in Sources */,
 				BD75649F1D99B0B700CE455F /* Logger.swift in Sources */,
+				BDFF8ABC1DBF9B8700AB2FA8 /* DropboxControllerInterface.swift in Sources */,
 				BD73D3611DAB6E5000845EEF /* RecordingActivityLogic.swift in Sources */,
 				BDDC9D781D8AFC4100C36430 /* GraphLatencyHistogram.swift in Sources */,
 				BDBB025B1DA45942000838E0 /* LowerViewManager.swift in Sources */,
 				BD9AA0811DAE67FB00C8F7BD /* ConfigurableCell.swift in Sources */,
+				BDFF8AC01DBF9BDA00AB2FA8 /* VisualizerInterface.swift in Sources */,
 				BD8508911DAD153700BE3B53 /* Recording+CoreDataProperties.swift in Sources */,
 				BD981C5F1DAFAC0F00F18078 /* TabBarController.swift in Sources */,
 				BD7564991D9931A800CE455F /* Date+Additions.swift in Sources */,

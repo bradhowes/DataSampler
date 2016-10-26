@@ -48,6 +48,15 @@ RecordingsStoreDependent {
 
         fetchRecordings()
         tableView.reloadData()
+
+        let twoTapGesture = UITapGestureRecognizer(target: self, action: #selector(doubleTappedCell))
+        twoTapGesture.numberOfTapsRequired = 2
+        twoTapGesture.numberOfTouchesRequired = 1
+        tableView.addGestureRecognizer(twoTapGesture)
+    }
+
+    func doubleTappedCell(sender: UITapGestureRecognizer) {
+        tabBarController?.selectedIndex = 0
     }
 
     /**
@@ -193,7 +202,11 @@ RecordingsStoreDependent {
      */
     func doDelete(sender: UIBarButtonItem) {
         guard let items = tableView.indexPathsForSelectedRows else { return }
-        items.forEach { fetcher?.object(at: $0).delete() }
+
+        // NOTE: reverse the items so that we are deleting from the end. That way indices stay the same during the
+        // deletions.
+        //
+        items.reversed().forEach { fetcher?.object(at: $0).delete() }
         setEditing(false, animated: true)
     }
 
@@ -243,6 +256,11 @@ RecordingsStoreDependent {
             cell?.accessoryType = .none
         }
 
+        selectRow(at: indexPath)
+    }
+
+    private func selectRow(at indexPath: IndexPath) {
+
         // Remember the selected recording and row
         //
         selectedRecording = fetcher?.object(at: indexPath)
@@ -250,13 +268,9 @@ RecordingsStoreDependent {
 
         // Mark the selected row and show recorded info in main view
         //
-        let cell = tableView.cellForRow(at: selectedRecordingIndex!)
+        let cell = tableView.cellForRow(at: indexPath)
         cell? .accessoryType = .checkmark
         RecordingsTableNotification.post(kind: .recordingSelected, recording: selectedRecording!)
-
-        // Move to the main view
-        //
-        tabBarController?.selectedIndex = 0
     }
 
     /**

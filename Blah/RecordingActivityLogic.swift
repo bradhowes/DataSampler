@@ -76,6 +76,10 @@ final class RecordingActivityLogic: NSObject, RecordingActivityLogicInterface {
         }
     }
 
+    func upload(recording: Recording) {
+        RecordingActivityLogicNotification.post(recording: currentRecording!)
+    }
+
     func delete(recording: Recording) {
         if selectedRecording == recording {
             selectedRecording = nil

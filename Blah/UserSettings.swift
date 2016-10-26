@@ -26,8 +26,10 @@ public protocol SettingInterface {
 
     /// The name of the user setting
     var name: UserSettingName { get }
+
     /// The default value to use if not found in UserDefaults
     var defaultValue: Any { get }
+
     // A printable description of the setting
     var settingDescription: String { get }
 

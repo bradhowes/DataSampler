@@ -69,7 +69,7 @@ class TextRecorder: NSObject, UITextViewDelegate {
             DispatchQueue.main.async {
                 guard let tv = self.textView else { return }
                 tv.text = String(validatingUTF8: s) ?? ""
-                tv.scrollRangeToVisible(NSMakeRange(self.logText.length, 0))
+                tv.scrollRangeToVisible(NSMakeRange(0, 0))
             }
         } catch {
             Logger.log("*** failed to restore text from \(logPath)")

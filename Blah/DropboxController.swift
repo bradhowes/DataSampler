@@ -27,27 +27,40 @@ final public class DropboxController: Dependency<DropboxControllerDependent>, Dr
         self.recordingsStore = recordingsStore
         super.init()
 
+        RecordingActivityLogicNotification.observe(observer: self, selector: #selector(maybeUpload))
         RecordingsStoreNotification.observe(observer: self, selector: #selector(storeIsReady),
                                             recordingStore: self.recordingsStore)
+        UserSettingsChangedNotification.observe(observer: self, selector: #selector(dropboxLinkingChanged),
+                                                setting: .dropboxLinkButtonText)
+        UserSettingsChangedNotification.observe(observer: self, selector: #selector(dropboxLinkingChanged),
+                                                setting: .uploadAutomatically)
+
         DropboxClientsManager.setupWithAppKey("8dg497axhy58ypa")
 
         if recordingsStore.isReady {
             makeClient()
         }
-
-        RecordingActivityLogicNotification.observe(observer: self, selector: #selector(maybeUpload))
     }
 
     func maybeUpload(notification: Notification) {
-        if recording == nil {
-            recording = RecordingActivityLogicNotification(notification: notification).recording
-            DispatchQueue.main.async {
-                self.startUpload()
+        if self.recording == nil {
+            let recording = RecordingActivityLogicNotification(notification: notification).recording
+            if recording.awaitingUpload {
+                self.recording = recording
+                DispatchQueue.main.async {
+                    self.startUpload()
+                }
             }
         }
     }
 
     func storeIsReady(notification: Notification) {
+        guard client == nil else { return }
+        makeClient()
+    }
+
+    func dropboxLinkingChanged(notification: Notification) {
+        guard client == nil else { return }
         makeClient()
     }
 
@@ -60,6 +73,7 @@ final public class DropboxController: Dependency<DropboxControllerDependent>, Dr
     }
 
     private func makeClient() {
+        guard client == nil && recordingsStore.isReady else { return }
 
         self.fetcher = recordingsStore.cannedFetchRequest(name: "uploadable")
         if fetcher?.fetchedObjects == nil {

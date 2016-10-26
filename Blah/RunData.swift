@@ -139,7 +139,7 @@ public final class RunData : NSObject, NSCoding, RunDataInterface {
                 sample.missingCount = missingCount
                 let spacing = (sample - prev) / Double(missingCount)
                 var arrivalTime = prev.arrivalTime
-                missing.append(Sample(identifier: prev.identifier + 1, latency: 0.0, emissionTime: arrivalTime,
+                missing.append(Sample(identifier: prev.identifier + 1, latency: -1.0, emissionTime: arrivalTime,
                                       arrivalTime: arrivalTime, medianLatency: 0.0, averageLatency: 0.0))
                 for ident in 0..<missingCount {
                     arrivalTime = arrivalTime.addingTimeInterval(spacing / 2.0)
@@ -147,7 +147,7 @@ public final class RunData : NSObject, NSCoding, RunDataInterface {
                                           emissionTime: arrivalTime, arrivalTime: arrivalTime, medianLatency: 0.0,
                                           averageLatency: 0.0))
                     arrivalTime = arrivalTime.addingTimeInterval(spacing / 2.0)
-                    missing.append(Sample(identifier: prev.identifier + 1 + ident, latency: 0.0,
+                    missing.append(Sample(identifier: prev.identifier + 1 + ident, latency: -1.0,
                                           emissionTime: arrivalTime, arrivalTime: arrivalTime, medianLatency: 0.0,
                                           averageLatency: 0.0))
                 }

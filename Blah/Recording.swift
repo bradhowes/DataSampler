@@ -97,7 +97,7 @@ public final class Recording : NSManagedObject, CoreDataEntityProtocol {
         self.startTime = now.timeIntervalSinceReferenceDate
         self.endTime = self.startTime
         self.size = 0
-        self.awaitingUpload = false
+        self.awaitingUpload = userSettings.uploadAutomatically
         self.uploaded = false
         self.emitInterval = Int32(userSettings.emitInterval)
         self.driver = userSettings.notificationDriver
@@ -159,7 +159,6 @@ public final class Recording : NSManagedObject, CoreDataEntityProtocol {
 
             Logger.log("+ size: \(bytes)")
             self.size = bytes
-            self.awaitingUpload = true
             self.save()
         }
     }

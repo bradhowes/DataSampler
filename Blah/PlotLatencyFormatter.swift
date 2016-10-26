@@ -13,15 +13,22 @@ import Foundation
  */
 final class PlotLatencyFormatter : NumberFormatter {
 
+    override init() {
+        super.init()
+        maximumFractionDigits = 2
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+    }
+
     /**
      Formatting function for latency values
      - parameter obj: an NSNumber object containing the latency value
      - returns: the label to use
      */
     override func string(for obj: Any?) -> String? {
-        guard let obj = obj as? NSNumber else { return nil }
-        let dvalue = obj.doubleValue
-        var value: String = String.localizedStringWithFormat("%.1f", dvalue)
+        guard var value = super.string(for: obj) else { return nil }
         if value.hasSuffix(".0") {
             value.removeSubrange(value.index(value.endIndex, offsetBy: -2)..<value.endIndex)
         }

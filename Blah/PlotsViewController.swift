@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import PDFGenerator
 
 /** 
  The main view controller for the app. The view is split in two, with the upper-half showing an XY scatter plot and the
@@ -78,6 +79,14 @@ final class PlotsViewController: UIViewController, RecordingActivityLogicDepende
         //
         Logger.singleton.textView = logView
         EventLog.singleton.textView = eventsView
+
+        RecordingsTableNotification.observe(kind: .recordingShared, observer: self, selector: #selector(shareRecording))
+    }
+
+    func shareRecording(notification: Notification) {
+        let recording = RecordingsTableNotification(notification: notification).recording
+        visualize(dataSource: recording.runData)
+        share();
     }
 
     override func didReceiveMemoryWarning() {
@@ -128,5 +137,12 @@ extension PlotsViewController: VisualizerInterface {
     func visualize(dataSource: RunDataInterface) {
         self.plotView.source = dataSource
         self.histogramView.source = dataSource.histogram
+    }
+}
+
+extension PlotsViewController: PDFSharingInterface {
+    func share() {
+        let data = try! PDFGenerator.generated(by: [self.plotView.pdfContent,
+                                                    self.histogramView.pdfContent])
     }
 }

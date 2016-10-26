@@ -9,8 +9,9 @@
 import Foundation
 import UIKit
 import CorePlot
+import PDFGenerator
 
-final class GraphLatencyHistogram : CPTGraphHostingView, CPTPlotDataSource, CPTBarPlotDelegate, CPTAxisDelegate, HistogramObserver {
+final class GraphLatencyHistogram : CPTGraphHostingView, HistogramObserver {
 
     var source: Histogram! {
         willSet {
@@ -32,6 +33,30 @@ final class GraphLatencyHistogram : CPTGraphHostingView, CPTPlotDataSource, CPTB
     private var binCount: Int { return source.bins.count }
     private var maxValue: Int { return source.bins[source.maxBinIndex] }
 
+    fileprivate lazy var labelStyle: CPTMutableTextStyle = {
+        let labelStyle = CPTMutableTextStyle()
+        labelStyle.color = CPTColor(componentRed: 0.0, green: 1.0, blue: 1.0, alpha: 0.75)
+        labelStyle.fontSize = 12.0
+        return labelStyle
+    }()
+
+    fileprivate var annotation: CPTPlotSpaceAnnotation? = nil
+    fileprivate var annotationIndex: Int = 0
+
+    fileprivate lazy var annotationStyle: CPTMutableTextStyle = {
+        let annotationStyle = CPTMutableTextStyle()
+        annotationStyle.color = self.labelStyle.color
+        annotationStyle.fontSize = 12.0
+        return annotationStyle
+    }()
+
+    fileprivate lazy var titleStyle: CPTMutableTextStyle = {
+        let titleStyle = CPTMutableTextStyle()
+        titleStyle.color = CPTColor(genericGray: 0.75)
+        titleStyle.fontSize = 11.0
+        return titleStyle
+    }()
+    
     func histogramBinChanged(_ histogram: Histogram, index: Int) {
         hostedGraph?.allPlots().last!.reloadData(inIndexRange: NSMakeRange(index, 1))
         if Thread.isMainThread {
@@ -73,14 +98,6 @@ final class GraphLatencyHistogram : CPTGraphHostingView, CPTPlotDataSource, CPTB
         let tickLineStyle = CPTMutableLineStyle()
         tickLineStyle.lineWidth = 0.75
         tickLineStyle.lineColor = CPTColor(genericGray: 0.25)
-        
-        let labelStyle = CPTMutableTextStyle()
-        labelStyle.color = CPTColor(componentRed: 0.0, green: 1.0, blue: 1.0, alpha: 0.75)
-        labelStyle.fontSize = 12.0
-        
-        let titleStyle = CPTMutableTextStyle()
-        titleStyle.color = CPTColor(genericGray: 0.75)
-        titleStyle.fontSize = 11.0
         
         guard let axisSet = graph.axisSet as? CPTXYAxisSet else { return }
         guard let x = axisSet.xAxis else { return }
@@ -208,6 +225,9 @@ final class GraphLatencyHistogram : CPTGraphHostingView, CPTPlotDataSource, CPTB
         graph.layoutAndRender(in: context);
         context.endPage();
     }
+}
+
+extension GraphLatencyHistogram: CPTBarPlotDataSource {
 
     // - Data Source Methods
     //
@@ -224,3 +244,44 @@ final class GraphLatencyHistogram : CPTGraphHostingView, CPTPlotDataSource, CPTB
         }
     }
 }
+
+extension GraphLatencyHistogram: CPTBarPlotDelegate {
+
+    func barPlot(_ plot: CPTBarPlot, barWasSelectedAtRecord idx: UInt) {
+        if let annotation = self.annotation {
+            hostedGraph?.plotAreaFrame?.plotArea?.removeAnnotation(annotation)
+            self.annotation = nil
+            if self.annotationIndex == Int(idx) {
+                return
+            }
+        }
+
+        self.annotationIndex = Int(idx)
+
+        let x = Int(idx)
+        let y = source.bins[x]
+
+        let tag = "\(y)"
+        let textLayer = CPTTextLayer(text: tag, style: annotationStyle)
+        textLayer.fill = CPTFill(color: CPTColor.black().withAlphaComponent(0.3))
+        let pos = [NSNumber(value: x), NSNumber(value: y)]
+        let plotSpace = hostedGraph!.allPlotSpaces().last as! CPTXYPlotSpace
+        self.annotation = CPTPlotSpaceAnnotation(plotSpace: plotSpace, anchorPlotPoint: pos)
+        self.annotation?.contentLayer = textLayer
+
+        self.annotation?.displacement = CGPoint(x: 0.0, y: textLayer.frame.height / 2.0)
+        hostedGraph?.plotAreaFrame?.plotArea?.addAnnotation(self.annotation)
+    }
+}
+
+extension GraphLatencyHistogram: PDFRenderable {
+
+    var pdfContent: PDFPage {
+        get {
+            let graph = self.hostedGraph! as! CPTXYGraph
+            let data = graph.dataForPDFRepresentationOfLayer()
+            return PDFPage.binary(data)
+        }
+    }
+}
+

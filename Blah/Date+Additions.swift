@@ -8,6 +8,12 @@
 
 import Foundation
 
+/**
+ Allow for subtraction operator between two Date objects.
+ - parameter lhs: first Date object
+ - parameter rhs: second date object
+ - returns: difference between the two Date as seconds
+ */
 func -(_ lhs: Date, _ rhs: Date) -> TimeInterval {
     return lhs.timeIntervalSince(rhs)
 }

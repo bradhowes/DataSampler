@@ -19,6 +19,8 @@ public protocol DropboxControllerDependent: class {
  Protocol for a class that implements the `DropboxController` interface.
  */
 public protocol DropboxControllerInterface: class {
+    var isLinked: Bool { get }
     func toggleAccountLinking(viewController: UIViewController)
+    func upload(recording: Recording)
 }
 

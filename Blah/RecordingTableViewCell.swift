@@ -21,15 +21,17 @@ final class RecordingTableViewCell: MGSwipeTableCell {
     @IBOutlet weak var title: UITextView!
     @IBOutlet weak var detail: UITextView!
 
+    fileprivate var activityHandler: CellActivityHandler!
     fileprivate var recording: Recording!
 }
 
 extension RecordingTableViewCell: ConfigurableCell {
 
-    func configure(dataSource recording: Recording) {
+    func configure(dataSource recording: Recording, activityHandler: CellActivityHandler) {
 
-        self.delegate = self;
         self.recording = recording
+        self.activityHandler = activityHandler
+        self.delegate = self
 
         textLabel?.text = recording.displayName
 
@@ -83,9 +85,11 @@ extension RecordingTableViewCell: ConfigurableCell {
 
         if !recording.isRecording {
             if !recording.uploading {
-                leftButtons.append(MGSwipeButton(title: "", icon: UIImage(named:"upload.png"),
-                                                 backgroundColor: UIColor.white))
-                leftButtons.last!.tag = Button.upload.rawValue
+                if activityHandler.canUpload {
+                    leftButtons.append(MGSwipeButton(title: "", icon: UIImage(named:"upload.png"),
+                                                     backgroundColor: UIColor.white))
+                    leftButtons.last!.tag = Button.upload.rawValue
+                }
                 rightButtons.append(MGSwipeButton(title: "Delete", backgroundColor: UIColor.red))
                 rightButtons.last!.tag = Button.delete.rawValue
             }
@@ -101,21 +105,14 @@ extension RecordingTableViewCell: MGSwipeTableCellDelegate {
     func swipeTableCell(_ cell: MGSwipeTableCell, tappedButtonAt index: Int, direction: MGSwipeDirection,
                         fromExpansion: Bool) -> Bool {
         switch direction {
-        case .rightToLeft:
-            recording.delete()
-            recording = nil
+        case .rightToLeft: activityHandler.deleteRequest(button: rightButtons[index] as! UIButton, recording: recording)
         case .leftToRight:
-            if leftButtons[index].tag == Button.upload.rawValue {
-                if recording != nil && !recording.uploading {
-                    recording.uploaded = false
-                    recording.awaitingUpload = true
-                    recording.progress = 0.0
-                    recording.save()
-                    RecordingActivityLogicNotification.post(recording: recording)
-                }
+            let button = leftButtons[index] as! UIButton
+            if button.tag == Button.upload.rawValue {
+                activityHandler.uploadRequest(button: button, recording: recording)
             }
-            else if leftButtons[index].tag == Button.share.rawValue {
-                RecordingsTableNotification.post(kind: .recordingShared, recording: self.recording)
+            else if button.tag == Button.share.rawValue {
+                activityHandler.shareRequest(button: button, recording: recording)
             }
         }
         return true

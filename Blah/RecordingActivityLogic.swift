@@ -8,51 +8,48 @@
 
 import Foundation
 
-final class RecordingActivityLogic: NSObject, RecordingActivityLogicInterface {
+/** 
+ Manages state changes to `Recording` instances.
+ */
+final class RecordingActivityLogic: NSObject, RecordingActivityLogicInterface, PDFRenderingDependent {
 
-    private(set) var dependentType: Any.Type = RecordingActivityLogicDependent.self
-
+    /// Object that can render the graphs using `Recording` data.
     weak var visualizer: VisualizerInterface? {
         didSet {
             visualizer?.visualize(dataSource: newRunData())
         }
     }
 
+    /// Object that can generate a PDF of the graphs using `Recording` data.
+    weak var pdfRenderer: PDFRenderingInterface!
+
+    /// Returns `true` when `Recording` instances can be uploaded to Dropbox
+    var canUpload: Bool { return dropboxController.isLinked }
+
     private let recordingsStore: RecordingsStoreInterface
-    private var demoDriver: DriverInterface
+    private let dropboxController: DropboxControllerInterface
+    private let demoDriver: DriverInterface
+
     private var currentRecording: Recording?
     private var selectedRecording: Recording?
 
-    init(store: RecordingsStoreInterface, demoDriver: DriverInterface) {
+    init(store: RecordingsStoreInterface, dropboxController: DropboxControllerInterface, demoDriver: DriverInterface) {
         self.recordingsStore = store
+        self.dropboxController = dropboxController
         self.demoDriver = demoDriver
         super.init()
-
-        // Begin observing notifications from the RecordingsTableViewController for when a recording is deleted or
-        // selected there.
-        //
-        observeRecordingsTableNotifications()
-    }
-
-    /**
-     Begin watching for notifications from the RecordingsTableViewController
-     */
-    private func observeRecordingsTableNotifications() {
-        RecordingsTableNotification.observe(kind: .recordingSelected, observer: self,
-                                            selector: #selector(recordingSelected))
-        RecordingsTableNotification.observe(kind: .recordingDeleted, observer: self,
-                                            selector: #selector(recordingDeleted))
     }
 
     private func newRunData() -> RunDataInterface {
         return recordingsStore.newRunData()
     }
 
-    func startRecording() {
+    func start() {
+        currentRecording = recordingsStore.newRecording()
+        if currentRecording == nil {
+            fatalError("failed to create new Recording")
+        }
 
-        // Create a new Recording instance for the data we will gather
-        //
-        currentRecording = recordingsStore.newRecording()!
         selectedRecording = currentRecording
         Logger.clear()
         EventLog.clear()
@@ -60,24 +57,24 @@ final class RecordingActivityLogic: NSObject, RecordingActivityLogicInterface {
         demoDriver.start(runData: currentRecording!.runData)
     }
 
-    func stopRecording() {
+    func stop() {
         demoDriver.stop()
-        currentRecording!.finished()
-        RecordingActivityLogicNotification.post(recording: currentRecording!)
-        currentRecording = nil
+        guard let recording = self.currentRecording else { return }
+        recording.stopped(pdfRenderer: self.pdfRenderer)
+        self.currentRecording = nil
+        if recording.awaitingUpload {
+            self.dropboxController.upload(recording: recording)
+        }
     }
 
     func select(recording: Recording) {
         if selectedRecording != recording {
             selectedRecording = recording
             visualizer?.visualize(dataSource: recording.runData)
+            // pdfRenderer.render(recording: recording) // !!!
             Logger.restore(from: recording.folder)
             EventLog.restore(from: recording.folder)
         }
-    }
-
-    func upload(recording: Recording) {
-        RecordingActivityLogicNotification.post(recording: currentRecording!)
     }
 
     func delete(recording: Recording) {
@@ -88,22 +85,17 @@ final class RecordingActivityLogic: NSObject, RecordingActivityLogicInterface {
             Logger.clear()
             EventLog.clear()
         }
+        recording.delete()
     }
 
-    /**
-     Handle the `recordingSelected` notification. Switch various views to show the selected Recording instance.
-     - parameter notification: received notification
-     */
-    func recordingSelected(notification: Notification) {
-        select(recording: RecordingsTableNotification(notification: notification).recording)
+    func share(recording: Recording) {
+
     }
 
-    /**
-     Handle the `recordingDeleted` notification. If the Recording being deleted is what is currently installed, then
-     install an empty RunData.
-     - parameter notification: received notification
-     */
-    func recordingDeleted(notification: Notification) {
-        delete(recording: RecordingsTableNotification(notification: notification).recording)
+    func upload(recording: Recording) {
+        if !recording.uploading {
+            recording.uploadingRequested()
+            dropboxController.upload(recording: recording)
+        }
     }
 }

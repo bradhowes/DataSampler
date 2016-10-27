@@ -10,163 +10,243 @@ import UIKit
 import SwiftyDropbox
 import CoreData
 
-public class Dependency<DependentClass>: NSObject {
-    static func isDependentType(object: AnyObject) -> Bool { return object is DependentClass }
-}
+/** 
+ Manages uploads to a linked Dropbox account.
+ */
+final public class DropboxController: NSObject, DropboxControllerInterface {
 
-final public class DropboxController: Dependency<DropboxControllerDependent>, DropboxControllerInterface {
+    /// Status of linking with a Dropbox account
+    public var isLinked: Bool { return self.client != nil }
 
     private var userSettings: UserSettingsInterface
     private var recordingsStore: RecordingsStoreInterface
     private var fetcher: NSFetchedResultsController<Recording>?
-    private var client: DropboxClient?
-    private var recording: Recording?
 
+    private var backgroundTask: DispatchWorkItem?
+    private var client: DropboxClient? {
+        didSet {
+            DropboxControllerNotification.post(isLinked: client != nil)
+        }
+    }
+
+    /**
+     Initialize instance.
+     - parameter userSettings: user settings that control linking
+     - parameter recordingsStore: source of Recording objects that are ready to be uploaded
+     */
     init(userSettings: UserSettingsInterface, recordingsStore: RecordingsStoreInterface) {
         self.userSettings = userSettings
         self.recordingsStore = recordingsStore
         super.init()
 
-        RecordingActivityLogicNotification.observe(observer: self, selector: #selector(maybeUpload))
+        // Receive notification when the Core Data stack is ready. 
+        //
         RecordingsStoreNotification.observe(observer: self, selector: #selector(storeIsReady),
                                             recordingStore: self.recordingsStore)
+
+        // Receive notification when linking changes state
+        //
         UserSettingsChangedNotification.observe(observer: self, selector: #selector(dropboxLinkingChanged),
                                                 setting: .dropboxLinkButtonText)
-        UserSettingsChangedNotification.observe(observer: self, selector: #selector(dropboxLinkingChanged),
-                                                setting: .uploadAutomatically)
 
         DropboxClientsManager.setupWithAppKey("8dg497axhy58ypa")
 
-        if recordingsStore.isReady {
+        if userSettings.useDropbox && recordingsStore.isReady {
             makeClient()
         }
     }
 
-    func maybeUpload(notification: Notification) {
-        if self.recording == nil {
-            let recording = RecordingActivityLogicNotification(notification: notification).recording
-            if recording.awaitingUpload {
-                self.recording = recording
-                DispatchQueue.main.async {
-                    self.startUpload()
+    /**
+     Perform a closure under a single-threaded guarantee of access.
+     - parameter closure: the block to execute
+     */
+    private func synced(closure: () -> ()) {
+        objc_sync_enter(self)
+        closure()
+        objc_sync_exit(self)
+    }
+
+    /**
+     Handle a request to upload a recording. Performs any uploads on a background thread.
+     - parameter recording: the Recording to upload
+     */
+    public func upload(recording: Recording) {
+        synced {
+
+            // Only create one task for handling uploads
+            //
+            if self.backgroundTask == nil {
+                self.backgroundTask = DispatchWorkItem {
+                    self.startUpload(recording: recording)
                 }
+                DispatchQueue.global(qos: .background).async(execute: self.backgroundTask!)
             }
         }
     }
 
-    func storeIsReady(notification: Notification) {
-        guard client == nil else { return }
-        makeClient()
+    /**
+     Notification from the recordings store that it is available for fetching
+     - parameter notification: the notification from the store
+     */
+    public func storeIsReady(notification: Notification) {
+        self.makeClient()
     }
 
-    func dropboxLinkingChanged(notification: Notification) {
-        guard client == nil else { return }
-        makeClient()
+    /**
+     Notification from user settings when linking status changes.
+     - parameter notification: the notification from UserSettings
+     */
+    public func dropboxLinkingChanged(notification: Notification) {
+        self.makeClient()
     }
 
-    private func nextRecordingToUpload() -> Recording? {
-        return fetcher?.fetchedObjects?.first(where: { (recording) -> Bool in
-            if recording.uploaded == true { return false }
-            if recording.isRecording == true { return false }
-            return recording.awaitingUpload
-        })
+    private func dropBackgroundTask(cancel: Bool = false) {
+        synced {
+            if cancel { self.backgroundTask?.cancel() }
+            self.backgroundTask = nil
+        }
     }
 
+    /**
+     See if there is another Recording waiting to be uploaded to Dropbox. NOTE: this clears the `backgroundTask` with
+     malice.
+     */
+    private func checkForUploads() {
+        dropBackgroundTask()
+        if let recording = fetcher?.fetchedObjects?.first(where: { (recording) -> Bool in
+            return !recording.uploaded && !recording.isRecording && recording.awaitingUpload
+        }) {
+            upload(recording: recording)
+        }
+    }
+
+    /**
+     Attempt to create a Dropbox client to perform uploads. The attempt is made in a background thread.
+     */
     private func makeClient() {
-        guard client == nil && recordingsStore.isReady else { return }
+        synced {
 
-        self.fetcher = recordingsStore.cannedFetchRequest(name: "uploadable")
-        if fetcher?.fetchedObjects == nil {
-            do {
-                try fetcher?.performFetch()
-            } catch {
-                assertionFailure("Failed to fetch: \(error)")
+            // If there is an active background task, cancel it. The user could have disabled linking while we have an
+            // active upload taking place.
+            //
+            if self.backgroundTask != nil {
+                self.backgroundTask!.cancel()
+                self.backgroundTask = nil
             }
-        }
 
-        client = DropboxClientsManager.authorizedClient
-        if client != nil {
-            DispatchQueue.main.async {
+            // Check if conditions are right for having a client
+            //
+            if !self.userSettings.useDropbox || !self.recordingsStore.isReady {
+                client = nil
+                return
+            }
+
+            // Create task to do the connection
+            //
+            self.backgroundTask = DispatchWorkItem {
+                self.client = DropboxClientsManager.authorizedClient
+                if self.client == nil {
+                    self.synced { self.backgroundTask = nil }
+                    return
+                }
+
+                self.fetcher = self.recordingsStore.cannedFetchRequest(name: "uploadable")
+                if self.fetcher?.fetchedObjects == nil {
+                    do {
+                        try self.fetcher?.performFetch()
+                        } catch {
+                            fatalError("Failed to fetch: \(error)")
+                    }
+                }
+
                 self.checkForUploads()
             }
+
+            // Peform the above on the background thread
+            //
+            DispatchQueue.global(qos: .background).async(execute: self.backgroundTask!)
         }
     }
 
-    private func checkForUploads() {
-        if recording == nil {
-            recording = nextRecordingToUpload()
-            if recording != nil {
-                startUpload()
-            }
-        }
-    }
-
-    private func sanitizeFolderName(_ name: String) -> String {
+    /**
+     Convert an iOS folder into one suitable for Dropbox.
+     - parameter name: the String representation of the folder
+     - returns: the sanitized version
+     */
+    private func sanitizeFolder(named folder: String) -> String {
         let chars = CharacterSet(charactersIn: "- .")
-        let bits = name.components(separatedBy: chars)
+        let bits = folder.components(separatedBy: chars)
         return bits.joined()
     }
 
-    private func startUpload() {
-        guard let rec = self.recording else { return }
-        guard let client = self.client else { return }
-        let destFolder = sanitizeFolderName("/" + rec.directoryName)
-        rec.progress = 0.0
-        rec.uploading = true
+    /**
+     Attempt to start an upload of a Recording
+     - parameter recording: the Recording instance to upload
+     */
+    private func startUpload(recording: Recording) {
+        guard let client = self.client else {
+            dropBackgroundTask()
+            return
+        }
+
+        let destFolder = sanitizeFolder(named: "/" + recording.directoryName)
+        recording.uploadingStarted()
+
+        // Create a Dropbox folder to hold the recording artifacts
+        //
         client.files.createFolder(path: destFolder).response { (response, error) in
             if let response = response {
                 print(response)
-                rec.progress = 1.0 / 3.0
-                self.uploadLog(for: rec, into: destFolder)
+                recording.progress = 1.0 / 4.0
+                self.uploadFile(index: 0, of: recording, into: destFolder)
             }
             else if let error = error {
                 print(error)
-                // If the error was 'directory already exists', then we should continue on.
-                //
-                self.uploadLog(for: rec, into: destFolder)
+                self.uploadFile(index: 0, of: recording, into: destFolder)
             }
         }
     }
 
-    private func uploadLog(for rec: Recording, into destFolder: String) {
-        let dest = destFolder + "/" + Logger.singleton.fileName
-        let source = rec.folder.appendingPathComponent(Logger.singleton.fileName)
-        self.client?.files.upload(path: dest, input: source).response { (response, error) in
-            if let response = response {
-                print (response)
-                self.uploadEvents(for: rec, into: destFolder)
-            }
-            else if let error = error {
-                print(error)
-            }
-        }.progress { (progress) in
-            rec.progress = 1.0 / 3.0 + progress.fractionCompleted / 3.0
+    /**
+     Upload a file artifict for a recording.
+     - parameter index: the next index of `recording.sharableArtifacts` to upload
+     - parameter recording: the Recording being processed
+     - parameter destFolder: the destination folder to write into
+     */
+    private func uploadFile(index: Int, of recording: Recording, into destFolder: String) {
+        guard let client = self.client else {
+            dropBackgroundTask()
+            return
         }
-    }
 
-    private func uploadEvents(for rec: Recording, into destFolder: String) {
-        let dest = destFolder + "/" + EventLog.singleton.fileName
-        let source = rec.folder.appendingPathComponent(EventLog.singleton.fileName)
-        rec.progress = 0.5
-        self.client?.files.upload(path: dest, input: source).response { (response, error) in
+        let source = recording.sharableArtifacts[index]
+        let dest = destFolder + "/" + source.lastPathComponent
+        print("\(source) -> \(dest)")
+
+        // Upload the file
+        //
+        client.files.upload(path: dest, input: source).response { (response, error) in
             if let response = response {
                 print (response)
-                rec.uploading = false
-                rec.progress = 1.0
-                rec.uploaded = true
-                rec.awaitingUpload = false
-                rec.save()
+                if index + 1 < recording.sharableArtifacts.count {
 
-                self.recording = nil
-                DispatchQueue.main.async {
+                    // Upload the next file
+                    //
+                    recording.progress = Double(index + 2) / 4.0
+                    self.uploadFile(index: index + 1, of: recording, into: destFolder)
+                }
+                else {
+
+                    // Done! Update the recording state and see if there are more to upload
+                    //
+                    recording.uploadingCompleted()
                     self.checkForUploads()
                 }
             }
             else if let error = error {
                 print(error)
+                recording.uploadingFailed()
             }
-        }.progress { (progress) in
-            rec.progress = 2.0 + progress.fractionCompleted / 3.0
         }
     }
 
@@ -212,12 +292,11 @@ final public class DropboxController: Dependency<DropboxControllerDependent>, Dr
             self.userSettings.write()
             DropboxClientsManager.unlinkClients()
             self.client = nil
+            self.dropBackgroundTask(cancel: true)
         })
 
         alert.addAction(cancelAction)
         alert.addAction(unlinkAction)
-        viewController.present(alert, animated: true) {
-            
-        }
+        viewController.present(alert, animated: true) {}
     }
 }

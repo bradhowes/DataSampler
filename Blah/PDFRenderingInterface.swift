@@ -7,16 +7,15 @@
 //
 
 import Foundation
-import PDFGenerator
 
-public protocol PDFRenderable: class {
-    var pdfContent: PDFPage { get }
+public protocol PDFRenderingDependent: class {
+    var pdfRenderer: PDFRenderingInterface! { get set }
 }
 
 /**
  Protocol for visualizing the contents of a recording.
  */
-public protocol PDFSharingInterface: class {
+public protocol PDFRenderingInterface: class {
 
-    func share()
+    func render(recording: Recording) -> Int64
 }

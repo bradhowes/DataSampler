@@ -92,7 +92,10 @@
 		BDFF8ABE1DBF9BB000AB2FA8 /* UserSettingsInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDFF8ABD1DBF9BB000AB2FA8 /* UserSettingsInterface.swift */; };
 		BDFF8AC01DBF9BDA00AB2FA8 /* VisualizerInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDFF8ABF1DBF9BDA00AB2FA8 /* VisualizerInterface.swift */; };
 		BDFF8AC21DBF9BFA00AB2FA8 /* RecordingActivityLogicInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDFF8AC11DBF9BFA00AB2FA8 /* RecordingActivityLogicInterface.swift */; };
-		BDFF8AC41DC0B2B200AB2FA8 /* PDFSharingInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDFF8AC31DC0B2B200AB2FA8 /* PDFSharingInterface.swift */; };
+		BDFF8AC41DC0B2B200AB2FA8 /* PDFRenderingInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDFF8AC31DC0B2B200AB2FA8 /* PDFRenderingInterface.swift */; };
+		BDFF8AC61DC0CF9200AB2FA8 /* SharingInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDFF8AC51DC0CF9200AB2FA8 /* SharingInterface.swift */; };
+		BDFF8AC81DC1261A00AB2FA8 /* GraphSkin.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDFF8AC71DC1261A00AB2FA8 /* GraphSkin.swift */; };
+		BDFF8ACA1DC218DE00AB2FA8 /* Dispatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDFF8AC91DC218DE00AB2FA8 /* Dispatch.swift */; };
 		CE6535F626638F337BDB06FC /* Pods_Blah.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ACDA023CC4D206794F87C46E /* Pods_Blah.framework */; };
 /* End PBXBuildFile section */
 
@@ -208,7 +211,10 @@
 		BDFF8ABD1DBF9BB000AB2FA8 /* UserSettingsInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserSettingsInterface.swift; sourceTree = "<group>"; };
 		BDFF8ABF1DBF9BDA00AB2FA8 /* VisualizerInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VisualizerInterface.swift; sourceTree = "<group>"; };
 		BDFF8AC11DBF9BFA00AB2FA8 /* RecordingActivityLogicInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RecordingActivityLogicInterface.swift; sourceTree = "<group>"; };
-		BDFF8AC31DC0B2B200AB2FA8 /* PDFSharingInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PDFSharingInterface.swift; sourceTree = "<group>"; };
+		BDFF8AC31DC0B2B200AB2FA8 /* PDFRenderingInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PDFRenderingInterface.swift; sourceTree = "<group>"; };
+		BDFF8AC51DC0CF9200AB2FA8 /* SharingInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SharingInterface.swift; sourceTree = "<group>"; };
+		BDFF8AC71DC1261A00AB2FA8 /* GraphSkin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GraphSkin.swift; sourceTree = "<group>"; };
+		BDFF8AC91DC218DE00AB2FA8 /* Dispatch.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Dispatch.swift; sourceTree = "<group>"; };
 		F34C4E5F49323E86C7948436 /* Pods-BlahTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BlahTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-BlahTests/Pods-BlahTests.debug.xcconfig"; sourceTree = "<group>"; };
 		F657859C3132944BCAC76486 /* Pods-BlahTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BlahTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-BlahTests/Pods-BlahTests.release.xcconfig"; sourceTree = "<group>"; };
 		FF00F94554101A88F19C9D5D /* Pods-Blah.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Blah.release.xcconfig"; path = "Pods/Target Support Files/Pods-Blah/Pods-Blah.release.xcconfig"; sourceTree = "<group>"; };
@@ -359,7 +365,8 @@
 				BDFF8ABB1DBF9B8700AB2FA8 /* DropboxControllerInterface.swift */,
 				BDFF8ABD1DBF9BB000AB2FA8 /* UserSettingsInterface.swift */,
 				BDFF8ABF1DBF9BDA00AB2FA8 /* VisualizerInterface.swift */,
-				BDFF8AC31DC0B2B200AB2FA8 /* PDFSharingInterface.swift */,
+				BDFF8AC31DC0B2B200AB2FA8 /* PDFRenderingInterface.swift */,
+				BDFF8AC51DC0CF9200AB2FA8 /* SharingInterface.swift */,
 				BDFF8AC11DBF9BFA00AB2FA8 /* RecordingActivityLogicInterface.swift */,
 				BDBCEF571DA9CE3D00B09DC9 /* RecordingsStoreInterface.swift */,
 			);
@@ -389,6 +396,7 @@
 				BD9AA0801DAE67FB00C8F7BD /* ConfigurableCell.swift */,
 				BDBB025C1DA45983000838E0 /* LowerView.swift */,
 				BDBB025A1DA45942000838E0 /* LowerViewManager.swift */,
+				BDFF8AC71DC1261A00AB2FA8 /* GraphSkin.swift */,
 				BD87F59E1D8AAAD1007A6F99 /* GraphLatencyByTime.swift */,
 				BDDC9D771D8AFC4100C36430 /* GraphLatencyHistogram.swift */,
 				BDBB02591DA45246000838E0 /* Label Formatters */,
@@ -425,6 +433,7 @@
 				BD17D0551D8EE67C00A18062 /* OrderedArray.swift */,
 				BD15E0AF1D934486005B709D /* RandomUniform.swift */,
 				BDBCEF551DA9CC5400B09DC9 /* CriticalSection.swift */,
+				BDFF8AC91DC218DE00AB2FA8 /* Dispatch.swift */,
 			);
 			name = Utils;
 			sourceTree = "<group>";
@@ -724,17 +733,20 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BDFF8AC81DC1261A00AB2FA8 /* GraphSkin.swift in Sources */,
 				BD4948471D89F23000C50DE2 /* AppDelegate.swift in Sources */,
 				BD73D3631DAB706100845EEF /* DemoDriver.swift in Sources */,
+				BDFF8AC61DC0CF9200AB2FA8 /* SharingInterface.swift in Sources */,
 				BD87F59F1D8AAAD1007A6F99 /* GraphLatencyByTime.swift in Sources */,
 				BDFF8AC21DBF9BFA00AB2FA8 /* RecordingActivityLogicInterface.swift in Sources */,
-				BDFF8AC41DC0B2B200AB2FA8 /* PDFSharingInterface.swift in Sources */,
+				BDFF8AC41DC0B2B200AB2FA8 /* PDFRenderingInterface.swift in Sources */,
 				BDFEEC3C1D91E875003E8555 /* UserSettings.swift in Sources */,
 				BDBB025D1DA45983000838E0 /* LowerView.swift in Sources */,
 				BDBCEF561DA9CC5400B09DC9 /* CriticalSection.swift in Sources */,
 				BD9AA0831DAE687300C8F7BD /* RecordingTableViewCell.swift in Sources */,
 				BDFF8ABE1DBF9BB000AB2FA8 /* UserSettingsInterface.swift in Sources */,
 				BD58DDBC1D97C476007765E3 /* PlotTimeFormatter.swift in Sources */,
+				BDFF8ACA1DC218DE00AB2FA8 /* Dispatch.swift in Sources */,
 				BD17D0561D8EE67C00A18062 /* OrderedArray.swift in Sources */,
 				BD6539F81DA448EC008C32C6 /* RecordingsTableViewController.swift in Sources */,
 				BD15E0B01D934486005B709D /* RandomUniform.swift in Sources */,

@@ -8,35 +8,37 @@
 
 import Foundation
 
-struct RecordingActivityLogicNotification {
-    static let finished = Notification.Name("RecordingActivityLogic.finished")
-    let recording: Recording
+struct DropboxControllerNotification {
+    static let Name = Notification.Name("DropboxController.linkingChanged")
 
-    init(recording: Recording) {
-        self.recording = recording
+    let isLinked: Bool
+
+    init(isLinked: Bool) {
+        self.isLinked = isLinked
     }
 
     init(notification: Notification) {
-        self.recording = notification.object as! Recording
+        let userInfo = notification.userInfo!
+        self.isLinked = (userInfo["isLinked"] as! NSNumber).boolValue
     }
 
     private func post() {
-        let notif = Notification(name: RecordingActivityLogicNotification.finished, object: self.recording)
+        let notif = Notification(name: DropboxControllerNotification.Name, object: nil,
+                                 userInfo: ["isLinked": NSNumber(value: isLinked)])
         NotificationCenter.default.post(notif)
     }
 
-    static func post(recording: Recording) {
-        RecordingActivityLogicNotification(recording: recording).post()
+    static func post(isLinked: Bool) {
+        DropboxControllerNotification(isLinked: isLinked).post()
     }
 
     static func observe(observer: AnyObject, selector: Selector) {
-        NotificationCenter.default.addObserver(observer, selector: selector,
-                                               name: RecordingActivityLogicNotification.finished, object: nil)
+        NotificationCenter.default.addObserver(observer, selector: selector, name: DropboxControllerNotification.Name,
+                                               object: nil)
     }
 
     static func unobserve(observer: AnyObject) {
-        NotificationCenter.default.removeObserver(observer, name: RecordingActivityLogicNotification.finished,
-                                                  object: nil)
+        NotificationCenter.default.removeObserver(observer, name: DropboxControllerNotification.Name, object: nil)
     }
 }
 
@@ -69,42 +71,6 @@ struct RecordingsStoreNotification {
     static func unobserve(observer: AnyObject, recordingStore: RecordingsStoreInterface) {
         NotificationCenter.default.removeObserver(observer, name: RecordingsStoreNotification.ready,
                                                   object: recordingStore)
-    }
-}
-
-struct RecordingsTableNotification {
-
-    enum Kind: String {
-        case recordingSelected, recordingDeleted, recordingShared
-    }
-
-    let recording: Recording
-
-    init(recording: Recording) {
-        self.recording = recording
-    }
-
-    init(notification: Notification) {
-        self.recording = notification.userInfo!["recording"] as! Recording
-    }
-
-    private func post(kind: Kind) {
-        let notif = Notification(name: Notification.Name(kind.rawValue), object: self,
-                                 userInfo: ["recording": recording])
-        NotificationCenter.default.post(notif)
-    }
-
-    static func post(kind: Kind, recording: Recording) {
-        RecordingsTableNotification(recording: recording).post(kind: kind)
-    }
-
-    static func observe(kind: Kind, observer: AnyObject, selector: Selector) {
-        NotificationCenter.default.addObserver(observer, selector: selector,
-                                               name: Notification.Name(kind.rawValue), object: nil)
-    }
-
-    static func unobserve(kind: Kind, observer: AnyObject) {
-        NotificationCenter.default.removeObserver(observer, name: Notification.Name(kind.rawValue), object: nil)
     }
 }
 
@@ -214,19 +180,20 @@ struct HistogramBinChangedNotification {
 }
 
 struct UserSettingsChangedNotification {
-    static let settingChanged = "UserSettings.settingChanged."
 
-    static func notificationName(setting: UserSettingName) -> Notification.Name {
-        return Notification.Name(settingChanged + setting.rawValue)
+    static let prefix = "UserSettings.settingChanged."
+
+    static func Name(kind: UserSettingName) -> Notification.Name {
+        return Notification.Name(prefix + kind.rawValue)
     }
 
     static func observe(observer: AnyObject, selector: Selector, setting: UserSettingName) {
         NotificationCenter.default.addObserver(observer, selector: selector,
-                                               name: notificationName(setting: setting), object: nil)
+                                               name: UserSettingsChangedNotification.Name(kind: setting), object: nil)
     }
 
     static func unobserve(observer: AnyObject, setting: UserSettingName) {
-        NotificationCenter.default.removeObserver(observer, name: notificationName(setting: setting),
+        NotificationCenter.default.removeObserver(observer, name: UserSettingsChangedNotification.Name(kind: setting),
                                                   object: nil)
     }
 }
@@ -250,8 +217,7 @@ struct UserSettingsChangedNotificationWith<ValueType> {
     }
 
     func post(sender: SettingInterface) {
-        let notif = Notification(name: UserSettingsChangedNotification.notificationName(setting: name),
-                                 object: sender,
+        let notif = Notification(name: UserSettingsChangedNotification.Name(kind: name), object: sender,
                                  userInfo: ["oldValue": oldValue, "newValue": newValue, "name": name.rawValue])
         NotificationCenter.default.post(notif)
     }

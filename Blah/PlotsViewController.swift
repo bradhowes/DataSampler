@@ -53,6 +53,7 @@ final class PlotsViewController: UIViewController, RecordingActivityLogicDepende
         super.viewDidLoad()
 
         recordingActivityLogic.visualizer = self
+        recordingActivityLogic.pdfRenderer = self
 
         histogramButton.accessibilityLabel = "Histogram"
         logButton.accessibilityLabel = "Log"
@@ -79,14 +80,6 @@ final class PlotsViewController: UIViewController, RecordingActivityLogicDepende
         //
         Logger.singleton.textView = logView
         EventLog.singleton.textView = eventsView
-
-        RecordingsTableNotification.observe(kind: .recordingShared, observer: self, selector: #selector(shareRecording))
-    }
-
-    func shareRecording(notification: Notification) {
-        let recording = RecordingsTableNotification(notification: notification).recording
-        visualize(dataSource: recording.runData)
-        share();
     }
 
     override func didReceiveMemoryWarning() {
@@ -120,7 +113,7 @@ final class PlotsViewController: UIViewController, RecordingActivityLogicDepende
      */
     @IBAction func startButtonPressed(_ button:UIBarButtonItem) {
         setStartStopButton(stopButton)
-        recordingActivityLogic.startRecording()
+        recordingActivityLogic.start()
     }
 
     /**
@@ -129,7 +122,7 @@ final class PlotsViewController: UIViewController, RecordingActivityLogicDepende
      */
     @IBAction func stopButtonPressed(_ button:UIBarButtonItem) {
         setStartStopButton(startButton)
-        recordingActivityLogic.stopRecording()
+        recordingActivityLogic.stop()
     }
 }
 
@@ -140,9 +133,31 @@ extension PlotsViewController: VisualizerInterface {
     }
 }
 
-extension PlotsViewController: PDFSharingInterface {
-    func share() {
-        let data = try! PDFGenerator.generated(by: [self.plotView.pdfContent,
-                                                    self.histogramView.pdfContent])
+extension PlotsViewController: PDFRenderingInterface {
+
+    func render(recording: Recording) -> Int64 {
+        visualize(dataSource: recording.runData)
+
+        let margin: CGFloat = 50.0
+        var mediaBox = CGRect(x: 0.0, y: 0.0, width: 850.0, height: 1100.0)
+        let pdfData = NSMutableData()
+        guard let dataConsumer = CGDataConsumer(data: pdfData),
+            let pdfContext = CGContext(consumer: dataConsumer, mediaBox: &mediaBox, nil) else {
+                return 0
+        }
+
+        plotView.renderPDF(context: pdfContext, mediaBox: mediaBox, margin: margin)
+        histogramView.renderPDF(context: pdfContext, mediaBox: mediaBox, margin: margin)
+
+        pdfContext.closePDF()
+        print("pdfData.length: \(pdfData.length)")
+
+        do {
+            try pdfData.write(to: recording.graphsFileURL, options: .atomic)
+        } catch {
+            print("*** failed to write PDF data to \(recording.graphsFileURL) - \(error)")
+        }
+
+        return Int64(pdfData.length)
     }
 }

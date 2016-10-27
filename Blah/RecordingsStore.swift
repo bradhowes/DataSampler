@@ -21,6 +21,12 @@ final class RecordingsStore : NSObject, RecordingsStoreInterface {
     private(set) var stack: CoreDataStack?
     private(set) var isReady: Bool
 
+    /**
+     Intiialize new instance. The store may not be available for some time for requests. It will send out a notification
+     when it is ready.
+     - parameter userSettings: user settings that control some aspects of new `Recording` objects.
+     - parameter runDataFactory: a factory method used to create `RunData` objects
+     */
     init(userSettings: UserSettingsInterface, runDataFactory: @escaping RunDataInterface.FactoryType) {
         self.userSettings = userSettings
         self.runDataFactory = runDataFactory
@@ -37,7 +43,6 @@ final class RecordingsStore : NSObject, RecordingsStoreInterface {
                 self.stack = stack
                 self.isReady = true
                 RecordingsStoreNotification.post(recordingStore: self)
-
             case .failure(let err):
                 Logger.log("*** failed to create Core Data stack: \(err)")
                 assertionFailure("Error creating stack: \(err)")
@@ -45,6 +50,11 @@ final class RecordingsStore : NSObject, RecordingsStoreInterface {
         }
     }
 
+    /**
+     Obtain a new NSFetchedResultsController with a canned query (!!! FIXME !!!)
+     - parameter name: the canned query to perform
+     - returns: a new `Recording` fetch request
+     */
     func cannedFetchRequest(name: String) -> NSFetchedResultsController<Recording> {
         guard let mainContext = self.stack?.mainContext else {
             fatalError("invalid context")
@@ -57,10 +67,18 @@ final class RecordingsStore : NSObject, RecordingsStoreInterface {
         return fetcher
     }
 
+    /**
+     Create a new `RunData` object for a new recording
+     - returns: object that implements the `RunDataInterface`
+     */
     func newRunData() -> RunDataInterface {
         return runDataFactory(userSettings)
     }
 
+    /**
+     Create a new `Recording` instance attached to the main Core Data context.
+     - returns: new `Recording` instance
+     */
     func newRecording() -> Recording? {
         Logger.log("creating new recording")
         guard let mainContext = stack?.mainContext else {
@@ -70,6 +88,9 @@ final class RecordingsStore : NSObject, RecordingsStoreInterface {
         return Recording(context: mainContext, userSettings: userSettings, runData: newRunData())
     }
 
+    /**
+     Save all changes to Core Data
+     */
     func save() {
         guard let mainContext = stack?.mainContext else {
             Logger.log("*** RecordingsStore.save: nil stack")
@@ -79,6 +100,10 @@ final class RecordingsStore : NSObject, RecordingsStoreInterface {
         saveContext(mainContext) { Logger.log("savedContext: \($0)") }
     }
 
+    /**
+     Delete a recording instance, removing it from Core Data forever.
+     - parameter recording: the `Recording` instance to delete
+     */
     private func delete(recording: Recording) {
         guard let stack = self.stack else { return }
         stack.mainContext.performAndWait {

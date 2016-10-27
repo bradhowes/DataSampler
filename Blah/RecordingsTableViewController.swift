@@ -9,13 +9,13 @@
 import UIKit
 import CoreData
 import JSQCoreDataKit
-import CircleProgressView
+import MGSwipeTableCell
 
 /**
  Manages a view of recordings
  */
 final class RecordingsTableViewController: UITableViewController, NSFetchedResultsControllerDelegate,
-RecordingsStoreDependent {
+RecordingsStoreDependent, RecordingActivityLogicDependent {
 
     /// Source for recordings. The Core Data stack may not be ready when we receive this dependency so be careful
      var recordingsStore: RecordingsStoreInterface! {
@@ -29,6 +29,8 @@ RecordingsStoreDependent {
             }
         }
     }
+
+    var recordingActivityLogic: RecordingActivityLogicInterface!
 
     private var fetcher: NSFetchedResultsController<Recording>!
     private var selectedRecording: Recording? = nil
@@ -53,6 +55,12 @@ RecordingsStoreDependent {
         twoTapGesture.numberOfTapsRequired = 2
         twoTapGesture.numberOfTouchesRequired = 1
         tableView.addGestureRecognizer(twoTapGesture)
+
+        DropboxControllerNotification.observe(observer: self, selector: #selector(updateUploadButtons))
+    }
+
+    func updateUploadButtons(notification: Notification) {
+        self.tableView.reloadRows(at: self.tableView.indexPathsForVisibleRows ?? [], with: .none)
     }
 
     func doubleTappedCell(sender: UITapGestureRecognizer) {
@@ -75,7 +83,7 @@ RecordingsStoreDependent {
         do {
             try fetcher?.performFetch()
         } catch {
-            assertionFailure("Failed to fetch: \(error)")
+            fatalError("Failed to fetch: \(error)")
         }
     }
 
@@ -120,7 +128,7 @@ RecordingsStoreDependent {
     private func configureCell(_ cell: UITableViewCell, atIndexPath indexPath: IndexPath) {
         guard let recording = fetcher?.object(at: indexPath) else { return }
         guard let cell = cell as? RecordingTableViewCell else { fatalError("unexpected UITableViewCell") }
-        cell.configure(dataSource: recording)
+        cell.configure(dataSource: recording, activityHandler: self)
         cell.accessoryType = recording == selectedRecording ? .checkmark : .none
     }
 
@@ -206,7 +214,11 @@ RecordingsStoreDependent {
         // NOTE: reverse the items so that we are deleting from the end. That way indices stay the same during the
         // deletions.
         //
-        items.reversed().forEach { fetcher?.object(at: $0).delete() }
+        items.reversed().forEach {
+            if let recording = fetcher?.object(at: $0) {
+                self.recordingActivityLogic.delete(recording: recording)
+            }
+        }
         setEditing(false, animated: true)
     }
 
@@ -259,18 +271,28 @@ RecordingsStoreDependent {
         selectRow(at: indexPath)
     }
 
+    /**
+     User selected a row. Remember the row and show it in the graphs.
+     - parameter indexPath: the index of the recording to select
+     */
     private func selectRow(at indexPath: IndexPath) {
+        guard let recording = fetcher?.object(at: indexPath) else {
+            fatalError("unexpected nil Recording")
+        }
 
         // Remember the selected recording and row
         //
-        selectedRecording = fetcher?.object(at: indexPath)
+        selectedRecording = recording
         selectedRecordingIndex = indexPath
 
         // Mark the selected row and show recorded info in main view
         //
-        let cell = tableView.cellForRow(at: indexPath)
-        cell? .accessoryType = .checkmark
-        RecordingsTableNotification.post(kind: .recordingSelected, recording: selectedRecording!)
+        guard let cell = tableView.cellForRow(at: indexPath) else {
+            fatalError("unexpected nil cell")
+        }
+
+        cell.accessoryType = .checkmark
+        recordingActivityLogic.select(recording: recording)
     }
 
     /**
@@ -307,8 +329,8 @@ RecordingsStoreDependent {
      */
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            guard let obj = self.fetcher?.object(at: indexPath) else { return }
-            obj.delete()
+            guard let recording = self.fetcher?.object(at: indexPath) else { return }
+            recordingActivityLogic.delete(recording: recording)
         }
     }
 
@@ -376,7 +398,7 @@ RecordingsStoreDependent {
             if recording === selectedRecording {
                 selectedRecording = nil
                 selectedRecordingIndex = nil
-                RecordingsTableNotification.post(kind: .recordingDeleted, recording: recording)
+                recordingActivityLogic.delete(recording: recording)
             }
 
             // Do the row deletion
@@ -385,9 +407,8 @@ RecordingsStoreDependent {
 
         case .update:
 
-            // Row was updated. Update the cell with new recording info.
+            // Row was updated. Update the cell with any new recording info.
             //
-            Logger.log("+ updating \(indexPath!)")
             configureCell(tableView.cellForRow(at: indexPath!)!, atIndexPath: indexPath!)
 
         case .move:
@@ -412,5 +433,48 @@ RecordingsStoreDependent {
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         tableView.endUpdates()
         updateEditButtons()
+    }
+}
+
+// MARK: CellActivityHandler
+
+extension RecordingsTableViewController: CellActivityHandler {
+
+    /// Determine if the cell can upload to Dropbox
+    var canUpload: Bool {
+        return self.recordingActivityLogic.canUpload
+    }
+
+    /**
+     Request by the user to share the contents of a recording
+     - parameter button: the button that was pressed
+     - parameter recording: the `Recording` to share
+     */
+    func shareRequest(button: UIButton, recording: Recording) {
+        let objectsToShare = recording.sharableArtifacts
+        let controller = UIActivityViewController(activityItems: objectsToShare, applicationActivities: nil)
+        controller.modalPresentationStyle = .popover
+        self.present(controller, animated: true, completion: nil)
+        controller.popoverPresentationController?.sourceView = button
+        controller.popoverPresentationController?.sourceRect = button.frame
+        controller.popoverPresentationController?.permittedArrowDirections = .left
+    }
+
+    /**
+     Request by the user to upload a recording
+     - parameter button: the button that was pressed
+     - parameter recording: the `Recording` to upload
+     */
+    func uploadRequest(button: UIButton, recording: Recording) {
+        recordingActivityLogic.upload(recording: recording)
+    }
+
+    /**
+     Request by the user to delete a recording
+     - parameter button: the button that was pressed
+     - parameter recording: the `Recording` to delete
+     */
+    func deleteRequest(button: UIButton, recording: Recording) {
+        recordingActivityLogic.delete(recording: recording)
     }
 }

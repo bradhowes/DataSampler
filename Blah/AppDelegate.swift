@@ -1,4 +1,4 @@
-//
+
 //  AppDelegate.swift
 //  Blah
 //
@@ -48,7 +48,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         let userSettings = UserSettings()
         let recordingsStore = RecordingsStore(userSettings: userSettings, runDataFactory: RunData.MakeRunData)
         let dropboxController = DropboxController(userSettings: userSettings, recordingsStore: recordingsStore)
-        let recordingActivityLogic = RecordingActivityLogic(store: recordingsStore, demoDriver: DemoDriver())
+        let recordingActivityLogic = RecordingActivityLogic(store: recordingsStore,
+                                                            dropboxController: dropboxController,
+                                                            demoDriver: DemoDriver())
 
         guard let rvc = window?.rootViewController as? TabBarController else {
             fatalError("expected TabBarController as first view controller")

@@ -9,6 +9,7 @@
 import Foundation
 import CoreData
 import JSQCoreDataKit
+import PDFGenerator
 
 public final class Recording : NSManagedObject, CoreDataEntityProtocol {
 
@@ -82,10 +83,12 @@ public final class Recording : NSManagedObject, CoreDataEntityProtocol {
 
     var isRecording: Bool { return startTime == endTime }
 
-    override public func willSave() {
-        super.willSave()
-        Logger.log("Recording.willSave - \(startTime) updated: \(isUpdated) deleted: \(isDeleted)")
-    }
+    let graphsFileName: String = "graphs.pdf"
+
+    lazy var logFileURL: URL = { return self.folder.appendingPathComponent(Logger.singleton.fileName) }()
+    lazy var eventsFileURL: URL = { return self.folder.appendingPathComponent(EventLog.singleton.fileName) }()
+    lazy var graphsFileURL: URL = { return self.folder.appendingPathComponent(self.graphsFileName) }()
+    lazy var sharableArtifacts: [URL] = { return [self.logFileURL, self.eventsFileURL, self.graphsFileURL] }()
 
     init(context: NSManagedObjectContext, userSettings: UserSettingsInterface, runData: RunDataInterface) {
         super.init(entity: Recording.entity(context: context), insertInto: context)
@@ -108,6 +111,16 @@ public final class Recording : NSManagedObject, CoreDataEntityProtocol {
         self.updateTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { (timer: Timer) in
             self.progress += 1.0
         }
+
+        // Create folder to hold the recording data
+        //
+        let fileManager = FileManager.default
+        do {
+            try fileManager.createDirectory(at: self.folder, withIntermediateDirectories: true, attributes: nil)
+            Logger.log("created recording directory")
+        } catch {
+            Logger.log("failed to create directory")
+        }
     }
 
     @objc
@@ -123,31 +136,23 @@ public final class Recording : NSManagedObject, CoreDataEntityProtocol {
         saveContext(context) { Logger.log("saveContext: \($0)") }
     }
 
-    func finished() {
+    func stopped(pdfRenderer: PDFRenderingInterface?) {
         Logger.log("Recording.finished")
 
         self.updateTimer?.invalidate()
         self.updateTimer = nil
-
         let now = Date()
         endTime = now.timeIntervalSinceReferenceDate
 
-        // Create folder to hold the recording data
+        // Generate PDF of the graphs
         //
-        let fileManager = FileManager.default
-        do {
-            try fileManager.createDirectory(at: self.folder, withIntermediateDirectories: true, attributes: nil)
-            Logger.log("created recording directory")
-        } catch {
-            Logger.log("failed to create directory")
-        }
-
-        let archivePath = folder.appendingPathComponent("runData.archive")
-        let archiveData = NSKeyedArchiver.archivedData(withRootObject: runData)
-
-        Logger.log("archiving run data: \(archiveData.count)")
+        var bytes: Int64 = pdfRenderer?.render(recording: self) ?? 0
         DispatchQueue.global().async {
-            var bytes : Int64 = Int64(archiveData.count)
+
+            let archivePath = self.folder.appendingPathComponent("runData.archive")
+            let archiveData = NSKeyedArchiver.archivedData(withRootObject: self.runData)
+            bytes += archiveData.count
+
             do {
                 try archiveData.write(to: archivePath)
             } catch {
@@ -156,11 +161,37 @@ public final class Recording : NSManagedObject, CoreDataEntityProtocol {
 
             Logger.save(to: self.folder) { bytes += $0 }
             EventLog.save(to: self.folder) { bytes += $0 }
-
             Logger.log("+ size: \(bytes)")
+
             self.size = bytes
             self.save()
         }
+    }
+
+    func uploadingRequested() {
+        uploaded = false
+        awaitingUpload = true
+        progress = 0.0
+        save()
+    }
+
+    func uploadingStarted() {
+        progress = 0.0
+        uploading = true
+    }
+
+    func uploadingCompleted() {
+        uploaded = true
+        uploading = false
+        awaitingUpload = false
+        progress = 1.0
+        save()
+    }
+
+    func uploadingFailed() {
+        progress = 0.0
+        uploading = false
+        save()
     }
 
     func delete() {
@@ -174,6 +205,5 @@ public final class Recording : NSManagedObject, CoreDataEntityProtocol {
 
         self.managedObjectContext?.delete(self)
         save()
-        //RecordingsStore.delete(recording: self)
     }
 }

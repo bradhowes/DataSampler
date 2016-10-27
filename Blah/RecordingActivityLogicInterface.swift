@@ -18,20 +18,22 @@ public protocol RecordingActivityLogicDependent: class {
 /**
  Protocol for a class that implements the `RecordingActivityLogic` interface.
  */
-public protocol RecordingActivityLogicInterface: class {
+public protocol RecordingActivityLogicInterface: class, PDFRenderingDependent {
 
     /// Entity that uses the contents of a recording for drawing.
     var visualizer: VisualizerInterface? { get set }
 
+    var canUpload: Bool { get }
+
     /**
      Start recording a new experiment
      */
-    func startRecording()
+    func start()
 
     /**
      Stop recording
      */
-    func stopRecording()
+    func stop()
 
     /**
      Delete the given recording
@@ -44,5 +46,8 @@ public protocol RecordingActivityLogicInterface: class {
      - parameter recording: instance to view
      */
     func select(recording: Recording)
-}
 
+    func share(recording: Recording)
+
+    func upload(recording: Recording)
+}

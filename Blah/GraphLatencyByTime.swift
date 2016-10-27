@@ -10,14 +10,23 @@ import UIKit
 import CorePlot
 import PDFGenerator
 
-final class GraphLatencyByTime: CPTGraphHostingView {
+final class GraphLatencyByTime: CPTGraphHostingView, Skinnable {
 
     static let kLatencyPlotId = NSString(string: "Latency")
     static let kAveragePlotId = NSString(string: "Avg")
     static let kMedianPlotId = NSString(string: "Median")
     static let kMissingPlotId = NSString(string: "Miss")
-    
+
     let kPlotSymbolSize: Double = 8.0
+
+    let displaySkin = DisplayGraphSkin()
+    let pdfSkin = PDFGraphSkin()
+
+    var activeSkin: GraphSkinInterface! {
+        didSet {
+            applySkin()
+        }
+    }
 
     var source: RunDataInterface! {
         willSet {
@@ -39,7 +48,7 @@ final class GraphLatencyByTime: CPTGraphHostingView {
 
     func sampleAdded(notification: Notification) {
         let info = RunDataNewSampleNotification(notification: notification)
-        guard let plots = hostedGraph?.allPlots() else { return }
+        guard let plots = hostedGraph?.allPlots() else { fatalError("missing plots")}
 
         plots.forEach {
             if $0.identifier === GraphLatencyByTime.kMissingPlotId {
@@ -57,13 +66,11 @@ final class GraphLatencyByTime: CPTGraphHostingView {
             updateBounds()
         }
         else {
-            DispatchQueue.main.async(execute: self.updateBounds)
+            DispatchQueue.main.async {self.updateBounds()}
         }
     }
 
-    var targetYMax: Double?
-
-    fileprivate lazy var labelStyle: CPTMutableTextStyle = {
+    fileprivate lazy var labelStyle: CPTTextStyle = {
         let labelStyle = CPTMutableTextStyle()
         labelStyle.color = CPTColor(componentRed: 0.0, green: 1.0, blue: 1.0, alpha: 0.75)
         labelStyle.fontSize = 12.0
@@ -73,27 +80,25 @@ final class GraphLatencyByTime: CPTGraphHostingView {
     fileprivate var annotation: CPTPlotSpaceAnnotation? = nil
     fileprivate var annotationIndex: Int = 0
 
-    fileprivate lazy var annotationStyle: CPTMutableTextStyle = {
-        let annotationStyle = CPTMutableTextStyle()
-        annotationStyle.color = self.labelStyle.color
-        annotationStyle.fontSize = 12.0
-        return annotationStyle
+    fileprivate lazy var plotSpace: CPTXYPlotSpace = {
+        return self.hostedGraph!.allPlotSpaces().last! as! CPTXYPlotSpace
     }()
 
-    fileprivate lazy var titleStyle: CPTMutableTextStyle = {
-        let titleStyle = CPTMutableTextStyle()
-        titleStyle.color = CPTColor(genericGray: 0.75)
-        titleStyle.fontSize = 11.0
-        return titleStyle
+    fileprivate lazy var xAxis: CPTXYAxis = {
+        return (self.hostedGraph!.axisSet! as! CPTXYAxisSet).xAxis!
     }()
 
-    fileprivate let latencyFormatter = PlotLatencyFormatter()
+    fileprivate lazy var yAxis: CPTXYAxis = {
+        return (self.hostedGraph!.axisSet! as! CPTXYAxisSet).yAxis!
+    }()
+
+    fileprivate lazy var latencyFormatter = PlotLatencyFormatter()
 
     private func makeGraph() {
 
         let graph = CPTXYGraph(frame: self.frame)
         hostedGraph = graph
-        
+
         graph.paddingLeft = 0.0
         graph.paddingRight = 0.0
         graph.paddingTop = 0.0
@@ -107,18 +112,6 @@ final class GraphLatencyByTime: CPTGraphHostingView {
         graph.plotAreaFrame?.paddingBottom = 35.0
         graph.plotAreaFrame?.paddingRight = 4.0
 
-        let axisLineStyle = CPTMutableLineStyle()
-        axisLineStyle.lineWidth = 0.75
-        axisLineStyle.lineColor = CPTColor(genericGray: 0.45)
-        
-        let gridLineStyle = CPTMutableLineStyle()
-        gridLineStyle.lineWidth = 0.75
-        gridLineStyle.lineColor = CPTColor.green().withAlphaComponent(0.75)
-        
-        let tickLineStyle = CPTMutableLineStyle()
-        tickLineStyle.lineWidth = 0.75
-        tickLineStyle.lineColor = CPTColor(genericGray: 0.25)
-        
         let plotSpace = CPTXYPlotSpace()
         graph.add(plotSpace)
         
@@ -129,64 +122,12 @@ final class GraphLatencyByTime: CPTGraphHostingView {
         plotSpace.xRange = CPTPlotRange(locationDecimal: 0.0, lengthDecimal: 100.0)
         plotSpace.yRange = CPTPlotRange(locationDecimal: 0.0, lengthDecimal: 1.0)
 
-        guard let axisSet = graph.axisSet as? CPTXYAxisSet else { return }
-        guard let x = axisSet.xAxis else { return }
-        x.plotSpace = plotSpace
+        xAxis.plotSpace = plotSpace
+        yAxis.plotSpace = plotSpace
 
-        // X axis
-        //
-        x.titleTextStyle = titleStyle
-        x.title = ""
-        x.titleOffset = 18.0
-        x.labelTextStyle = labelStyle
+        configureForDisplay()
 
-        x.axisLineStyle = gridLineStyle
-        x.labelOffset = -4.0
-
-        x.axisConstraints = CPTConstraints(lowerOffset: 0.0) // Keep the X axis from moving up/down when scrolling
-        x.labelingPolicy = .automatic
-        x.labelFormatter = PlotTimeFormatter()
-        
-        x.tickDirection = .negative
-        x.majorTickLineStyle = gridLineStyle
-        x.majorTickLength = 5.0
-        x.majorIntervalLength = 10
-
-        x.minorTickLineStyle = nil;
-        x.minorTickLength = 0
-        x.minorTicksPerInterval = 0;
-        
-        x.majorGridLineStyle = gridLineStyle
-        x.minorGridLineStyle = nil
-        
-        // Y axis
-        //
-        guard let y = axisSet.yAxis else { return }
-        y.plotSpace = plotSpace
-
-        y.titleTextStyle = nil
-        y.title = nil
-        y.labelRotation = CGFloat(M_PI_2)
-        
-        y.labelTextStyle = labelStyle
-        y.labelOffset = -3.0
-
-        y.axisLineStyle = gridLineStyle
-        y.axisConstraints = CPTConstraints(lowerOffset: 0.0)
-
-        y.labelingPolicy = .locationsProvided
-        y.labelFormatter = latencyFormatter
-
-        y.majorGridLineStyle = gridLineStyle
-        y.minorGridLineStyle = nil
-
-        y.majorTickLineStyle = gridLineStyle
-        x.tickDirection = .negative
-        y.majorTickLength = 5.0
-
-        y.minorTickLineStyle = nil
-
-        graph.axisSet!.axes = [x, y]
+        graph.axisSet!.axes = [xAxis, yAxis]
 
         makeMissingPlot(graph: graph, plotSpace: plotSpace)
         makeAveragePlot(graph: graph, plotSpace: plotSpace)
@@ -195,6 +136,62 @@ final class GraphLatencyByTime: CPTGraphHostingView {
         makeLegend(graph: graph)
 
         updateBounds()
+    }
+
+    private func applySkin() {
+        xAxis.titleTextStyle = activeSkin.titleStyle
+        xAxis.labelTextStyle = activeSkin.labelStyle
+        xAxis.axisLineStyle = activeSkin.gridLineStyle
+        xAxis.majorTickLineStyle = activeSkin.gridLineStyle
+
+        yAxis.titleTextStyle = activeSkin.titleStyle
+        yAxis.labelTextStyle = activeSkin.labelStyle
+        yAxis.axisLineStyle = activeSkin.gridLineStyle
+        yAxis.majorTickLineStyle = activeSkin.gridLineStyle
+        yAxis.majorGridLineStyle = activeSkin.gridLineStyle
+    }
+    
+    private func configureGraph() {
+        xAxis.title = ""
+        xAxis.titleOffset = 18.0
+        xAxis.labelOffset = -4.0
+        xAxis.axisConstraints = CPTConstraints(lowerOffset: 0.0) // Keep the X axis from moving up/down when scrolling
+        xAxis.labelingPolicy = .automatic
+        xAxis.labelFormatter = PlotTimeFormatter()
+        xAxis.tickDirection = .negative
+        xAxis.majorTickLength = 2.5
+        xAxis.majorIntervalLength = 10
+        xAxis.minorTickLineStyle = nil;
+        xAxis.minorTickLength = 0
+        xAxis.minorTicksPerInterval = 0;
+        xAxis.minorGridLineStyle = nil
+
+        // Y axis
+        //
+        yAxis.titleTextStyle = nil
+        yAxis.title = nil
+        yAxis.labelRotation = CGFloat(M_PI_2)
+        yAxis.labelTextStyle = labelStyle
+        yAxis.labelOffset = -3.0
+        yAxis.axisConstraints = CPTConstraints(lowerOffset: 0.0)
+        yAxis.labelingPolicy = .locationsProvided
+        yAxis.labelFormatter = latencyFormatter
+        yAxis.minorGridLineStyle = nil
+        yAxis.tickDirection = .negative
+        yAxis.majorTickLength = 5.0
+        yAxis.minorTickLineStyle = nil
+    }
+
+    private func configureForDisplay() {
+        configureGraph()
+        activeSkin = displaySkin
+        yAxis.labelingPolicy = .locationsProvided
+    }
+
+    private func configureForPDF() {
+        configureGraph()
+        activeSkin = pdfSkin
+        yAxis.labelingPolicy = .automatic
     }
 
     private func makeLegend(graph: CPTXYGraph) {
@@ -206,7 +203,7 @@ final class GraphLatencyByTime: CPTGraphHostingView {
         legend.isHidden = true
         legend.fill = CPTFill(color: CPTColor.darkGray().withAlphaComponent(0.5))
 
-        legend.textStyle = titleStyle;
+        legend.textStyle = displaySkin.titleStyle;
 
         let lineStyle = CPTMutableLineStyle()
         lineStyle.lineWidth = 0.75
@@ -263,7 +260,6 @@ final class GraphLatencyByTime: CPTGraphHostingView {
     }
 
     private func makeAveragePlot(graph: CPTXYGraph, plotSpace: CPTXYPlotSpace) {
-        
         let plot = CPTScatterPlot()
         plot.identifier = GraphLatencyByTime.kAveragePlotId
         plot.dataSource = self
@@ -320,19 +316,44 @@ final class GraphLatencyByTime: CPTGraphHostingView {
     }
 
     private func updateTitle() {
-        guard let axisSet = hostedGraph?.axisSet as? CPTXYAxisSet else { return }
-        guard let x = axisSet.xAxis else { return }
-
         if !source.name.isEmpty {
-            x.title = String(format: "%@ - %lds Intervals", source.name, source.emitInterval)
+            xAxis.title = String(format: "%@ - %lds Intervals", source.name, source.emitInterval)
         }
         else {
-            x.title = String(format: "%lds Intervals", source.emitInterval)
+            xAxis.title = String(format: "%lds Intervals", source.emitInterval)
         }
 
-        Logger.log("new title: \(x.title)")
+        Logger.log("new title: \(xAxis.title)")
     }
-    
+
+    func renderPDF(context: CGContext, mediaBox: CGRect, margin: CGFloat) {
+        let savedSize = self.bounds.size
+        defer {
+            context.restoreGState()
+            context.endPDFPage()
+            configureForDisplay()
+            bounds.size = savedSize
+            hostedGraph?.reloadData()
+            updateTitle()
+            updateBounds(onePage: false)
+            setNeedsDisplay()
+        }
+
+        self.bounds.size.width = mediaBox.size.height - 2.0 * margin
+        self.bounds.size.height = mediaBox.size.width - 2.0 * margin
+
+        context.beginPDFPage(nil)
+        context.saveGState()
+        context.translateBy(x: mediaBox.width - margin, y: margin)
+        context.rotate(by: CGFloat.pi / 2.0)
+
+        configureForPDF()
+        hostedGraph?.reloadData()
+        updateTitle()
+        updateBounds(onePage: true)
+        hostedGraph?.layoutAndRender(in: context)
+    }
+
     func reload() {
         if Thread.isMainThread {
             self.hostedGraph?.reloadData()
@@ -341,7 +362,7 @@ final class GraphLatencyByTime: CPTGraphHostingView {
             self.setNeedsDisplay()
         }
         else {
-            DispatchQueue.main.async(execute: self.reload)
+            DispatchQueue.main.async() {self.reload()}
         }
     }
 
@@ -363,8 +384,7 @@ final class GraphLatencyByTime: CPTGraphHostingView {
         return source.samples[x0..<x1].map({$0.latency}).minMax()
     }
 
-    private func updateBounds() {
-        guard let plotSpace = hostedGraph?.allPlotSpaces().last as? CPTXYPlotSpace else { return }
+    private func updateBounds(onePage: Bool = false) {
         let plotData = source.samples
         let visiblePoints = calculatePlotWidth() * source.estArrivalInterval
 
@@ -374,12 +394,17 @@ final class GraphLatencyByTime: CPTGraphHostingView {
         if plotData.count > 0 {
             let tmp = plotData.last!
             let xPos = xValueFor(sample: tmp)
-            if xPos > xMax {
-                xMin = xPos - xMax
+            if onePage {
                 xMax = xPos
             }
-            else if xPos < xMax {
-                xMax = xPos
+            else {
+                if xPos > xMax {
+                    xMin = xPos - xMax
+                    xMax = xPos
+                }
+                else if xPos < xMax {
+                    xMax = xPos
+                }
             }
         }
 
@@ -403,36 +428,39 @@ final class GraphLatencyByTime: CPTGraphHostingView {
             let oldRange = plotSpace.xRange
             let newRange = CPTMutablePlotRange(location: NSNumber(value: xMin), length: NSNumber(value: xMax - xMin))
             newRange.expand(byFactor: 1.05)
-            CPTAnimation.animate(plotSpace, property: "xRange", from: oldRange, to: newRange, duration: 0.25)
+            CPTAnimation.animate(plotSpace, property: "xRange", from: oldRange, to: newRange, duration: 0.125)
         }
 
-        updateYRange()
+        updateYRange(onePage: onePage)
     }
 
-    fileprivate func updateYRange() {
-        guard let plotSpace = hostedGraph?.allPlotSpaces().last as? CPTXYPlotSpace else { return }
-        guard let axisSet = hostedGraph?.axisSet as? CPTXYAxisSet else { return }
-        guard let x = axisSet.xAxis else { return }
-        guard let y = axisSet.yAxis else { return }
-
+    fileprivate func calculateYRange() -> CPTMutablePlotRange {
         let xRange = plotSpace.xRange
         let yMinMax = findMinMaxInRange(range: xRange) ?? (0.0, 10.0)
         let yMax = floor(yMinMax.max + 0.9)
-        
-        if targetYMax != yMax {
-            targetYMax = yMax
-            let yRange = CPTMutablePlotRange(location: NSNumber(value: 0.0), length: NSNumber(value: yMax))
-            y.majorTickLocations = Set<NSNumber>([0, yMax / 2, yMax].map { NSNumber(value: $0) })
-            y.visibleAxisRange = yRange
-            y.visibleRange = yRange
-            x.gridLinesRange = yRange
+        let yRange = CPTMutablePlotRange(location: NSNumber(value: 0.0), length: NSNumber(value: yMax))
+        return yRange
+    }
 
-            yRange.expand(byFactor: 1.05)
-            let oldRange = plotSpace.yRange
-            CPTAnimation.animate(plotSpace, property: "yRange", from: oldRange, to: yRange, duration: 0.25)
+    fileprivate func updateYRange(onePage: Bool = false) {
+        let yRange = calculateYRange()
+        let yMax = yRange.endDouble
+
+        yAxis.majorTickLocations = Set<NSNumber>([0, yMax / 2.0, yMax].map { NSNumber(value: $0) })
+        yAxis.visibleAxisRange = yRange
+        yAxis.visibleRange = yRange
+        yAxis.gridLinesRange = plotSpace.xRange
+        xAxis.gridLinesRange = yRange
+
+        yRange.expand(byFactor: 1.05)
+
+        if onePage {
+            plotSpace.yRange = yRange
         }
-
-        y.gridLinesRange = xRange
+        else {
+            let oldRange = plotSpace.yRange
+            CPTAnimation.animate(plotSpace, property: "yRange", from: oldRange, to: yRange, duration: 0.125)
+        }
     }
 }
 
@@ -480,7 +508,6 @@ extension GraphLatencyByTime: CPTScatterPlotDataSource {
 extension GraphLatencyByTime: CPTPlotSpaceDelegate {
     
     func plotSpace(_ space: CPTPlotSpace, didChangePlotRangeFor coordinate: CPTCoordinate) {
-        guard let plotSpace = space as? CPTXYPlotSpace else { return }
         switch coordinate {
         case .Y:
             let yRange = plotSpace.yRange
@@ -524,7 +551,7 @@ extension GraphLatencyByTime: CPTScatterPlotDelegate {
         let y = sample.latency
 
         let tag = latencyFormatter.string(from: NSNumber(value: y)) ?? "???"
-        let textLayer = CPTTextLayer(text: "\(sample.identifier): " + tag, style: annotationStyle)
+        let textLayer = CPTTextLayer(text: "\(sample.identifier): " + tag, style: displaySkin.annotationStyle)
         textLayer.fill = CPTFill(color: CPTColor.black().withAlphaComponent(0.6))
         let pos = [NSNumber(value: x), NSNumber(value: y)]
         let plotSpace = hostedGraph!.allPlotSpaces().last as! CPTXYPlotSpace
@@ -539,26 +566,5 @@ extension GraphLatencyByTime: CPTScatterPlotDelegate {
             self.annotation?.displacement = CGPoint(x: -xOffset, y: 0.0)
         }
         hostedGraph?.plotAreaFrame?.plotArea?.addAnnotation(self.annotation)
-    }
-}
-
-extension GraphLatencyByTime: PDFRenderable {
-
-    var pdfContent: PDFPage {
-        get {
-            let graph = self.hostedGraph! as! CPTXYGraph
-            let plotSpace = graph.plotSpace(at: 0) as! CPTXYPlotSpace
-            let savedXRange = plotSpace.xRange
-            let savedYRange = plotSpace.yRange
-            plotSpace.xRange = plotSpace.globalXRange!
-            plotSpace.yRange = plotSpace.globalYRange!
-            defer {
-                plotSpace.xRange = savedXRange
-                plotSpace.yRange = savedYRange
-            }
-
-            let data = graph.dataForPDFRepresentationOfLayer()
-            return PDFPage.binary(data)
-        }
     }
 }

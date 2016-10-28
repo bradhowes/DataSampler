@@ -22,7 +22,7 @@ final class RecordingsStore : NSObject, RecordingsStoreInterface {
     private(set) var isReady: Bool
 
     /**
-     Intiialize new instance. The store may not be available for some time for requests. It will send out a notification
+     Intialize new instance. The store may not be available for some time for requests. It will send out a notification
      when it is ready.
      - parameter userSettings: user settings that control some aspects of new `Recording` objects.
      - parameter runDataFactory: a factory method used to create `RunData` objects

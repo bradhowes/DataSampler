@@ -18,10 +18,12 @@ public protocol RecordingActivityLogicDependent: class {
 /**
  Protocol for a class that implements the `RecordingActivityLogic` interface.
  */
-public protocol RecordingActivityLogicInterface: class, PDFRenderingDependent {
+public protocol RecordingActivityLogicInterface: class {
 
     /// Entity that uses the contents of a recording for drawing.
-    var visualizer: VisualizerInterface? { get set }
+    var visualizer: VisualizerInterface! { get set }
+
+    var pdfRenderer: PDFRenderingInterface! { get set }
 
     var canUpload: Bool { get }
 

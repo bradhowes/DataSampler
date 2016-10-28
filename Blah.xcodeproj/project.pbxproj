@@ -73,7 +73,7 @@
 		BD87F5A51D8ADDE0007A6F99 /* Histogram.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD87F5A41D8ADDE0007A6F99 /* Histogram.swift */; };
 		BD981C5F1DAFAC0F00F18078 /* TabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD981C5E1DAFAC0F00F18078 /* TabBarController.swift */; };
 		BD981C631DB133F900F18078 /* SampleInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD981C621DB133F900F18078 /* SampleInterface.swift */; };
-		BD9AA0811DAE67FB00C8F7BD /* ConfigurableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD9AA0801DAE67FB00C8F7BD /* ConfigurableCell.swift */; };
+		BD9AA0811DAE67FB00C8F7BD /* ActionableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD9AA0801DAE67FB00C8F7BD /* ActionableCell.swift */; };
 		BD9AA0831DAE687300C8F7BD /* RecordingTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD9AA0821DAE687300C8F7BD /* RecordingTableViewCell.swift */; };
 		BDA9CA881D8BF1CB0028991F /* HistogramBinFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDA9CA871D8BF1CB0028991F /* HistogramBinFormatter.swift */; };
 		BDBB025B1DA45942000838E0 /* LowerViewManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBB025A1DA45942000838E0 /* LowerViewManager.swift */; };
@@ -96,6 +96,7 @@
 		BDFF8AC61DC0CF9200AB2FA8 /* SharingInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDFF8AC51DC0CF9200AB2FA8 /* SharingInterface.swift */; };
 		BDFF8AC81DC1261A00AB2FA8 /* GraphSkin.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDFF8AC71DC1261A00AB2FA8 /* GraphSkin.swift */; };
 		BDFF8ACA1DC218DE00AB2FA8 /* Dispatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDFF8AC91DC218DE00AB2FA8 /* Dispatch.swift */; };
+		BDFF8ACC1DC3585000AB2FA8 /* ConfigurableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDFF8ACB1DC3585000AB2FA8 /* ConfigurableCell.swift */; };
 		CE6535F626638F337BDB06FC /* Pods_Blah.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ACDA023CC4D206794F87C46E /* Pods_Blah.framework */; };
 /* End PBXBuildFile section */
 
@@ -191,7 +192,7 @@
 		BD87F5A41D8ADDE0007A6F99 /* Histogram.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Histogram.swift; sourceTree = "<group>"; };
 		BD981C5E1DAFAC0F00F18078 /* TabBarController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TabBarController.swift; sourceTree = "<group>"; };
 		BD981C621DB133F900F18078 /* SampleInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SampleInterface.swift; path = Interfaces/SampleInterface.swift; sourceTree = "<group>"; };
-		BD9AA0801DAE67FB00C8F7BD /* ConfigurableCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConfigurableCell.swift; sourceTree = "<group>"; };
+		BD9AA0801DAE67FB00C8F7BD /* ActionableCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActionableCell.swift; sourceTree = "<group>"; };
 		BD9AA0821DAE687300C8F7BD /* RecordingTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RecordingTableViewCell.swift; sourceTree = "<group>"; };
 		BDA9CA871D8BF1CB0028991F /* HistogramBinFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HistogramBinFormatter.swift; sourceTree = "<group>"; };
 		BDA9CA8B1D8BFADF0028991F /* HistorgramTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HistorgramTests.swift; sourceTree = "<group>"; };
@@ -215,6 +216,7 @@
 		BDFF8AC51DC0CF9200AB2FA8 /* SharingInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SharingInterface.swift; sourceTree = "<group>"; };
 		BDFF8AC71DC1261A00AB2FA8 /* GraphSkin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GraphSkin.swift; sourceTree = "<group>"; };
 		BDFF8AC91DC218DE00AB2FA8 /* Dispatch.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Dispatch.swift; sourceTree = "<group>"; };
+		BDFF8ACB1DC3585000AB2FA8 /* ConfigurableCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConfigurableCell.swift; sourceTree = "<group>"; };
 		F34C4E5F49323E86C7948436 /* Pods-BlahTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BlahTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-BlahTests/Pods-BlahTests.debug.xcconfig"; sourceTree = "<group>"; };
 		F657859C3132944BCAC76486 /* Pods-BlahTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BlahTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-BlahTests/Pods-BlahTests.release.xcconfig"; sourceTree = "<group>"; };
 		FF00F94554101A88F19C9D5D /* Pods-Blah.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Blah.release.xcconfig"; path = "Pods/Target Support Files/Pods-Blah/Pods-Blah.release.xcconfig"; sourceTree = "<group>"; };
@@ -360,6 +362,8 @@
 		BD981C611DB132D100F18078 /* Interfaces */ = {
 			isa = PBXGroup;
 			children = (
+				BD9AA0801DAE67FB00C8F7BD /* ActionableCell.swift */,
+				BDFF8ACB1DC3585000AB2FA8 /* ConfigurableCell.swift */,
 				BD981C621DB133F900F18078 /* SampleInterface.swift */,
 				BDFF8AB91DBF9B5600AB2FA8 /* RunDataInterface.swift */,
 				BDFF8ABB1DBF9B8700AB2FA8 /* DropboxControllerInterface.swift */,
@@ -393,7 +397,6 @@
 			isa = PBXGroup;
 			children = (
 				BD87F5981D8A2AD1007A6F99 /* PlotsViewController.swift */,
-				BD9AA0801DAE67FB00C8F7BD /* ConfigurableCell.swift */,
 				BDBB025C1DA45983000838E0 /* LowerView.swift */,
 				BDBB025A1DA45942000838E0 /* LowerViewManager.swift */,
 				BDFF8AC71DC1261A00AB2FA8 /* GraphSkin.swift */,
@@ -763,10 +766,11 @@
 				BD17D04D1D8E8BC200A18062 /* RunData.swift in Sources */,
 				BD75649F1D99B0B700CE455F /* Logger.swift in Sources */,
 				BDFF8ABC1DBF9B8700AB2FA8 /* DropboxControllerInterface.swift in Sources */,
+				BDFF8ACC1DC3585000AB2FA8 /* ConfigurableCell.swift in Sources */,
 				BD73D3611DAB6E5000845EEF /* RecordingActivityLogic.swift in Sources */,
 				BDDC9D781D8AFC4100C36430 /* GraphLatencyHistogram.swift in Sources */,
 				BDBB025B1DA45942000838E0 /* LowerViewManager.swift in Sources */,
-				BD9AA0811DAE67FB00C8F7BD /* ConfigurableCell.swift in Sources */,
+				BD9AA0811DAE67FB00C8F7BD /* ActionableCell.swift in Sources */,
 				BDFF8AC01DBF9BDA00AB2FA8 /* VisualizerInterface.swift in Sources */,
 				BD8508911DAD153700BE3B53 /* Recording+CoreDataProperties.swift in Sources */,
 				BD981C5F1DAFAC0F00F18078 /* TabBarController.swift in Sources */,

@@ -126,6 +126,10 @@ final class PlotsViewController: UIViewController, RecordingActivityLogicDepende
     }
 }
 
+/** 
+ Implementation of VisualizerInterface. Sets the `source` properties of the two graphs using attributes from the given
+ `RunDataInterface` instance.
+ */
 extension PlotsViewController: VisualizerInterface {
     func visualize(dataSource: RunDataInterface) {
         self.plotView.source = dataSource
@@ -133,13 +137,32 @@ extension PlotsViewController: VisualizerInterface {
     }
 }
 
+/**
+ Implementation of the PDFRenderingInterface. Creates a PDF document containing two images, one for the latency plot and
+ the other for the histogram.
+ */
 extension PlotsViewController: PDFRenderingInterface {
 
+    /**
+     Generate PDF of the two graphs showing data for the given `Recording` instance.
+     - parameter recording: the `Recording` to render
+     - returns: the size in bytes of the resulting PDF
+     */
     func render(recording: Recording) -> Int64 {
+
+        // Use the recording data in the graphs
+        //
         visualize(dataSource: recording.runData)
 
-        let margin: CGFloat = 50.0
-        var mediaBox = CGRect(x: 0.0, y: 0.0, width: 850.0, height: 1100.0)
+        // US letter: 612x792
+        // A4 letter: 595x842
+        //
+        let margin: CGFloat = 72.0
+        var mediaBox = CGRect(x: 0.0, y: 0.0, width: 612.0, height: 792.0)
+        // var mediaBox = CGRect(x: 0.0, y: 0.0, width: 595.0, height: 842.0)
+
+        // Render into memory
+        //
         let pdfData = NSMutableData()
         guard let dataConsumer = CGDataConsumer(data: pdfData),
             let pdfContext = CGContext(consumer: dataConsumer, mediaBox: &mediaBox, nil) else {
@@ -152,6 +175,8 @@ extension PlotsViewController: PDFRenderingInterface {
         pdfContext.closePDF()
         print("pdfData.length: \(pdfData.length)")
 
+        // Save PDF to disk
+        //
         do {
             try pdfData.write(to: recording.graphsFileURL, options: .atomic)
         } catch {

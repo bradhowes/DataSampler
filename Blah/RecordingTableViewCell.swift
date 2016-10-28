@@ -12,25 +12,57 @@ import CircleProgressView
 import MGSwipeTableCell
 import PDFGenerator
 
-final class RecordingTableViewCell: MGSwipeTableCell {
+/**
+ Functionality for a cell in the `RecordingsTableView` view. Each cell shows information about an associated `Recording`
+ instance. Swiping on the cell reveals action buttons:
 
-    enum Button: Int {
+ - left swipe: Delete button
+ - right swipe: Dropbox upload button, share button
+ 
+ Since this is purely a view class, all activity for the action buttons is perfomed by the `ActionableCellHandler`
+ instance set in the `actionHandler` property.
+ */
+
+final class RecordingsTableViewCell: MGSwipeTableCell, ActionableCell {
+
+    enum Action: Int {
         case upload, share, delete
     }
 
     @IBOutlet weak var title: UITextView!
     @IBOutlet weak var detail: UITextView!
 
-    fileprivate var activityHandler: CellActivityHandler!
+    weak var actionHandler: ActionableCellHandler!
+
     fileprivate var recording: Recording!
+
+    func actionComplete() {
+        hideSwipe(animated: true)
+    }
+
+    fileprivate static let Actions: [(side: MGSwipeDirection, action: Action)] = [
+        (side: .leftToRight, action: .upload),
+        (side: .leftToRight, action: .share),
+        (side: .rightToLeft, action: .delete)
+    ]
+
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        actionHandler = nil
+        recording = nil
+    }
 }
 
-extension RecordingTableViewCell: ConfigurableCell {
+/** 
 
-    func configure(dataSource recording: Recording, activityHandler: CellActivityHandler) {
+ */
+extension RecordingsTableViewCell: ConfigurableCell {
+
+    typealias DataSource = Recording
+
+    func configure(dataSource recording: DataSource) {
 
         self.recording = recording
-        self.activityHandler = activityHandler
         self.delegate = self
 
         textLabel?.text = recording.displayName
@@ -83,38 +115,41 @@ extension RecordingTableViewCell: ConfigurableCell {
         leftSwipeSettings.transition = .drag
         rightSwipeSettings.transition = .drag
 
-        if !recording.isRecording {
-            if !recording.uploading {
-                if activityHandler.canUpload {
-                    leftButtons.append(MGSwipeButton(title: "", icon: UIImage(named:"upload.png"),
-                                                     backgroundColor: UIColor.white))
-                    leftButtons.last!.tag = Button.upload.rawValue
+        for (dir, action) in RecordingsTableViewCell.Actions {
+            if actionHandler.canPerform(action: action, recording: recording) {
+                switch action {
+                case .upload:
+                    leftButtons.append(MGSwipeButton(title: "", icon: UIImage(named: "upload.png"),
+                                                                              backgroundColor: UIColor.white))
+                case .share:
+                    leftButtons.append(MGSwipeButton(title: "", icon: UIImage(named: "share.png"),
+                                                                              backgroundColor: UIColor.white))
+                case .delete:
+                    rightButtons.append(MGSwipeButton(title: "Delete", backgroundColor: UIColor.red))
                 }
-                rightButtons.append(MGSwipeButton(title: "Delete", backgroundColor: UIColor.red))
-                rightButtons.last!.tag = Button.delete.rawValue
+
+                switch dir {
+                case .leftToRight: leftButtons.last!.tag = action.rawValue
+                case .rightToLeft: rightButtons.last!.tag = action.rawValue
+                }
             }
-            leftButtons.append(MGSwipeButton(title: "", icon: UIImage(named:"share.png"),
-                                             backgroundColor: UIColor.white))
-            leftButtons.last!.tag = Button.share.rawValue
         }
     }
 }
 
-extension RecordingTableViewCell: MGSwipeTableCellDelegate {
+extension RecordingsTableViewCell: MGSwipeTableCellDelegate {
 
     func swipeTableCell(_ cell: MGSwipeTableCell, tappedButtonAt index: Int, direction: MGSwipeDirection,
                         fromExpansion: Bool) -> Bool {
         switch direction {
-        case .rightToLeft: activityHandler.deleteRequest(button: rightButtons[index] as! UIButton, recording: recording)
+        case .rightToLeft:
+            let button = rightButtons[index]
+            let tag = Action(rawValue: button.tag)!
+            return actionHandler.performRequest(action: tag, cell: self, button: button, recording: recording)
         case .leftToRight:
-            let button = leftButtons[index] as! UIButton
-            if button.tag == Button.upload.rawValue {
-                activityHandler.uploadRequest(button: button, recording: recording)
-            }
-            else if button.tag == Button.share.rawValue {
-                activityHandler.shareRequest(button: button, recording: recording)
-            }
+            let button = leftButtons[index]
+            let tag = Action(rawValue: button.tag)!
+            return actionHandler.performRequest(action: tag, cell: self, button: button, recording: recording)
         }
-        return true
     }
 }

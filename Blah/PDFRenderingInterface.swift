@@ -8,10 +8,6 @@
 
 import Foundation
 
-public protocol PDFRenderingDependent: class {
-    var pdfRenderer: PDFRenderingInterface! { get set }
-}
-
 /**
  Protocol for visualizing the contents of a recording.
  */

@@ -11,12 +11,12 @@ import Foundation
 /** 
  Manages state changes to `Recording` instances.
  */
-final class RecordingActivityLogic: NSObject, RecordingActivityLogicInterface, PDFRenderingDependent {
+final class RecordingActivityLogic: NSObject, RecordingActivityLogicInterface {
 
     /// Object that can render the graphs using `Recording` data.
-    weak var visualizer: VisualizerInterface? {
+    weak var visualizer: VisualizerInterface! {
         didSet {
-            visualizer?.visualize(dataSource: newRunData())
+            visualizer.visualize(dataSource: newRunData())
         }
     }
 
@@ -53,7 +53,7 @@ final class RecordingActivityLogic: NSObject, RecordingActivityLogicInterface, P
         selectedRecording = currentRecording
         Logger.clear()
         EventLog.clear()
-        visualizer?.visualize(dataSource: currentRecording!.runData)
+        visualizer.visualize(dataSource: currentRecording!.runData)
         demoDriver.start(runData: currentRecording!.runData)
     }
 
@@ -70,7 +70,7 @@ final class RecordingActivityLogic: NSObject, RecordingActivityLogicInterface, P
     func select(recording: Recording) {
         if selectedRecording != recording {
             selectedRecording = recording
-            visualizer?.visualize(dataSource: recording.runData)
+            visualizer.visualize(dataSource: recording.runData)
             // pdfRenderer.render(recording: recording) // !!!
             Logger.restore(from: recording.folder)
             EventLog.restore(from: recording.folder)
@@ -81,7 +81,7 @@ final class RecordingActivityLogic: NSObject, RecordingActivityLogicInterface, P
         if selectedRecording == recording {
             selectedRecording = nil
             let runData = newRunData()
-            visualizer?.visualize(dataSource: runData)
+            visualizer.visualize(dataSource: runData)
             Logger.clear()
             EventLog.clear()
         }

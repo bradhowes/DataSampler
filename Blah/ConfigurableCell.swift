@@ -2,23 +2,22 @@
 //  ConfigurableCell.swift
 //  Blah
 //
-//  Created by Brad Howes on 10/12/16.
+//  Created by Brad Howes on 10/28/16.
 //  Copyright © 2016 Brad Howes. All rights reserved.
 //
 
-import UIKit
+import Foundation
 
-protocol CellActivityHandler: class {
-    var canUpload: Bool { get }
-
-    func shareRequest(button: UIButton, recording: Recording)
-    func uploadRequest(button: UIButton, recording: Recording)
-    func deleteRequest(button: UIButton, recording: Recording)
-}
-
+/**
+ Defines interface for a UITableViewCell that can be configured
+ */
 protocol ConfigurableCell: class {
 
-    associatedtype DataSource
+    associatedtype Model
 
-    func configure(dataSource: DataSource, activityHandler: CellActivityHandler)
+    /**
+     Configure a UITableViewCell
+     - parameter activityHandler: object to handle the processing of any cell buttons
+     */
+    func configure(dataSource: Model)
 }

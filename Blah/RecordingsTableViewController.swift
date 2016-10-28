@@ -12,12 +12,17 @@ import JSQCoreDataKit
 import MGSwipeTableCell
 
 /**
- Manages a view of recordings
+ Manages a view of recordings. All activity below should be focused on table view management. Business logic 
+ functionality is relegated to the `RecordingActivityLogicInterface` instance held in the `recordingActivityLogic`
+ property.
  */
 final class RecordingsTableViewController: UITableViewController, NSFetchedResultsControllerDelegate,
 RecordingsStoreDependent, RecordingActivityLogicDependent {
 
-    /// Source for recordings. The Core Data stack may not be ready when we receive this dependency so be careful
+    /** 
+     Source for recordings. The Core Data stack may not be ready when we receive this dependency so be careful.
+     Dependency injected by AppDelegate.
+     */
      var recordingsStore: RecordingsStoreInterface! {
         didSet {
             if recordingsStore.isReady {
@@ -30,6 +35,7 @@ RecordingsStoreDependent, RecordingActivityLogicDependent {
         }
     }
 
+    /// Dependency injected by AppDelegate
     var recordingActivityLogic: RecordingActivityLogicInterface!
 
     private var fetcher: NSFetchedResultsController<Recording>!
@@ -51,18 +57,29 @@ RecordingsStoreDependent, RecordingActivityLogicDependent {
         fetchRecordings()
         tableView.reloadData()
 
+        // Detect two-tap gesture and show plot view when it happens
+        //
         let twoTapGesture = UITapGestureRecognizer(target: self, action: #selector(doubleTappedCell))
         twoTapGesture.numberOfTapsRequired = 2
         twoTapGesture.numberOfTouchesRequired = 1
         tableView.addGestureRecognizer(twoTapGesture)
 
+        // Monitor for Dropbox linking activity so we can update the cells to reflect Dropbox upload capability
+        //
         DropboxControllerNotification.observe(observer: self, selector: #selector(updateUploadButtons))
     }
 
+    /** 
+     Dropbox linking changed. Show or hide Dropbox upload buttons
+     */
     func updateUploadButtons(notification: Notification) {
         self.tableView.reloadRows(at: self.tableView.indexPathsForVisibleRows ?? [], with: .none)
     }
 
+    /**
+     User double-dapped on cell. Show the plot views.
+     - parameter sender: gesture recognizer (ignored)
+     */
     func doubleTappedCell(sender: UITapGestureRecognizer) {
         tabBarController?.selectedIndex = 0
     }
@@ -127,8 +144,10 @@ RecordingsStoreDependent, RecordingActivityLogicDependent {
      */
     private func configureCell(_ cell: UITableViewCell, atIndexPath indexPath: IndexPath) {
         guard let recording = fetcher?.object(at: indexPath) else { return }
-        guard let cell = cell as? RecordingTableViewCell else { fatalError("unexpected UITableViewCell") }
-        cell.configure(dataSource: recording, activityHandler: self)
+        guard let cell = cell as? RecordingsTableViewCell else { fatalError("unexpected UITableViewCell") }
+
+        cell.actionHandler = self
+        cell.configure(dataSource: recording)
         cell.accessoryType = recording == selectedRecording ? .checkmark : .none
     }
 
@@ -436,45 +455,71 @@ RecordingsStoreDependent, RecordingActivityLogicDependent {
     }
 }
 
-// MARK: CellActivityHandler
+// MARK: ActionableCellHandler
 
-extension RecordingsTableViewController: CellActivityHandler {
+/** 
+ Handle action requests from the table view cell. This extension only handles view aspects of the actions. Actual 
+ processing is done by an RecordingActivityLogic instance.
+ */
+extension RecordingsTableViewController: ActionableCellHandler {
 
-    /// Determine if the cell can upload to Dropbox
-    var canUpload: Bool {
-        return self.recordingActivityLogic.canUpload
+    /**
+     Determine if an action can be performed right now
+     - parameter action: the kind of action to perform
+     - parameter recording: the recording the action will be performed on
+     - returns: true if it can
+     */
+    func canPerform<T>(action: T, recording: Recording) -> Bool {
+        let action = action as! RecordingsTableViewCell.Action
+        if recording.isRecording { return false }
+        if action == .upload { return recordingActivityLogic.canUpload }
+        return true
     }
 
     /**
-     Request by the user to share the contents of a recording
-     - parameter button: the button that was pressed
-     - parameter recording: the `Recording` to share
+     Process an action request on a recording
+     - parameter action: the kind of action to perform
+     - parameter cell: the cell that was acted on
+     - parameter button: the button in the cell that was pressed
+     - parameter recording: the recording to act on
+     - returns: true to dismiss the button now
      */
-    func shareRequest(button: UIButton, recording: Recording) {
-        let objectsToShare = recording.sharableArtifacts
-        let controller = UIActivityViewController(activityItems: objectsToShare, applicationActivities: nil)
-        controller.modalPresentationStyle = .popover
-        self.present(controller, animated: true, completion: nil)
-        controller.popoverPresentationController?.sourceView = button
-        controller.popoverPresentationController?.sourceRect = button.frame
-        controller.popoverPresentationController?.permittedArrowDirections = .left
-    }
+    func performRequest<T>(action: T, cell: ActionableCell, button: UIView, recording: Recording) -> Bool {
+        let action = action as! RecordingsTableViewCell.Action
+        switch action {
+        case .upload:
+            recordingActivityLogic.upload(recording: recording)
+            return true
 
-    /**
-     Request by the user to upload a recording
-     - parameter button: the button that was pressed
-     - parameter recording: the `Recording` to upload
-     */
-    func uploadRequest(button: UIButton, recording: Recording) {
-        recordingActivityLogic.upload(recording: recording)
-    }
+        case .share:
+            let objectsToShare = recording.sharableArtifacts
 
-    /**
-     Request by the user to delete a recording
-     - parameter button: the button that was pressed
-     - parameter recording: the `Recording` to delete
-     */
-    func deleteRequest(button: UIButton, recording: Recording) {
-        recordingActivityLogic.delete(recording: recording)
+            // Present a popup showing the various ways to share the content. Once chosen or dismissed, hide the button 
+            // in the table cell.
+            //
+            let controller = UIActivityViewController(activityItems: objectsToShare, applicationActivities: nil)
+            controller.modalPresentationStyle = .popover
+            controller.popoverPresentationController?.sourceView = button
+            controller.popoverPresentationController?.sourceRect = button.frame
+            controller.popoverPresentationController?.permittedArrowDirections = .left
+            controller.completionWithItemsHandler = {(_: UIActivityType?,_: Bool, _: [Any]?,_: Error?) in
+
+                // Dismiss the button along with the popover
+                //
+                cell.actionComplete()
+            }
+            present(controller, animated: true)
+
+            // Keep showing the button while the popover is present
+            //
+            return false
+
+        case .delete:
+
+            // Should we ask permission first?
+            //
+            recordingActivityLogic.delete(recording: recording)
+            return true
+        }
     }
 }

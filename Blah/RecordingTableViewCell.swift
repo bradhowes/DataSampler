@@ -36,6 +36,9 @@ final class RecordingsTableViewCell: MGSwipeTableCell, ActionableCell {
 
     fileprivate var recording: Recording!
 
+    /**
+     Implementation of `ActionableCell`. Hides any visible action buttons.
+     */
     func actionComplete() {
         hideSwipe(animated: true)
     }
@@ -46,6 +49,9 @@ final class RecordingsTableViewCell: MGSwipeTableCell, ActionableCell {
         (side: .rightToLeft, action: .delete)
     ]
 
+    /**
+     Override of `UITableViewCell`. This instance is about to be used to show recording info.
+     */
     override func prepareForReuse() {
         super.prepareForReuse()
         actionHandler = nil
@@ -53,14 +59,19 @@ final class RecordingsTableViewCell: MGSwipeTableCell, ActionableCell {
     }
 }
 
-/** 
+// - MARK: ConfigurableCell Implementation
 
- */
 extension RecordingsTableViewCell: ConfigurableCell {
 
     typealias DataSource = Recording
 
-    func configure(dataSource recording: DataSource) {
+    /**
+     Implementation of `ConfigurableCell` interface. Sets the content of the cell depending on the state of the given
+     `Recording` object.
+     - parameter recording: <#recording description#>
+     - parameter selected: <#selected description#>
+     */
+    func configure(dataSource recording: Recording, selected: Bool) {
 
         self.recording = recording
         self.delegate = self
@@ -72,7 +83,6 @@ extension RecordingsTableViewCell: ConfigurableCell {
         if recording.isRecording {
             status = "Recording"
             color = UIColor.red
-            accessoryType = .checkmark
         }
         else if recording.uploaded {
             status = "Uploaded"
@@ -91,8 +101,13 @@ extension RecordingsTableViewCell: ConfigurableCell {
 
         detailTextLabel?.textColor = color
 
-        let size = ByteCountFormatter.string(fromByteCount: recording.size, countStyle: .file)
-        detailTextLabel?.text = "\(recording.duration) • \(size) - \(status)"
+        if recording.isRecording {
+            detailTextLabel?.text = "\(recording.duration) - \(status)"
+        }
+        else {
+            let size = ByteCountFormatter.string(fromByteCount: recording.size, countStyle: .file)
+            detailTextLabel?.text = "\(recording.duration) • \(size) - \(status)"
+        }
 
         if recording.uploading {
             if accessoryView == nil {
@@ -108,6 +123,8 @@ extension RecordingsTableViewCell: ConfigurableCell {
         else {
             accessoryView = nil
         }
+
+        accessoryType = selected ? .checkmark : .none
 
         leftButtons = []
         rightButtons = []
@@ -136,6 +153,8 @@ extension RecordingsTableViewCell: ConfigurableCell {
         }
     }
 }
+
+// - MARK: MGSwipeTableCellDelegate methods
 
 extension RecordingsTableViewCell: MGSwipeTableCellDelegate {
 

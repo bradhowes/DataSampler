@@ -16,6 +16,9 @@ protocol TimestampGeneratorInterface {
     var value: Timestamp { get }
 }
 
+/** 
+ Implementation of TimestampGeneratorInterface using `Date` for times.
+ */
 final class TimestampGenerator: NSObject, TimestampGeneratorInterface {
 
     var value: TimestampGeneratorInterface.Timestamp {
@@ -26,6 +29,10 @@ final class TimestampGenerator: NSObject, TimestampGeneratorInterface {
 
     var dateTimeFormatter: DateFormatter
 
+    /**
+     Initialize new instance.
+     - parameter format: the format to use for the timestamps. See `DateFormatter`.
+     */
     init(format: String = "HH:mm:ss.SSS") {
         self.dateTimeFormatter = DateFormatter()
         self.dateTimeFormatter.setLocalizedDateFormatFromTemplate(format)

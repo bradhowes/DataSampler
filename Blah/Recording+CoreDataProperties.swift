@@ -9,7 +9,6 @@
 import Foundation
 import CoreData
 
-
 extension Recording {
 
     @nonobjc public class func fetchRequest() -> NSFetchRequest<Recording> {

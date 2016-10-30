@@ -148,11 +148,11 @@ extension PlotsViewController: PDFRenderingInterface {
      - parameter recording: the `Recording` to render
      - returns: the size in bytes of the resulting PDF
      */
-    func render(recording: Recording) -> Int64 {
+    func render(dataSource: RunDataInterface) -> NSData? {
 
         // Use the recording data in the graphs
         //
-        visualize(dataSource: recording.runData)
+        visualize(dataSource: dataSource)
 
         // US letter: 612x792
         // A4 letter: 595x842
@@ -166,7 +166,7 @@ extension PlotsViewController: PDFRenderingInterface {
         let pdfData = NSMutableData()
         guard let dataConsumer = CGDataConsumer(data: pdfData),
             let pdfContext = CGContext(consumer: dataConsumer, mediaBox: &mediaBox, nil) else {
-                return 0
+                return nil
         }
 
         plotView.renderPDF(context: pdfContext, mediaBox: mediaBox, margin: margin)
@@ -175,14 +175,6 @@ extension PlotsViewController: PDFRenderingInterface {
         pdfContext.closePDF()
         print("pdfData.length: \(pdfData.length)")
 
-        // Save PDF to disk
-        //
-        do {
-            try pdfData.write(to: recording.graphsFileURL, options: .atomic)
-        } catch {
-            print("*** failed to write PDF data to \(recording.graphsFileURL) - \(error)")
-        }
-
-        return Int64(pdfData.length)
+        return pdfData
     }
 }

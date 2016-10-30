@@ -28,22 +28,35 @@ final class RecordingActivityLogic: NSObject, RecordingActivityLogicInterface {
 
     private let recordingsStore: RecordingsStoreInterface
     private let dropboxController: DropboxControllerInterface
-    private let demoDriver: DriverInterface
-
+    private let demoDriver: DriverInterface?
     private var currentRecording: Recording?
     private var selectedRecording: Recording?
 
-    init(store: RecordingsStoreInterface, dropboxController: DropboxControllerInterface, demoDriver: DriverInterface) {
+    /**
+     Initialize new instance.
+     - parameter store: the Core Data storage to use for creating new `Recording` instances
+     - parameter dropboxController: the Dropbox controller to use for uploading recordings
+     - parameter demoDriver: the driver to use for generating synthetic data
+     */
+    init(store: RecordingsStoreInterface, dropboxController: DropboxControllerInterface,
+         demoDriver: DriverInterface? = nil) {
         self.recordingsStore = store
         self.dropboxController = dropboxController
         self.demoDriver = demoDriver
         super.init()
     }
 
+    /**
+     Create a new `RunData` object for use with a new recording.
+     - returns: new `RunData` instance
+     */
     private func newRunData() -> RunDataInterface {
         return recordingsStore.newRunData()
     }
 
+    /**
+     Begin a new recording. Creates a new `Recording` instance and begins receiving data.
+     */
     func start() {
         currentRecording = recordingsStore.newRecording()
         if currentRecording == nil {
@@ -54,11 +67,14 @@ final class RecordingActivityLogic: NSObject, RecordingActivityLogicInterface {
         Logger.clear()
         EventLog.clear()
         visualizer.visualize(dataSource: currentRecording!.runData)
-        demoDriver.start(runData: currentRecording!.runData)
+        demoDriver?.start(runData: currentRecording!.runData)
     }
 
+    /**
+     Stops the current recording.
+     */
     func stop() {
-        demoDriver.stop()
+        demoDriver?.stop()
         guard let recording = self.currentRecording else { return }
         recording.stopped(pdfRenderer: self.pdfRenderer)
         self.currentRecording = nil
@@ -67,6 +83,10 @@ final class RecordingActivityLogic: NSObject, RecordingActivityLogicInterface {
         }
     }
 
+    /**
+     Select a recording for viewing.
+     - parameter recording: the `Recording` instance to show
+     */
     func select(recording: Recording) {
         if selectedRecording != recording {
             selectedRecording = recording
@@ -77,6 +97,10 @@ final class RecordingActivityLogic: NSObject, RecordingActivityLogicInterface {
         }
     }
 
+    /**
+     Delete a recording.
+     - parameter recording: the `Recording` instance to delete
+     */
     func delete(recording: Recording) {
         if selectedRecording == recording {
             selectedRecording = nil
@@ -88,10 +112,10 @@ final class RecordingActivityLogic: NSObject, RecordingActivityLogicInterface {
         recording.delete()
     }
 
-    func share(recording: Recording) {
-
-    }
-
+    /**
+     Upload recording assets to Dropbox.
+     - parameter recording: the `Recording` instance to upload.
+     */
     func upload(recording: Recording) {
         if !recording.uploading {
             recording.uploadingRequested()

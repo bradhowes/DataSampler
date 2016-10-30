@@ -19,8 +19,20 @@ public protocol DropboxControllerDependent: class {
  Protocol for a class that implements the `DropboxController` interface.
  */
 public protocol DropboxControllerInterface: class {
+
+    /// Determine current linking status. Returns `true` if linked
     var isLinked: Bool { get }
+
+    /**
+     Toggle account linking with Dropbox.
+     - parameter viewController: the currently active view controller when the link change request took place
+     */
     func toggleAccountLinking(viewController: UIViewController)
+
+    /**
+     Request to upload a `Recording` instance. May not happen immediately.
+     - parameter recording: the `Recording` instance to upload.
+     */
     func upload(recording: Recording)
 }
 

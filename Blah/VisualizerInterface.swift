@@ -13,6 +13,7 @@ import PDFGenerator
  Protocol for visualizing the contents of a recording.
  */
 public protocol VisualizerInterface: class {
+
     /**
      Generate or update displays using the given data
      - parameter dataSource: data to visualize

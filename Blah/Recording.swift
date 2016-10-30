@@ -146,7 +146,20 @@ public final class Recording : NSManagedObject, CoreDataEntityProtocol {
 
         // Generate PDF of the graphs
         //
-        var bytes: Int64 = pdfRenderer?.render(recording: self) ?? 0
+        var bytes: Int64 = 0
+        if let pdfData = pdfRenderer?.render(dataSource: self.runData) ?? nil {
+
+            bytes = Int64(pdfData.length)
+
+            // Save PDF to disk
+            //
+            do {
+                try pdfData.write(to: graphsFileURL, options: .atomic)
+            } catch {
+                print("*** failed to write PDF data to \(graphsFileURL) - \(error)")
+            }
+        }
+
         DispatchQueue.global().async {
 
             let archivePath = self.folder.appendingPathComponent("runData.archive")

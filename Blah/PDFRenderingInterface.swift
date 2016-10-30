@@ -1,5 +1,5 @@
 //
-//  SharingInterface.swift
+//  PDFRenderingInterface.swift
 //  Blah
 //
 //  Created by Brad Howes on 10/26/16.
@@ -13,5 +13,10 @@ import Foundation
  */
 public protocol PDFRenderingInterface: class {
 
-    func render(recording: Recording) -> Int64
+    /**
+     Generate PDF
+     - parameter dataSource: data to use to generate the PDF
+     - returns: NSData containing the PDF or nil if there was an error
+     */
+    func render(dataSource: RunDataInterface) -> NSData?
 }

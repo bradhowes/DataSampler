@@ -51,19 +51,21 @@ final class RecordingsStore : NSObject, RecordingsStoreInterface {
     }
 
     /**
-     Obtain a new NSFetchedResultsController with a canned query (!!! FIXME !!!)
+     Obtain a new NSFetchedResultsController with a canned query.
      - parameter name: the canned query to perform
-     - returns: a new `Recording` fetch request
+     - returns: a new `Recording` fetch request wrapped in a NSFetchedResultsController
      */
     func cannedFetchRequest(name: String) -> NSFetchedResultsController<Recording> {
         guard let mainContext = self.stack?.mainContext else {
             fatalError("invalid context")
         }
 
-        let fetcher = NSFetchedResultsController(fetchRequest: Recording.fetchRequest,
-                                                 managedObjectContext: mainContext,
-                                                 sectionNameKeyPath: nil, cacheName: nil)
-        Logger.log("fetcher: \(fetcher)")
+        let managedObjectModel = mainContext.persistentStoreCoordinator!.managedObjectModel
+        let fr = managedObjectModel.fetchRequestTemplate(forName: name)!.copy() as! NSFetchRequest<Recording>
+        fr.sortDescriptors = Recording.defaultSortDescriptors
+        fr.fetchBatchSize = 30
+        let fetcher = NSFetchedResultsController(fetchRequest: fr, managedObjectContext: mainContext,
+                                                 sectionNameKeyPath: nil, cacheName: "recordingCache")
         return fetcher
     }
 

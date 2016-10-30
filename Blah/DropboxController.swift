@@ -57,21 +57,11 @@ final public class DropboxController: NSObject, DropboxControllerInterface {
     }
 
     /**
-     Perform a closure under a single-threaded guarantee of access.
-     - parameter closure: the block to execute
-     */
-    private func synced(closure: () -> ()) {
-        objc_sync_enter(self)
-        closure()
-        objc_sync_exit(self)
-    }
-
-    /**
      Handle a request to upload a recording. Performs any uploads on a background thread.
      - parameter recording: the Recording to upload
      */
     public func upload(recording: Recording) {
-        synced {
+        synchronized(obj: self) {
 
             // Only create one task for handling uploads
             //
@@ -101,7 +91,7 @@ final public class DropboxController: NSObject, DropboxControllerInterface {
     }
 
     private func dropBackgroundTask(cancel: Bool = false) {
-        synced {
+        synchronized(obj: self) {
             if cancel { self.backgroundTask?.cancel() }
             self.backgroundTask = nil
         }
@@ -124,7 +114,7 @@ final public class DropboxController: NSObject, DropboxControllerInterface {
      Attempt to create a Dropbox client to perform uploads. The attempt is made in a background thread.
      */
     private func makeClient() {
-        synced {
+        synchronized(obj: self) {
 
             // If there is an active background task, cancel it. The user could have disabled linking while we have an
             // active upload taking place.
@@ -146,11 +136,11 @@ final public class DropboxController: NSObject, DropboxControllerInterface {
             self.backgroundTask = DispatchWorkItem {
                 self.client = DropboxClientsManager.authorizedClient
                 if self.client == nil {
-                    self.synced { self.backgroundTask = nil }
+                    synchronized(obj: self) { self.backgroundTask = nil }
                     return
                 }
 
-                self.fetcher = self.recordingsStore.cannedFetchRequest(name: "uploadable")
+                self.fetcher = self.recordingsStore.cannedFetchRequest(name: "awaitingUpload")
                 if self.fetcher?.fetchedObjects == nil {
                     do {
                         try self.fetcher?.performFetch()
@@ -250,6 +240,11 @@ final public class DropboxController: NSObject, DropboxControllerInterface {
         }
     }
 
+    /**
+     Handle the response from Dropbox for the request to link. If the linking was successful, create new Dropbox client
+     and begin uploading recordings.
+     - parameter url: the URL to use to obtain the link result
+     */
     func handleRedirect(url: URL) {
         if let authResult = DropboxClientsManager.handleRedirectURL(url) {
             switch authResult {
@@ -266,6 +261,12 @@ final public class DropboxController: NSObject, DropboxControllerInterface {
         }
     }
 
+    /**
+     Toggle the linking to Dropbox. If linked, this will cause the app to no longer be linked to Dropbox (if confirmed
+     by the user). If unlinked, then this will begin the linking process within the Dropbox SDK which requires the user
+     to login and grant authorization in the Dropbox SDK.
+     - parameter viewController: the view controller to use for presenting any future views
+     */
     public func toggleAccountLinking(viewController: UIViewController) {
         if userSettings.useDropbox {
             disable(viewController: viewController)
@@ -275,19 +276,29 @@ final public class DropboxController: NSObject, DropboxControllerInterface {
         }
     }
 
+    /**
+     Enable linking with Dropbox.
+     - parameter viewController: the view controller to use for presenting future views
+     */
     private func enable(viewController: UIViewController) {
         DropboxClientsManager.authorizeFromController(UIApplication.shared,
                                                       controller: viewController,
                                                       openURL: { (url: URL) -> Void in UIApplication.shared.open(url) })
     }
 
+    /**
+     Disable linking with Dropbox.
+     - parameter viewController: the view controller to use for presenting future views
+     */
     private func disable(viewController: UIViewController) {
         let title = "Dropbox"
         let msg = "Are you sure you want to unlink from Dropbox? This will prevent the app from saving future recordings to your Dropbox folder"
         let alert = UIAlertController(title: title, message: msg, preferredStyle: .alert)
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: {(action: UIAlertAction) in
-        })
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
         let unlinkAction = UIAlertAction(title: "Confirm", style: .destructive, handler: {(action: UIAlertAction) in
+
+            // Confirmed unlinking.
+            //
             self.userSettings.useDropbox = false
             self.userSettings.write()
             DropboxClientsManager.unlinkClients()
@@ -295,8 +306,10 @@ final public class DropboxController: NSObject, DropboxControllerInterface {
             self.dropBackgroundTask(cancel: true)
         })
 
+        // Show confirmation dialog
+        //
         alert.addAction(cancelAction)
         alert.addAction(unlinkAction)
-        viewController.present(alert, animated: true) {}
+        viewController.present(alert, animated: true)
     }
 }

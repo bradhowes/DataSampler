@@ -23,8 +23,10 @@ public protocol RecordingActivityLogicInterface: class {
     /// Entity that uses the contents of a recording for drawing.
     var visualizer: VisualizerInterface! { get set }
 
+    /// Entity that generates PDF from the contents of a recording.
     var pdfRenderer: PDFRenderingInterface! { get set }
 
+    /// Returns `true` if application supports uploading
     var canUpload: Bool { get }
 
     /**
@@ -49,7 +51,9 @@ public protocol RecordingActivityLogicInterface: class {
      */
     func select(recording: Recording)
 
-    func share(recording: Recording)
-
+    /**
+     Upload a recording to Dropbox
+     - parameter recording: the `Recording` instance to upload.
+     */
     func upload(recording: Recording)
 }

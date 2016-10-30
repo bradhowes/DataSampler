@@ -89,7 +89,7 @@ RecordingsStoreDependent, RecordingActivityLogicDependent {
      - parameter notification: the notification from the store
      */
     func storeIsReady(notification: Notification? = nil) {
-        fetcher = recordingsStore.cannedFetchRequest(name: "blah")
+        fetcher = recordingsStore.cannedFetchRequest(name: "all")
         fetcher.delegate = self
     }
 
@@ -135,7 +135,7 @@ RecordingsStoreDependent, RecordingActivityLogicDependent {
         updateEditButtons()
     }
 
-    // MARK: Table view data source
+    // - MARK: Table view data source
 
     /**
      Configure a UITableViewCell with recording info for display.
@@ -147,8 +147,7 @@ RecordingsStoreDependent, RecordingActivityLogicDependent {
         guard let cell = cell as? RecordingsTableViewCell else { fatalError("unexpected UITableViewCell") }
 
         cell.actionHandler = self
-        cell.configure(dataSource: recording)
-        cell.accessoryType = recording == selectedRecording ? .checkmark : .none
+        cell.configure(dataSource: recording, selected: recording == selectedRecording)
     }
 
     /**
@@ -179,6 +178,7 @@ RecordingsStoreDependent, RecordingActivityLogicDependent {
      - No rows, no 'Edit'
      - One row currently recording, no 'Edit'
      - Otherwise, show 'Edit'
+
      If editing, then:
      - Show 'Cancel' button on left
      - Show 'Trash' button on right but only if there is at least one row selected
@@ -326,7 +326,7 @@ RecordingsStoreDependent, RecordingActivityLogicDependent {
         }
     }
 
-    // MARK: Table view delegate
+    // - MARK: Table view delegate
 
     /**
      Table view delegate method that asks if a row can be edited.
@@ -353,7 +353,7 @@ RecordingsStoreDependent, RecordingActivityLogicDependent {
         }
     }
 
-    // MARK: Fetched results controller delegate
+    // - MARK: Fetched results controller delegate
 
     /**
      Notification from fetch results controller that a batch of changes will take place.
@@ -408,7 +408,7 @@ RecordingsStoreDependent, RecordingActivityLogicDependent {
 
             // Do the row insertion
             //
-            tableView.insertRows(at: [newIndexPath!], with: .fade)
+            tableView.insertRows(at: [newIndexPath!], with: .none)
 
         case .delete:
 
@@ -455,7 +455,7 @@ RecordingsStoreDependent, RecordingActivityLogicDependent {
     }
 }
 
-// MARK: ActionableCellHandler
+// - MARK: ActionableCellHandler
 
 /** 
  Handle action requests from the table view cell. This extension only handles view aspects of the actions. Actual 

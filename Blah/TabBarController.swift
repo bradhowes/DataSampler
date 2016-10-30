@@ -16,7 +16,7 @@ public final class TabBarController: UITabBarController {
     /** 
      Custom transitioning animator. Implements `UIViewControllerAnimatedTransitioning`
      */
-    private class CrossDissolveAnimator: NSObject, UIViewControllerAnimatedTransitioning {
+    fileprivate class CrossDissolveAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 
         /**
          Duration of the animation
@@ -65,8 +65,17 @@ public final class TabBarController: UITabBarController {
     }
 }
 
+// - MARK: UITabBarControllerDelegate methods
+
 extension TabBarController: UITabBarControllerDelegate {
 
+    /**
+     Obtain an animator for the transition from one view to another.
+     - parameter tabBarController: the UITabBarController performing the view change
+     - parameter fromVC: the view controller transitioning from
+     - parameter toVC: the view controller transitioning to
+     - returns: animation to use for the transition
+     */
     public func tabBarController(_ tabBarController: UITabBarController,
                                  animationControllerForTransitionFrom fromVC: UIViewController,
                                  to toVC: UIViewController) -> UIViewControllerAnimatedTransitioning? {

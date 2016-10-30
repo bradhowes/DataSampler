@@ -12,7 +12,17 @@ import Foundation
  Protocol for all EventLog classes
  */
 protocol EventLogInterface {
+
+    /**
+     Clear the log.
+     */
     static func clear()
+
+    /**
+     Save the contents of the log to a file.
+     - parameter url: the URL of the file to save to
+     - parameter done: closure invoked at end of save operation that conveys the number of bytes that were written
+     */
     static func save(to url: URL, done: @escaping (Int64)->() )
     static func restore(from url: URL)
     @discardableResult static func log(_ args: CVarArg...) -> String

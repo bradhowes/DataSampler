@@ -14,10 +14,7 @@ import Foundation
  - parameter closure: the code to execute
  */
 func synchronized(obj: AnyObject, closure: () -> ()) {
-    defer {
-        objc_sync_exit(obj)
-    }
-
+    defer { objc_sync_exit(obj) }
     objc_sync_enter(obj)
     closure()
 }

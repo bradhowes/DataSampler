@@ -6,23 +6,32 @@
 //  Copyright © 2016 Brad Howes. All rights reserved.
 //
 
-import Foundation
 import CoreData
-import JSQCoreDataKit
-import PDFGenerator
+import Foundation
 
-public final class Recording : NSManagedObject, CoreDataEntityProtocol {
+/** 
+ A `Recording` instance contains all of the data and meta-data associated with a recording session. Instances are 
+ persisted in Core Data.
+ */
+public final class Recording : NSManagedObject {
 
-    public static let defaultSortDescriptors = [NSSortDescriptor(key: "startTime", ascending: false)]
+    /// The file name for the archived `RunData` data
+    private static let runDataFileName = "runData.archive"
 
+    /// The file name for the PDF containg graph images
+    private static let pdfFileName: String = "graphs.pdf"
+
+    /// The formatter to use when showing recording durations
     private static var durationFormatter = { PlotTimeFormatter() }()
 
+    /// The formatter to use when generating directory names for recording data.
     private static var directoryNameDateFormatter: DateFormatter = {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd HH.mm.ss"
         return dateFormatter
     }()
 
+    /// The formatter to use when showing a recording date/time
     private static var displayNameDateFormatter: DateFormatter = {
         let dateFormatter = DateFormatter()
         dateFormatter.formatterBehavior = .default
@@ -30,42 +39,79 @@ public final class Recording : NSManagedObject, CoreDataEntityProtocol {
         dateFormatter.timeStyle = .medium
         return dateFormatter
     }()
-    
+
+    /**
+     Create a directory name for the given Date value
+     - parameter date: the Date value to use
+     - returns: a valid iOS directory name derived from the given Date
+     */
     private class func directoryName(from date: Date) -> String {
         return Recording.directoryNameDateFormatter.string(from: date)
     }
 
+    /**
+     Create a String representation of the given Date value
+     - parameter date: the Date value to format
+     - returns: the String representation to show
+     */
     private class func displayName(from date: Date) -> String {
         return Recording.displayNameDateFormatter.string(from: date)
     }
 
+    /**
+     Create a Date value from the given time interval.
+     - parameter interval: the time interval to format
+     - returns: the Date value
+     */
     private func dateFrom(interval: TimeInterval) -> Date {
         return Date(timeIntervalSinceReferenceDate: interval)
     }
 
+    /// Internal timer that updates a recording meta data while a recording is in process.
     private var updateTimer: Timer?
 
+    /// The URL for the logging file
+    private lazy var logFileURL: URL = { return self.folder.appendingPathComponent(Logger.singleton.fileName) }()
+
+    /// The URL for the events file
+    private lazy var eventsFileURL: URL = { return self.folder.appendingPathComponent(EventLog.singleton.fileName) }()
+
+    /// The URL for the PDF graphs file
+    private lazy var pdfFileURL: URL = { return self.folder.appendingPathComponent(Recording.pdfFileName) }()
+    
+    /// The entity name found in the xcdatamodel file.
+    static let entityName = "Recording"
+
+    /// The sort descriptor to use by default
+    static let defaultSortDescriptors = [NSSortDescriptor(key: "startTime", ascending: false)]
+
+    // - MARK: Public properties
+
+    /// The display name for the recording
     var displayName: String {
         return Recording.displayName(from: dateFrom(interval: startTime))
     }
 
+    /// The directory name for the recording
     var directoryName: String {
         return Recording.directoryName(from: dateFrom(interval: startTime))
     }
 
+    /// The formatted recording duration
     var duration: String {
         let duration = isRecording ? Date().timeIntervalSince(dateFrom(interval: startTime)) : endTime - startTime
         return Recording.durationFormatter.string(double: duration)
     }
 
+    /// The location of the recording folder
     lazy var folder: URL = {
-        let fileManager = FileManager.default
-        let docDir = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
-        return docDir.appendingPathComponent(self.directoryName, isDirectory: true)
+        return URL.documents.appendingPathComponent(self.directoryName, isDirectory: true)
     }()
 
+    /// Obtain the RunData instance associated with this recording. If there is an archive file for `RunData` then 
+    /// reanimate from it. Otherwise, create a new `RunData` instance.
     lazy var runData: RunDataInterface = {
-        let archivePath = self.folder.appendingPathComponent("runData.archive")
+        let archivePath = self.folder.appendingPathComponent(Recording.runDataFileName)
         do {
             let archiveData = try Data(contentsOf: archivePath)
             Logger.log("archiveData size: \(archiveData.count)")
@@ -81,22 +127,26 @@ public final class Recording : NSManagedObject, CoreDataEntityProtocol {
         return RunData()
     }()
 
+    /// Holds `true` if currently recording data
     var isRecording: Bool { return startTime == endTime }
 
-    let graphsFileName: String = "graphs.pdf"
+    /// The collection of artifacts for the recording
+    lazy var sharableArtifacts: [URL] = { return [self.logFileURL, self.eventsFileURL, self.pdfFileURL] }()
 
-    lazy var logFileURL: URL = { return self.folder.appendingPathComponent(Logger.singleton.fileName) }()
-    lazy var eventsFileURL: URL = { return self.folder.appendingPathComponent(EventLog.singleton.fileName) }()
-    lazy var graphsFileURL: URL = { return self.folder.appendingPathComponent(self.graphsFileName) }()
-    lazy var sharableArtifacts: [URL] = { return [self.logFileURL, self.eventsFileURL, self.graphsFileURL] }()
-
+    /**
+     Initialize a new `Recording` instance
+     - parameter context: the managed object context to associate with
+     - parameter userSettings: the `UserSettings` instance to pull runtime settings from
+     - parameter runData: the `RunData` instance to use to store incoming samples
+     */
     init(context: NSManagedObjectContext, userSettings: UserSettingsInterface, runData: RunDataInterface) {
-        super.init(entity: Recording.entity(context: context), insertInto: context)
+        super.init(entity: NSEntityDescription.entity(forEntityName: Recording.entityName, in: context)!, insertInto: context)
 
         let now = Date()
         self.runData = runData
         self.runData.startTime = now
         self.runData.name = now.description
+
         self.startTime = now.timeIntervalSinceReferenceDate
         self.endTime = self.startTime
         self.size = 0
@@ -107,20 +157,6 @@ public final class Recording : NSManagedObject, CoreDataEntityProtocol {
 
         self.progress = 0.0
         self.uploading = false
-
-        self.updateTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { (timer: Timer) in
-            self.progress += 1.0
-        }
-
-        // Create folder to hold the recording data
-        //
-        let fileManager = FileManager.default
-        do {
-            try fileManager.createDirectory(at: self.folder, withIntermediateDirectories: true, attributes: nil)
-            Logger.log("created recording directory")
-        } catch {
-            Logger.log("failed to create directory")
-        }
     }
 
     @objc
@@ -129,11 +165,40 @@ public final class Recording : NSManagedObject, CoreDataEntityProtocol {
     }
 
     func save() {
+        Logger.log("Recording.save - BEGIN")
         guard let context = self.managedObjectContext else {
-            Logger.log("*** managedObjectContext is nil")
+            Logger.log("Recording.save *** managedObjectContext is nil")
             return
         }
-        saveContext(context) { Logger.log("saveContext: \($0)") }
+
+        do {
+            try context.save()
+        } catch {
+            Logger.log("Recording.save - context.save: \(error)")
+        }
+
+        Logger.log("Recording.save - END")
+    }
+
+    func started() {
+
+        // Create folder to hold the recording data.
+        //
+        let fileManager = FileManager.default
+        do {
+            try fileManager.createDirectory(at: self.folder, withIntermediateDirectories: true, attributes: nil)
+            Logger.log("created recording directory")
+        } catch {
+            Logger.log("failed to create directory")
+        }
+
+        // Create timer that will periodically update this managed object in order to show elapsed time in the table
+        // view.
+        //
+        self.updateTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { (timer: Timer) in
+            self.progress += 1.0
+        }
+
     }
 
     func stopped(pdfRenderer: PDFRenderingInterface?) {
@@ -154,15 +219,15 @@ public final class Recording : NSManagedObject, CoreDataEntityProtocol {
             // Save PDF to disk
             //
             do {
-                try pdfData.write(to: graphsFileURL, options: .atomic)
+                try pdfData.write(to: pdfFileURL, options: .atomic)
             } catch {
-                print("*** failed to write PDF data to \(graphsFileURL) - \(error)")
+                print("*** failed to write PDF data to \(pdfFileURL) - \(error)")
             }
         }
 
         DispatchQueue.global().async {
 
-            let archivePath = self.folder.appendingPathComponent("runData.archive")
+            let archivePath = self.folder.appendingPathComponent(Recording.runDataFileName)
             let archiveData = NSKeyedArchiver.archivedData(withRootObject: self.runData)
             bytes += archiveData.count
 
@@ -180,6 +245,24 @@ public final class Recording : NSManagedObject, CoreDataEntityProtocol {
             self.save()
         }
     }
+
+    func delete() {
+        let fileManager = FileManager.default
+        do {
+            try fileManager.removeItem(atPath: self.folder.path)
+            Logger.log("removed recording directory \(folder)")
+        } catch {
+            Logger.log("failed to remove directory \(folder) - \(error)")
+        }
+
+        self.managedObjectContext?.delete(self)
+        save()
+    }
+}
+
+// - MARK: Uploading State Changes
+
+extension Recording {
 
     func uploadingRequested() {
         uploaded = false
@@ -204,19 +287,6 @@ public final class Recording : NSManagedObject, CoreDataEntityProtocol {
     func uploadingFailed() {
         progress = 0.0
         uploading = false
-        save()
-    }
-
-    func delete() {
-        let fileManager = FileManager.default
-        do {
-            try fileManager.removeItem(atPath: self.folder.path)
-            Logger.log("removed recording directory \(folder)")
-        } catch {
-            Logger.log("failed to remove directory \(folder) - \(error)")
-        }
-
-        self.managedObjectContext?.delete(self)
         save()
     }
 }

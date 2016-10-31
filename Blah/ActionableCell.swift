@@ -11,7 +11,7 @@ import UIKit
 /** 
  Interface for a UITableViewCell-like instance that has buttons that perform actions.
  */
-protocol ActionableCell: class {
+public protocol ActionableCell: class {
 
     /// Property to hold instance which process actions for the cell.
     var actionHandler: ActionableCellHandler! { get set }
@@ -25,7 +25,7 @@ protocol ActionableCell: class {
 /**
  Defines interface for an object that can respond to buttons in an `ActionableCell` instance.
  */
-protocol ActionableCellHandler: class {
+public protocol ActionableCellHandler: class {
 
     /// Provide upload status
     func canPerform<T>(action: T, recording: Recording) -> Bool

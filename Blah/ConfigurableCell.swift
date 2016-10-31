@@ -11,7 +11,7 @@ import Foundation
 /**
  Defines interface for a UITableViewCell that can be configured
  */
-protocol ConfigurableCell: class {
+public protocol ConfigurableCell: class {
 
     associatedtype Model
 

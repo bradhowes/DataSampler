@@ -25,6 +25,7 @@ import PDFGenerator
 
 final class RecordingsTableViewCell: MGSwipeTableCell, ActionableCell {
 
+    /// The actions that the cell supports
     enum Action: Int {
         case upload, share, delete
     }
@@ -32,8 +33,10 @@ final class RecordingsTableViewCell: MGSwipeTableCell, ActionableCell {
     @IBOutlet weak var title: UITextView!
     @IBOutlet weak var detail: UITextView!
 
+    /// The object that will perform the actions on behalf of the cell.
     weak var actionHandler: ActionableCellHandler!
 
+    /// The `Recording` instance associated with the cell.
     fileprivate var recording: Recording!
 
     /**
@@ -43,10 +46,11 @@ final class RecordingsTableViewCell: MGSwipeTableCell, ActionableCell {
         hideSwipe(animated: true)
     }
 
-    fileprivate static let Actions: [(side: MGSwipeDirection, action: Action)] = [
-        (side: .leftToRight, action: .upload),
-        (side: .leftToRight, action: .share),
-        (side: .rightToLeft, action: .delete)
+    /// Configuration of actions for the cell. Defines which side of the cell actions will appear.
+    fileprivate static let Actions: [(side: MGSwipeDirection, action: Action, gen: ()->UIView)] = [
+        (side: .leftToRight, action: .upload, {return MGSwipeButton(title: "", icon: UIImage(named: "upload.png"), backgroundColor: UIColor.white)}),
+        (side: .leftToRight, action: .share, {return MGSwipeButton(title: "", icon: UIImage(named: "share.png"), backgroundColor: UIColor.white)}),
+        (side: .rightToLeft, action: .delete, {return MGSwipeButton(title: "Delete", backgroundColor: UIColor.red)})
     ]
 
     /**
@@ -68,8 +72,8 @@ extension RecordingsTableViewCell: ConfigurableCell {
     /**
      Implementation of `ConfigurableCell` interface. Sets the content of the cell depending on the state of the given
      `Recording` object.
-     - parameter recording: <#recording description#>
-     - parameter selected: <#selected description#>
+     - parameter recording: the `Recording` instance to associate with the cell
+     - parameter selected: `true` if the cell is currently selected and being displayed in the plots
      */
     func configure(dataSource recording: Recording, selected: Bool) {
 
@@ -78,6 +82,8 @@ extension RecordingsTableViewCell: ConfigurableCell {
 
         textLabel?.text = recording.displayName
 
+        // Build the status text to show depending on recording and uploading states
+        //
         var status = ""
         var color = UIColor.blue
         if recording.isRecording {
@@ -109,6 +115,8 @@ extension RecordingsTableViewCell: ConfigurableCell {
             detailTextLabel?.text = "\(recording.duration) • \(size) - \(status)"
         }
 
+        // Show a progress indicator if uploading
+        //
         if recording.uploading {
             if accessoryView == nil {
                 let pv = CircleProgressView(frame: CGRect(x: 0.0, y: 0.0, width: 25.0, height: 25.0))
@@ -124,31 +132,27 @@ extension RecordingsTableViewCell: ConfigurableCell {
             accessoryView = nil
         }
 
+        // Show a checkmark if cell is currently selected
+        //
         accessoryType = selected ? .checkmark : .none
 
+        // Configure the left/right swipe buttons for the cell
+        //
         leftButtons = []
         rightButtons = []
 
         leftSwipeSettings.transition = .drag
         rightSwipeSettings.transition = .drag
 
-        for (dir, action) in RecordingsTableViewCell.Actions {
+        for (dir, action, gen) in RecordingsTableViewCell.Actions {
             if actionHandler.canPerform(action: action, recording: recording) {
-                switch action {
-                case .upload:
-                    leftButtons.append(MGSwipeButton(title: "", icon: UIImage(named: "upload.png"),
-                                                                              backgroundColor: UIColor.white))
-                case .share:
-                    leftButtons.append(MGSwipeButton(title: "", icon: UIImage(named: "share.png"),
-                                                                              backgroundColor: UIColor.white))
-                case .delete:
-                    rightButtons.append(MGSwipeButton(title: "Delete", backgroundColor: UIColor.red))
-                }
-
-                switch dir {
-                case .leftToRight: leftButtons.last!.tag = action.rawValue
-                case .rightToLeft: rightButtons.last!.tag = action.rawValue
-                }
+                var buttons: [UIView] = {
+                    switch dir {
+                    case .leftToRight: return leftButtons
+                    case .rightToLeft: return rightButtons}
+                }()
+                buttons.append(gen())
+                buttons.last!.tag = action.rawValue
             }
         }
     }
@@ -160,15 +164,13 @@ extension RecordingsTableViewCell: MGSwipeTableCellDelegate {
 
     func swipeTableCell(_ cell: MGSwipeTableCell, tappedButtonAt index: Int, direction: MGSwipeDirection,
                         fromExpansion: Bool) -> Bool {
-        switch direction {
-        case .rightToLeft:
-            let button = rightButtons[index]
-            let tag = Action(rawValue: button.tag)!
-            return actionHandler.performRequest(action: tag, cell: self, button: button, recording: recording)
-        case .leftToRight:
-            let button = leftButtons[index]
-            let tag = Action(rawValue: button.tag)!
-            return actionHandler.performRequest(action: tag, cell: self, button: button, recording: recording)
-        }
+        let button = { () -> UIView in
+            switch direction {
+            case .rightToLeft: return rightButtons[index]
+            case .leftToRight: return leftButtons[index]
+            }
+        }()
+        let tag = Action(rawValue: button.tag)!
+        return actionHandler.performRequest(action: tag, cell: self, button: button, recording: recording)
     }
 }

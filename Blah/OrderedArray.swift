@@ -8,6 +8,9 @@
 
 import Foundation
 
+/**
+ An Array that maintains ordering of items.
+ */
 public struct OrderedArray<Element:Comparable> : Collection, CustomDebugStringConvertible {
 
     public typealias Predicate = (Element, Element) -> Bool

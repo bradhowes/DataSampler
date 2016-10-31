@@ -8,7 +8,6 @@
 
 import UIKit
 import CoreData
-import JSQCoreDataKit
 import MGSwipeTableCell
 
 /**
@@ -47,15 +46,8 @@ RecordingsStoreDependent, RecordingActivityLogicDependent {
      */
     override func viewDidLoad() {
         super.viewDidLoad()
-        guard recordingsStore.isReady else { return }
 
         tableView.delegate = self
-        if fetcher == nil {
-            storeIsReady()
-        }
-
-        fetchRecordings()
-        tableView.reloadData()
 
         // Detect two-tap gesture and show plot view when it happens
         //
@@ -67,7 +59,13 @@ RecordingsStoreDependent, RecordingActivityLogicDependent {
         // Monitor for Dropbox linking activity so we can update the cells to reflect Dropbox upload capability
         //
         DropboxControllerNotification.observe(observer: self, selector: #selector(updateUploadButtons))
+
+        if recordingsStore.isReady {
+            storeIsReady()
+        }
     }
+
+
 
     /** 
      Dropbox linking changed. Show or hide Dropbox upload buttons
@@ -86,11 +84,14 @@ RecordingsStoreDependent, RecordingActivityLogicDependent {
 
     /**
      Notification handler invoked when RecordingsStore reports that is ready.
-     - parameter notification: the notification from the store
+     - parameter notification: the notification from the store (ignored)
      */
     func storeIsReady(notification: Notification? = nil) {
+        if fetcher != nil { return }
         fetcher = recordingsStore.cannedFetchRequest(name: "all")
         fetcher.delegate = self
+        fetchRecordings()
+        tableView.reloadData()
     }
 
     /**
@@ -417,10 +418,9 @@ RecordingsStoreDependent, RecordingActivityLogicDependent {
             if recording === selectedRecording {
                 selectedRecording = nil
                 selectedRecordingIndex = nil
-                recordingActivityLogic.delete(recording: recording)
             }
 
-            // Do the row deletion
+            // Do the row deletion.
             //
             tableView.deleteRows(at: [indexPath!], with: .fade)
 

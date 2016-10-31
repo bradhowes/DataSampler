@@ -103,11 +103,13 @@ final public class DropboxController: NSObject, DropboxControllerInterface {
      */
     private func checkForUploads() {
         dropBackgroundTask()
-        if let recording = fetcher?.fetchedObjects?.first(where: { (recording) -> Bool in
-            return !recording.uploaded && !recording.isRecording && recording.awaitingUpload
-        }) {
+        if let recording = fetcher?.fetchedObjects?.last {
+            precondition(recording.uploaded == false)
+            precondition(recording.isRecording == false)
+            precondition(recording.awaitingUpload == true)
             upload(recording: recording)
         }
+
     }
 
     /**

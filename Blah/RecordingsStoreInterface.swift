@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import JSQCoreDataKit
 import CoreData
 
 /**
@@ -22,11 +21,10 @@ public protocol RecordingsStoreDependent: class {
  */
 public protocol RecordingsStoreInterface: class {
 
-    var stack: CoreDataStack? { get }
     var isReady: Bool { get }
 
     func cannedFetchRequest(name: String) -> NSFetchedResultsController<Recording>
     func newRunData() -> RunDataInterface
-    func newRecording() -> Recording?
+    func newRecording() -> Recording
     func save()
 }

@@ -58,15 +58,16 @@ final class RecordingActivityLogic: NSObject, RecordingActivityLogicInterface {
      Begin a new recording. Creates a new `Recording` instance and begins receiving data.
      */
     func start() {
-        currentRecording = recordingsStore.newRecording()
-        if currentRecording == nil {
-            fatalError("failed to create new Recording")
-        }
 
+        currentRecording = recordingsStore.newRecording()
         selectedRecording = currentRecording
+
         Logger.clear()
         EventLog.clear()
+
+        currentRecording!.started()
         visualizer.visualize(dataSource: currentRecording!.runData)
+
         demoDriver?.start(runData: currentRecording!.runData)
     }
 
@@ -75,7 +76,7 @@ final class RecordingActivityLogic: NSObject, RecordingActivityLogicInterface {
      */
     func stop() {
         demoDriver?.stop()
-        guard let recording = self.currentRecording else { return }
+        guard let recording = self.currentRecording else { fatalError("*** nil recording") }
         recording.stopped(pdfRenderer: self.pdfRenderer)
         self.currentRecording = nil
         if recording.awaitingUpload {
@@ -91,7 +92,6 @@ final class RecordingActivityLogic: NSObject, RecordingActivityLogicInterface {
         if selectedRecording != recording {
             selectedRecording = recording
             visualizer.visualize(dataSource: recording.runData)
-            // pdfRenderer.render(recording: recording) // !!!
             Logger.restore(from: recording.folder)
             EventLog.restore(from: recording.folder)
         }

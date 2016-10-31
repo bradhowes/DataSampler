@@ -12,14 +12,15 @@ import JSQCoreDataKit
 /** 
  Manager of the Core Data stack for recordings.
  */
-final class RecordingsStore : NSObject, RecordingsStoreInterface {
+final public class RecordingsStore : NSObject, RecordingsStoreInterface {
 
     internal var dependentType: Any.Type { return RecordingsStoreDependent.self }
 
     private let userSettings: UserSettingsInterface
     private let runDataFactory: RunDataInterface.FactoryType
     private(set) var stack: CoreDataStack?
-    private(set) var isReady: Bool
+
+    private(set) public var isReady: Bool
 
     /**
      Intialize new instance. The store may not be available for some time for requests. It will send out a notification
@@ -33,6 +34,7 @@ final class RecordingsStore : NSObject, RecordingsStoreInterface {
         self.isReady = false
 
         super.init()
+
         Logger.log("RecordingsStore.init")
         let model = CoreDataModel(name: "RecordingModel")
         let factory = CoreDataStackFactory(model: model)
@@ -55,7 +57,7 @@ final class RecordingsStore : NSObject, RecordingsStoreInterface {
      - parameter name: the canned query to perform
      - returns: a new `Recording` fetch request wrapped in a NSFetchedResultsController
      */
-    func cannedFetchRequest(name: String) -> NSFetchedResultsController<Recording> {
+    public func cannedFetchRequest(name: String) -> NSFetchedResultsController<Recording> {
         guard let mainContext = self.stack?.mainContext else {
             fatalError("invalid context")
         }
@@ -64,8 +66,11 @@ final class RecordingsStore : NSObject, RecordingsStoreInterface {
         let fr = managedObjectModel.fetchRequestTemplate(forName: name)!.copy() as! NSFetchRequest<Recording>
         fr.sortDescriptors = Recording.defaultSortDescriptors
         fr.fetchBatchSize = 30
+
+        // NOTE: using NSFetchedResultsController is probably overkill for all purposes other than UITableView support.
+        //
         let fetcher = NSFetchedResultsController(fetchRequest: fr, managedObjectContext: mainContext,
-                                                 sectionNameKeyPath: nil, cacheName: "recordingCache")
+                                                 sectionNameKeyPath: nil, cacheName: name)
         return fetcher
     }
 
@@ -73,7 +78,7 @@ final class RecordingsStore : NSObject, RecordingsStoreInterface {
      Create a new `RunData` object for a new recording
      - returns: object that implements the `RunDataInterface`
      */
-    func newRunData() -> RunDataInterface {
+    public func newRunData() -> RunDataInterface {
         return runDataFactory(userSettings)
     }
 
@@ -81,11 +86,10 @@ final class RecordingsStore : NSObject, RecordingsStoreInterface {
      Create a new `Recording` instance attached to the main Core Data context.
      - returns: new `Recording` instance
      */
-    func newRecording() -> Recording? {
+    public func newRecording() -> Recording {
         Logger.log("creating new recording")
         guard let mainContext = stack?.mainContext else {
-            Logger.log("*** RecordingsStore.newRecording: nil stack")
-            return nil
+            fatalError("*** RecordingsStore.newRecording: nil stack")
         }
         return Recording(context: mainContext, userSettings: userSettings, runData: newRunData())
     }
@@ -93,7 +97,7 @@ final class RecordingsStore : NSObject, RecordingsStoreInterface {
     /**
      Save all changes to Core Data
      */
-    func save() {
+    public func save() {
         guard let mainContext = stack?.mainContext else {
             Logger.log("*** RecordingsStore.save: nil stack")
             return

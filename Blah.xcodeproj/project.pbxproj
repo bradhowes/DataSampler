@@ -64,6 +64,7 @@
 		BD75649F1D99B0B700CE455F /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD75649E1D99B0B700CE455F /* Logger.swift */; };
 		BD7564A11D99B67E00CE455F /* EventLogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD7564A01D99B67E00CE455F /* EventLogTests.swift */; };
 		BD7564A31D99C72600CE455F /* EventLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD7564A21D99C72600CE455F /* EventLog.swift */; };
+		BD7C9AE01DC646A800863335 /* URL+Additions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD7C9ADF1DC646A800863335 /* URL+Additions.swift */; };
 		BD85088F1DACCBBC00BE3B53 /* DropboxController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD85088E1DACCBBC00BE3B53 /* DropboxController.swift */; };
 		BD8508911DAD153700BE3B53 /* Recording+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD8508901DAD153700BE3B53 /* Recording+CoreDataProperties.swift */; };
 		BD87F5991D8A2AD1007A6F99 /* PlotsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD87F5981D8A2AD1007A6F99 /* PlotsViewController.swift */; };
@@ -180,6 +181,7 @@
 		BD75649E1D99B0B700CE455F /* Logger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		BD7564A01D99B67E00CE455F /* EventLogTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventLogTests.swift; sourceTree = "<group>"; };
 		BD7564A21D99C72600CE455F /* EventLog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventLog.swift; sourceTree = "<group>"; };
+		BD7C9ADF1DC646A800863335 /* URL+Additions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "URL+Additions.swift"; sourceTree = "<group>"; };
 		BD85088D1DAC27A200BE3B53 /* Blah.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Blah.entitlements; sourceTree = "<group>"; };
 		BD85088E1DACCBBC00BE3B53 /* DropboxController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DropboxController.swift; sourceTree = "<group>"; };
 		BD8508901DAD153700BE3B53 /* Recording+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Recording+CoreDataProperties.swift"; sourceTree = "<group>"; };
@@ -425,12 +427,13 @@
 		BDBB02581DA44FDC000838E0 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
-				BDBCEF551DA9CC5400B09DC9 /* CriticalSection.swift */,
 				BD17D0501D8ED9EE00A18062 /* Collection+Additions.swift */,
+				BDBCEF551DA9CC5400B09DC9 /* CriticalSection.swift */,
 				BD7564981D9931A800CE455F /* Date+Additions.swift */,
 				BD87F5A41D8ADDE0007A6F99 /* Histogram.swift */,
 				BD17D0551D8EE67C00A18062 /* OrderedArray.swift */,
 				BD15E0AF1D934486005B709D /* RandomUniform.swift */,
+				BD7C9ADF1DC646A800863335 /* URL+Additions.swift */,
 			);
 			name = Utils;
 			sourceTree = "<group>";
@@ -740,6 +743,7 @@
 				BDBB025D1DA45983000838E0 /* LowerView.swift in Sources */,
 				BDBCEF561DA9CC5400B09DC9 /* CriticalSection.swift in Sources */,
 				BD9AA0831DAE687300C8F7BD /* RecordingTableViewCell.swift in Sources */,
+				BD7C9AE01DC646A800863335 /* URL+Additions.swift in Sources */,
 				BDFF8ABE1DBF9BB000AB2FA8 /* UserSettingsInterface.swift in Sources */,
 				BD58DDBC1D97C476007765E3 /* PlotTimeFormatter.swift in Sources */,
 				BD17D0561D8EE67C00A18062 /* OrderedArray.swift in Sources */,

@@ -28,7 +28,7 @@ final class RecordingActivityLogic: NSObject, RecordingActivityLogicInterface {
 
     private let recordingsStore: RecordingsStoreInterface
     private let dropboxController: DropboxControllerInterface
-    private let demoDriver: DriverInterface?
+    private let demoDriver: SamplingDriverInterface?
     private var currentRecording: Recording?
     private var selectedRecording: Recording?
 
@@ -39,7 +39,7 @@ final class RecordingActivityLogic: NSObject, RecordingActivityLogicInterface {
      - parameter demoDriver: the driver to use for generating synthetic data
      */
     init(store: RecordingsStoreInterface, dropboxController: DropboxControllerInterface,
-         demoDriver: DriverInterface? = nil) {
+         demoDriver: SamplingDriverInterface? = nil) {
         self.recordingsStore = store
         self.dropboxController = dropboxController
         self.demoDriver = demoDriver

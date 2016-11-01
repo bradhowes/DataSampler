@@ -3,7 +3,7 @@
 platform :ios, '9.3'
 use_frameworks!                 # Add this if you are targeting iOS 8+ or using Swift
 
-target 'Blah' do
+target 'DataSampler' do
 
   pod 'CircleProgressView', '~> 1.0'
   pod 'CorePlot', '~> 2.0'
@@ -13,7 +13,7 @@ target 'Blah' do
   pod 'PDFGenerator', '~> 2.0.1'
   pod 'SwiftyDropbox', '~> 4.0'
 
-  target 'BlahTests' do
+  target 'DataSamplerTests' do
     inherit! :search_paths
   end
   

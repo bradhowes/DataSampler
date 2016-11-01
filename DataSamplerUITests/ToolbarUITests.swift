@@ -8,7 +8,7 @@
 
 import XCTest
 
-class BlahUITests: XCTestCase {
+class ToolbarUITests: XCTestCase {
         
     override func setUp() {
         super.setUp()

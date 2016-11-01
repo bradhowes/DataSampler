@@ -10,7 +10,6 @@ target 'DataSampler' do
   pod 'InAppSettingsKit', '~> 2.0'
   pod 'JSQCoreDataKit', '~> 6.0'
   pod 'MGSwipeTableCell', '~> 1.5.6'
-  pod 'PDFGenerator', '~> 2.0.1'
   pod 'SwiftyDropbox', '~> 4.0'
 
   target 'DataSamplerTests' do

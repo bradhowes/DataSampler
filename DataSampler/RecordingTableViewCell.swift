@@ -10,7 +10,6 @@ import Foundation
 import UIKit
 import CircleProgressView
 import MGSwipeTableCell
-import PDFGenerator
 
 /**
  Functionality for a cell in the `RecordingsTableView` view. Each cell shows information about an associated `Recording`
@@ -146,15 +145,19 @@ extension RecordingsTableViewCell: ConfigurableCell {
 
         for (dir, action, gen) in RecordingsTableViewCell.Actions {
             if actionHandler.canPerform(action: action, recording: recording) {
-                var buttons: [UIView] = {
-                    switch dir {
-                    case .leftToRight: return leftButtons
-                    case .rightToLeft: return rightButtons}
-                }()
-                buttons.append(gen())
-                buttons.last!.tag = action.rawValue
+                switch dir {
+                case .leftToRight:
+                    leftButtons.append(gen())
+                    leftButtons.last!.tag = action.rawValue
+                case .rightToLeft:
+                    rightButtons.append(gen())
+                    rightButtons.last!.tag = action.rawValue
+                }
             }
         }
+
+        print("leftButtons: \(leftButtons)")
+        print("rightButtons: \(rightButtons)")
     }
 }
 

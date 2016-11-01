@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import PDFGenerator
 
 /**
  Protocol for visualizing the contents of a recording.

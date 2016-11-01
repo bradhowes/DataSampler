@@ -9,7 +9,6 @@
 import Foundation
 import UIKit
 import CorePlot
-import PDFGenerator
 
 final class GraphLatencyHistogram : CPTGraphHostingView, HistogramObserver, Skinnable {
 

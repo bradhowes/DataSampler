@@ -8,7 +8,6 @@
 
 import UIKit
 import CorePlot
-import PDFGenerator
 
 final class GraphLatencyByTime: CPTGraphHostingView, Skinnable {
 

@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import PDFGenerator
 
 /** 
  The main view controller for the app. The view is split in two, with the upper-half showing an XY scatter plot and the

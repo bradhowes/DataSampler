@@ -1,13 +1,13 @@
 //
 //  FixedTimestampGenerator.swift
-//  Blah
+//  DataSampler
 //
 //  Created by Brad Howes on 10/10/16.
 //  Copyright © 2016 Brad Howes. All rights reserved.
 //
 
 import Foundation
-@testable import Blah
+@testable import DataSampler
 
 final class FixedTimestampGenerator: NSObject, TimestampGeneratorInterface {
 

@@ -1,13 +1,13 @@
 //
-//  BlahTests.swift
-//  BlahTests
+//  DataSamplerTests.swift
+//  DataSamplerTests
 //
 //  Created by Brad Howes on 9/14/16.
 //  Copyright © 2016 Brad Howes. All rights reserved.
 //
 
 import XCTest
-@testable import Blah
+@testable import DataSampler
 
 class HistogramTests: XCTestCase {
     

@@ -1,6 +1,6 @@
 //
 //  BRHRandomness.swift
-//  Blah
+//  DataSampler
 //
 //  Created by Brad Howes on 9/22/16.
 //  Copyright © 2016 Brad Howes. All rights reserved.

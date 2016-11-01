@@ -1,6 +1,6 @@
 //
 //  DropboxController.swift
-//  Blah
+//  DataSampler
 //
 //  Created by Brad Howes on 10/11/16.
 //  Copyright © 2016 Brad Howes. All rights reserved.

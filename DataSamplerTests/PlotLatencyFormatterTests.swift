@@ -1,13 +1,13 @@
 //
 //  BRHBinFormatterTests.swift
-//  Blah
+//  DataSampler
 //
 //  Created by Brad Howes on 9/21/16.
 //  Copyright © 2016 Brad Howes. All rights reserved.
 //
 
 import XCTest
-@testable import Blah
+@testable import DataSampler
 
 class PlotLatencyFormatterTests: XCTestCase {
     

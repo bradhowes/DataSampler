@@ -1,6 +1,6 @@
 //
 //  AppNotifications.swift
-//  Blah
+//  DataSampler
 //
 //  Created by Brad Howes on 10/7/16.
 //  Copyright © 2016 Brad Howes. All rights reserved.

@@ -1,6 +1,6 @@
 //
 //  BRHLatencyHistogramGraphSource.swift
-//  Blah
+//  DataSampler
 //
 //  Created by Brad Howes on 9/16/16.
 //  Copyright © 2016 Brad Howes. All rights reserved.

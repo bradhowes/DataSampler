@@ -1,6 +1,6 @@
 //
-//  BlahUITests.swift
-//  BlahUITests
+//  DataSamplerUITests.swift
+//  DataSamplerUITests
 //
 //  Created by Brad Howes on 10/8/16.
 //  Copyright © 2016 Brad Howes. All rights reserved.

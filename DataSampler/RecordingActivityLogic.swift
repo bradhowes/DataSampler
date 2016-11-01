@@ -1,6 +1,6 @@
 //
 //  ActivityLogic.swift
-//  Blah
+//  DataSampler
 //
 //  Created by Brad Howes on 10/10/16.
 //  Copyright © 2016 Brad Howes. All rights reserved.

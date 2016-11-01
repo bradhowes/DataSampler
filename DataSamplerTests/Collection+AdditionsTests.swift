@@ -1,13 +1,13 @@
 //
 //  BRHCollection+AdditionsTests.swift
-//  Blah
+//  DataSampler
 //
 //  Created by Brad Howes on 9/18/16.
 //  Copyright © 2016 Brad Howes. All rights reserved.
 //
 
 import XCTest
-@testable import Blah
+@testable import DataSampler
 
 class CollectionAdditionsTests: XCTestCase {
 

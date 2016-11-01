@@ -66,8 +66,7 @@ final class PlotsViewController: UIViewController, RecordingActivityLogicDepende
             try lowerViewManager.add(view: logView, button: logButton)
             try lowerViewManager.add(view: eventsView, button: eventsButton)
         } catch {
-            print(error)
-            abort()
+            fatalError("\(error)")
         }
 
         // Remove the 'stop' button from the toolbar

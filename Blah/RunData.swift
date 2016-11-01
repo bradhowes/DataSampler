@@ -154,14 +154,7 @@ public final class RunData : NSObject, NSCoding, RunDataInterface {
             }
 
             let denom = Double(samples.count)
-            if samples.count == 1 {
-                estArrivalInterval = sample - prev
-            }
-            else {
-                estArrivalInterval = min(estArrivalInterval, ((sample - prev) +
-                    estArrivalInterval * (denom - 1.0)) / denom)
-            }
-
+            estArrivalInterval = min(estArrivalInterval, sample - prev)
             sample.averageLatency = (sample.latency + prev.averageLatency * denom) / (denom + 1.0)
             EventLog.log("averageLatency", sample.averageLatency)
         }

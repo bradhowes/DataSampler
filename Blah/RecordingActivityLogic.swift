@@ -68,7 +68,7 @@ final class RecordingActivityLogic: NSObject, RecordingActivityLogicInterface {
         currentRecording!.started()
         visualizer.visualize(dataSource: currentRecording!.runData)
 
-        demoDriver?.start(runData: currentRecording!.runData)
+        demoDriver?.start(emitInterval: Int(currentRecording!.emitInterval), runData: currentRecording!.runData)
     }
 
     /**

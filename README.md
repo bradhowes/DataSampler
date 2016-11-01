@@ -31,7 +31,7 @@ session. The top half of the display shows a scatter plot of received sample dat
 elapsed time and the Y access latency values calculate from the received samples. Below this plot, there is a
 bar chart which represents a histogram of latency values, each histogram bin representing one second.
 
-![plots](images/mainScreen.png)
+![plots](images/mainScreen.png?raw=true)
 
 At the top left there is a start button (green arrow) which will start a new recording session. To the
 right there are three buttons which control the lower view. The first button shows the historgram plot mentioned
@@ -40,8 +40,8 @@ the third button reveals an *events* view which is simply a collection of comma-
 notable events. Using the CSV format allows easy importing into applications such as Apple's Numbers or
 Microsoft's Excel.
 
-![log view](images/logView.png)
-![event view](images/eventView.png)
+![log view](images/logView.png?raw=true)
+![event view](images/eventView.png?raw=true)
 
 ## Recordings
 
@@ -50,7 +50,7 @@ recording will make it current, updating the plots and logs of the first screen 
 Recordings may be shared using the iOS sharing facility, and they may also be uploaded to a Dropbox account once
 you have gone through the Dropbox linking procedure which is reached on the settings screen described below.
 
-![recordings](images/recordingsScreen.png)
+![recordings](images/recordingsScreen.png?raw=true)
 
 The uploading and sharing buttons appear when you swipe a recording cell to the right; swiping to the left
 reveals a delete button for erasing the recording from the device. Double-tapping a recording will make it
@@ -72,5 +72,5 @@ directory.
 The third and final screen in the application shows various configuration options (most of these can also be
 manipulated through the iOS Settings app). In the app view, there is a button which controls Dropbox linking.
 
-![settings](images/settingsScreen.png)
+![settings](images/settingsScreen.png?raw=true)
 

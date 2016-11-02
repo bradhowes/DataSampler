@@ -9,14 +9,23 @@
 import UIKit
 import CorePlot
 
+extension CPTPlot {
+
+    var plotId: LatencyPlotId {
+        get {
+            return LatencyPlotId(rawValue: name!)!
+        }
+        set {
+            name = newValue.rawValue
+            title = newValue.legend
+        }
+    }
+}
+
+/**
+ Scatter plot that shows sample latencies over time.
+ */
 final class GraphLatencyByTime: CPTGraphHostingView, Skinnable {
-
-    static let kLatencyPlotId = NSString(string: "Latency")
-    static let kAveragePlotId = NSString(string: "Avg")
-    static let kMedianPlotId = NSString(string: "Median")
-    static let kMissingPlotId = NSString(string: "Miss")
-
-    let kPlotSymbolSize: Double = 8.0
 
     let displaySkin = DisplayGraphSkin()
     let pdfSkin = PDFGraphSkin()
@@ -27,40 +36,29 @@ final class GraphLatencyByTime: CPTGraphHostingView, Skinnable {
         }
     }
 
-    var source: RunDataInterface! {
+    var source: RunDataInterface? {
         willSet {
             if source != nil {
-                RunDataNewSampleNotification.unobserve(from: source, observer: self)
+                RunDataNewSampleNotification.unobserve(from: source!, observer: self)
+                if annotation != nil {
+                    hostedGraph?.plotAreaFrame?.plotArea?.removeAnnotation(annotation)
+                    annotation = nil
+                }
+            }
+            else {
+                makeGraph()
             }
         }
         didSet {
-            RunDataNewSampleNotification.observe(from: source, observer: self, selector: #selector(sampleAdded))
-            if hostedGraph == nil {
-                makeGraph()
-                updateTitle()
-            }
-            else {
-                reload()
-            }
+            RunDataNewSampleNotification.observe(from: source!, observer: self, selector: #selector(sampleAdded))
+            plots.forEach { $0.source = source }
+            updateTitle()
+            reload()
         }
     }
 
     func sampleAdded(notification: Notification) {
-        let info = RunDataNewSampleNotification(notification: notification)
-        guard let plots = hostedGraph?.allPlots() else { fatalError("missing plots")}
-
-        plots.forEach {
-            if $0.identifier === GraphLatencyByTime.kMissingPlotId {
-                if info.sample.missingCount > 0 {
-                    let numRecords = info.sample.missingCount * 2 + 1
-                    $0.insertData(at: UInt(source.missing.count - numRecords), numberOfRecords: UInt(numRecords))
-                }
-            }
-            else {
-                $0.insertData(at: UInt(info.index), numberOfRecords: 1)
-            }
-        }
-
+        plots.forEach { $0.insertRecord() }
         if Thread.isMainThread {
             updateBounds()
         }
@@ -83,6 +81,10 @@ final class GraphLatencyByTime: CPTGraphHostingView, Skinnable {
         return self.hostedGraph!.allPlotSpaces().last! as! CPTXYPlotSpace
     }()
 
+    fileprivate lazy var plots: [LatencyPlotInterface] = {
+        return self.hostedGraph!.allPlots().map { $0 as! LatencyPlotInterface }
+    }()
+
     fileprivate lazy var xAxis: CPTXYAxis = {
         return (self.hostedGraph!.axisSet! as! CPTXYAxisSet).xAxis!
     }()
@@ -93,7 +95,7 @@ final class GraphLatencyByTime: CPTGraphHostingView, Skinnable {
 
     fileprivate lazy var latencyFormatter = PlotLatencyFormatter()
 
-    private func makeGraph() {
+    fileprivate func makeGraph() {
 
         let graph = CPTXYGraph(frame: self.frame)
         hostedGraph = graph
@@ -102,7 +104,7 @@ final class GraphLatencyByTime: CPTGraphHostingView, Skinnable {
         graph.paddingRight = 0.0
         graph.paddingTop = 0.0
         graph.paddingBottom = 0.0
-        
+
         graph.plotAreaFrame?.masksToBorder = false;
         graph.plotAreaFrame?.borderLineStyle = nil
         graph.plotAreaFrame?.cornerRadius = 0.0
@@ -113,7 +115,7 @@ final class GraphLatencyByTime: CPTGraphHostingView, Skinnable {
 
         let plotSpace = CPTXYPlotSpace()
         graph.add(plotSpace)
-        
+
         plotSpace.allowsUserInteraction = true
         plotSpace.allowsMomentumX = true
         plotSpace.allowsMomentumY = false
@@ -140,20 +142,20 @@ final class GraphLatencyByTime: CPTGraphHostingView, Skinnable {
     private func applySkin() {
         xAxis.titleTextStyle = activeSkin.titleStyle
         xAxis.labelTextStyle = activeSkin.labelStyle
-        xAxis.axisLineStyle = activeSkin.gridLineStyle
         xAxis.majorTickLineStyle = activeSkin.gridLineStyle
+        xAxis.majorGridLineStyle = activeSkin.gridLineStyle
 
         yAxis.titleTextStyle = activeSkin.titleStyle
         yAxis.labelTextStyle = activeSkin.labelStyle
-        yAxis.axisLineStyle = activeSkin.gridLineStyle
         yAxis.majorTickLineStyle = activeSkin.gridLineStyle
         yAxis.majorGridLineStyle = activeSkin.gridLineStyle
     }
-    
+
     private func configureGraph() {
         xAxis.title = ""
         xAxis.titleOffset = 18.0
         xAxis.labelOffset = -4.0
+        xAxis.axisLineStyle = nil // activeSkin.gridLineStyle
         xAxis.axisConstraints = CPTConstraints(lowerOffset: 0.0) // Keep the X axis from moving up/down when scrolling
         xAxis.labelingPolicy = .automatic
         xAxis.labelFormatter = PlotTimeFormatter()
@@ -171,13 +173,14 @@ final class GraphLatencyByTime: CPTGraphHostingView, Skinnable {
         yAxis.title = nil
         yAxis.labelRotation = CGFloat(M_PI_2)
         yAxis.labelTextStyle = labelStyle
-        yAxis.labelOffset = -3.0
+        yAxis.labelOffset = -1.5
+        yAxis.axisLineStyle = nil
         yAxis.axisConstraints = CPTConstraints(lowerOffset: 0.0)
         yAxis.labelingPolicy = .locationsProvided
         yAxis.labelFormatter = latencyFormatter
         yAxis.minorGridLineStyle = nil
         yAxis.tickDirection = .negative
-        yAxis.majorTickLength = 5.0
+        yAxis.majorTickLength = 2.5
         yAxis.minorTickLineStyle = nil
     }
 
@@ -193,128 +196,37 @@ final class GraphLatencyByTime: CPTGraphHostingView, Skinnable {
         yAxis.labelingPolicy = .automatic
     }
 
-    private func makeLegend(graph: CPTXYGraph) {
-        let legend = CPTLegend(graph: graph)
-
-        graph.legend = legend
-        graph.legendAnchor = .top
-        graph.legendDisplacement = CGPoint(x: 0.0, y: -5.0)
-        legend.isHidden = true
-        legend.fill = CPTFill(color: CPTColor.darkGray().withAlphaComponent(0.5))
-
-        legend.textStyle = displaySkin.titleStyle;
-
-        let lineStyle = CPTMutableLineStyle()
-        lineStyle.lineWidth = 0.75
-        lineStyle.lineColor = CPTColor(genericGray: 0.45)
-
-        legend.borderLineStyle = lineStyle
-        legend.cornerRadius = 5.0
-        legend.swatchSize = CGSize(width: 25.0, height: 25.0)
-        legend.numberOfRows = 1
-        legend.delegate = self
-
-        // Create a 2-tap gesture recognizer to show/hide the legend
-        //
-        let recognizer = UITapGestureRecognizer(target: self, action: #selector(handleTap))
-        recognizer.numberOfTouchesRequired = 1
-        recognizer.numberOfTapsRequired = 2
-        self.addGestureRecognizer(recognizer)
-    }
-
-    func handleTap(recognizer: UITapGestureRecognizer) {
-        guard let legend = self.hostedGraph?.legend else { return }
-        legend.isHidden = !legend.isHidden
-    }
-    
     private func makeLatencyPlot(graph: CPTXYGraph, plotSpace: CPTXYPlotSpace) {
-
-        let plot = CPTScatterPlot()
-        plot.identifier = GraphLatencyByTime.kLatencyPlotId
-        plot.dataSource = self
-        plot.cachePrecision = .double
-
-        let lineStyle = CPTMutableLineStyle()
-        lineStyle.lineJoin = .round
-        lineStyle.lineCap = .round
-        lineStyle.lineWidth = 1.0
-        lineStyle.lineColor = CPTColor.gray()
-        plot.dataLineStyle = lineStyle
-
-        let symbolGradient = CPTGradient(beginning: CPTColor(componentRed: 0.75, green: 0.75, blue: 1.0, alpha: 1.0),
-                                         ending: CPTColor.cyan())
-        symbolGradient.gradientType = .radial
-        symbolGradient.startAnchor = CGPoint(x: 0.25, y: 0.75)
-        
-        let plotSymbol = CPTPlotSymbol.ellipse()
-        plotSymbol.fill = CPTFill(gradient: symbolGradient)
-        plotSymbol.lineStyle = nil;
-        plotSymbol.size = CGSize(width: kPlotSymbolSize, height: kPlotSymbolSize)
-        plot.plotSymbol = plotSymbol;
-        plot.plotSymbolMarginForHitDetection = CGFloat(kPlotSymbolSize) * CGFloat(1.5)
-
-        plot.delegate = self
-
+        let plot = LatencyPlot()
+        plot.configure(owner: self)
         graph.add(plot, to: plotSpace)
     }
 
     private func makeAveragePlot(graph: CPTXYGraph, plotSpace: CPTXYPlotSpace) {
-        let plot = CPTScatterPlot()
-        plot.identifier = GraphLatencyByTime.kAveragePlotId
-        plot.dataSource = self
-        plot.cachePrecision = .double
-
-        let lineStyle = CPTMutableLineStyle()
-        lineStyle.lineJoin = .round
-        lineStyle.lineCap = .round
-        lineStyle.lineWidth = 3.0
-        lineStyle.lineColor = CPTColor.yellow()
-        plot.dataLineStyle = lineStyle
-        
+        let plot = AveragePlot()
+        plot.configure(owner: self)
         graph.add(plot, to: plotSpace)
     }
-    
+
     private func makeMedianPlot(graph: CPTXYGraph, plotSpace: CPTXYPlotSpace) {
-
-        let plot = CPTScatterPlot()
-        plot.identifier = GraphLatencyByTime.kMedianPlotId
-        plot.dataSource = self
-        plot.cachePrecision = .double
-        
-        let lineStyle = CPTMutableLineStyle()
-        lineStyle.lineJoin = .round
-        lineStyle.lineCap = .round
-        lineStyle.lineWidth = 3.0
-        lineStyle.lineColor = CPTColor.magenta()
-        plot.dataLineStyle = lineStyle
-        
+        let plot = MedianPlot()
+        plot.configure(owner: self)
         graph.add(plot, to: plotSpace)
     }
-    
+
     private func makeMissingPlot(graph: CPTXYGraph, plotSpace: CPTXYPlotSpace) {
-        
-        let plot = CPTScatterPlot()
-        plot.identifier = GraphLatencyByTime.kMissingPlotId
-        plot.dataSource = self
-        plot.cachePrecision = .double
-
-        let lineStyle = CPTMutableLineStyle()
-        lineStyle.lineJoin = .round
-        lineStyle.lineCap = .round
-        lineStyle.lineWidth = 1.0
-        lineStyle.lineColor = CPTColor.red()
-        plot.dataLineStyle = lineStyle
-        plot.areaBaseValue = 0.0
-        plot.areaFill = CPTFill(color: CPTColor.red().withAlphaComponent(0.25))
+        let plot = MissingPlot()
+        plot.configure(owner: self)
         graph.add(plot, to: plotSpace)
     }
-    
+
     override func layoutSubviews() {
         super.layoutSubviews()
         updateBounds()
     }
 
     private func updateTitle() {
+        guard let source = self.source else { return }
         if !source.name.isEmpty {
             xAxis.title = String(format: "%@ - %lds Intervals", source.name, source.emitInterval)
         }
@@ -353,86 +265,94 @@ final class GraphLatencyByTime: CPTGraphHostingView, Skinnable {
         hostedGraph?.layoutAndRender(in: context)
     }
 
+    private let xRangeNeedsUpdate = CPTPlotRange(location: NSNumber(value: 0.0), length: NSNumber(value: 1.0))
+
     func reload() {
         if Thread.isMainThread {
             self.hostedGraph?.reloadData()
             self.updateTitle()
+            self.plotSpace.xRange = xRangeNeedsUpdate
             self.updateBounds()
             self.setNeedsDisplay()
         }
         else {
-            DispatchQueue.main.async() {self.reload()}
+            DispatchQueue.main.async() {
+                self.reload()
+            }
         }
     }
 
-    private func calculatePlotWidth() -> Double {
-        guard let w = hostedGraph?.frame.size.width else { return 10.0 }
-        return floor(Double(w) / (kPlotSymbolSize * 1.5))
+    fileprivate func plotWidthInSamples() -> Double {
+        guard let w = hostedGraph?.frame.size.width else { return 100.0 }
+        return floor(Double(w) / (LatencyPlot.kPlotSymbolSize * 1.5))
     }
 
-    private func findFirstSampleAtOrBefore(when: TimeInterval) -> Int {
-        let pos = source.samples.map({$0.arrivalTime}).insertionIndexOf(value: source.startTime.addingTimeInterval(when),
-                                                                        predicate: {$0 < $1})
+    fileprivate func findFirstSampleAtOrBefore(when: TimeInterval) -> Int {
+        guard let source = self.source else { return 0 }
+        let value = source.startTime.addingTimeInterval(when)
+        let pos = source.samples.map({$0.arrivalTime}).insertionIndexOf(value: value, predicate: {$0 < $1})
         return pos
     }
 
-    private func findMinMaxInRange(range: CPTPlotRange) -> (min: Double, max: Double)? {
+    fileprivate func findMinMaxInRange(range: CPTPlotRange) -> (min: Double, max: Double)? {
+        guard let source = self.source else { return nil }
         if source.samples.count == 0 { return nil }
         let x0 = findFirstSampleAtOrBefore(when: range.locationDouble)
         let x1 = findFirstSampleAtOrBefore(when: range.endDouble)
         return source.samples[x0..<x1].map({$0.latency}).minMax()
     }
 
-    private func updateBounds(onePage: Bool = false) {
-        let plotData = source.samples
-        let visiblePoints = calculatePlotWidth() * source.estArrivalInterval
+    fileprivate func updateBounds(onePage: Bool = false) {
+        guard let samples = source?.samples else { return }
 
+        let spacing = Double(source!.emitInterval)
+        let plotWidthInTime = plotWidthInSamples() * spacing
+        let oldRange = plotSpace.xRange
+
+        // Calculate initial X axis min/max values
+        //
         var xMin = 0.0
-        var xMax = visiblePoints
+        var xMax = plotWidthInTime
+        var xPos = xMax
 
-        if plotData.count > 0 {
-            let tmp = plotData.last!
-            let xPos = xValueFor(sample: tmp)
+        if samples.count > 0 {
+            xPos = xValueFor(sample: samples.last!)
             if onePage {
                 xMax = xPos
             }
-            else {
-                if xPos > xMax {
-                    xMin = xPos - xMax
-                    xMax = xPos
-                }
-                else if xPos < xMax {
+            else if xPos > plotWidthInTime {
+                if oldRange != xRangeNeedsUpdate {
+                    xMin = xPos - plotWidthInTime
                     xMax = xPos
                 }
             }
+            else {
+                xMin = 0.0
+                xMax = max(xPos, 10.0)
+            }
         }
 
-        let xMinPadded = 0.0 - source.estArrivalInterval / 2.0
-        let xMaxPadded = xMax + source.estArrivalInterval / 2.0
-        plotSpace.globalXRange = CPTPlotRange(location: NSNumber(value: xMinPadded),
-                                              length: NSNumber(value: xMaxPadded - xMinPadded))
+        plotSpace.globalXRange = CPTPlotRange(location: NSNumber(value: -0.1), length: NSNumber(value: xPos * 1.02))
 
-        if xMin == 0.0 {
-
-            // Nothing going on here -- just show a default range of X
-            //
-            let xRange = CPTMutablePlotRange(location: NSNumber(value: xMin), length: NSNumber(value: xMax - xMin))
-            xRange.expand(byFactor: 1.05)
-            plotSpace.xRange = xRange
-        }
-        else if plotData.count > 1 && xValueFor(sample:plotData[plotData.count - 2]) < plotSpace.xRange.endDouble {
+        if samples.count > 1 && xValueFor(sample:samples[samples.count - 2]) < plotSpace.xRange.endDouble {
 
             // Scroll the view to show the new points
             //
-            let oldRange = plotSpace.xRange
-            let newRange = CPTMutablePlotRange(location: NSNumber(value: xMin), length: NSNumber(value: xMax - xMin))
-            newRange.expand(byFactor: 1.05)
+            let newRange = CPTPlotRange(location: NSNumber(value: xMin), length: NSNumber(value: (xMax - xMin) * 1.02))
+            CPTAnimation.animate(plotSpace, property: "xRange", from: oldRange, to: newRange, duration: 0.125)
+        }
+        else if oldRange == xRangeNeedsUpdate || xMax < plotWidthInTime {
+            let newRange = CPTPlotRange(location: -0.1, length: NSNumber(value: xMax * 1.02))
             CPTAnimation.animate(plotSpace, property: "xRange", from: oldRange, to: newRange, duration: 0.125)
         }
 
         updateYRange(onePage: onePage)
     }
 
+    /** 
+     Determine max sample value in visible X range.
+     - returns: plot range of [0.0, max Y]
+     */
     fileprivate func calculateYRange() -> CPTMutablePlotRange {
         let xRange = plotSpace.xRange
         let yMinMax = findMinMaxInRange(range: xRange) ?? (0.0, 10.0)
@@ -441,6 +361,9 @@ final class GraphLatencyByTime: CPTGraphHostingView, Skinnable {
         return yRange
     }
 
+    /** 
+     Determine max latency value and update graph elements to use it as max value on Y axis.
+     */
     fileprivate func updateYRange(onePage: Bool = false) {
         let yRange = calculateYRange()
         let yMax = yRange.endDouble
@@ -463,49 +386,32 @@ final class GraphLatencyByTime: CPTGraphHostingView, Skinnable {
     }
 }
 
-// - MARK: Data Source Methods
+// - MARK: CPTScatterPlotDataSource Methods
 
 extension GraphLatencyByTime: CPTScatterPlotDataSource {
 
     func numberOfRecords(for plot: CPTPlot) -> UInt {
-        guard let tag = plot.identifier as? NSString else { return 0 }
-        switch tag {
-        case GraphLatencyByTime.kMissingPlotId: return UInt(source.missing.count)
-        default: return UInt(source.samples.count)
-        }
+        return UInt((plot as! LatencyPlotInterface).numberOfRecords())
     }
 
     func xValueFor(sample: Sample) -> Double {
-        return sample.arrivalTime.timeIntervalSince(source.startTime)
-    }
-
-    func yValueFor(sample: Sample) -> Double {
-        return sample.latency
+        return sample.arrivalTime.timeIntervalSince(source!.startTime)
     }
 
     func number(for plot: CPTPlot, field fieldEnum: UInt, record idx: UInt) -> Any? {
         guard let field = CPTScatterPlotField(rawValue: Int(fieldEnum)) else { return nil }
-        guard let tag = plot.identifier as? NSString else { return nil }
-        let sample = tag == GraphLatencyByTime.kMissingPlotId ? source.missing[Int(idx)] : source.samples[Int(idx)]
+        guard let p = plot as? LatencyPlotInterface else { fatalError("*** unexpected plot type") }
         switch field {
-        case .X: return xValueFor(sample: sample)
-        case .Y:
-            switch plot.identifier as! NSString {
-            case GraphLatencyByTime.kLatencyPlotId: return sample.latency
-            case GraphLatencyByTime.kAveragePlotId: return sample.averageLatency
-            case GraphLatencyByTime.kMedianPlotId: return sample.medianLatency
-            case GraphLatencyByTime.kMissingPlotId: return sample.latency
-            default: return 0.0
-            }
+        case .X: return p.xValueOfRecord(record: Int(idx))
+        case .Y: return p.yValueOfRecord(record: Int(idx))
         }
     }
-
 }
 
-// - MARK: Plot Space Delegate Methods
+// - MARK: CPTPlotSpaceDelegate Methods
 
 extension GraphLatencyByTime: CPTPlotSpaceDelegate {
-    
+
     func plotSpace(_ space: CPTPlotSpace, didChangePlotRangeFor coordinate: CPTCoordinate) {
         switch coordinate {
         case .Y:
@@ -514,24 +420,56 @@ extension GraphLatencyByTime: CPTPlotSpaceDelegate {
                 plotSpace.yRange = CPTPlotRange(location: NSNumber(value: 0.0), length: yRange.length)
             }
         case .X:
-            let xRange = plotSpace.xRange
-            if xRange.locationDouble < 0.0 {
-                plotSpace.xRange = CPTPlotRange(location: NSNumber(value: 0.0), length: xRange.length)
-            }
-
             updateYRange()
         default: break
         }
     }
 }
 
-// - MARK: Legend Delegate Methods
+// - MARK: Legend Management
 
 extension GraphLatencyByTime: CPTLegendDelegate {
+
+    fileprivate func makeLegend(graph: CPTXYGraph) {
+        let legend = CPTLegend(graph: graph)
+
+        graph.legend = legend
+        graph.legendAnchor = .top
+        graph.legendDisplacement = CGPoint(x: 0.0, y: -5.0)
+        legend.isHidden = true
+        legend.fill = CPTFill(color: CPTColor.darkGray().withAlphaComponent(0.5))
+
+        legend.textStyle = displaySkin.titleStyle;
+
+        let lineStyle = CPTMutableLineStyle()
+        lineStyle.lineWidth = 0.75
+        lineStyle.lineColor = CPTColor(genericGray: 0.45)
+
+        legend.borderLineStyle = lineStyle
+        legend.cornerRadius = 5.0
+        legend.swatchSize = CGSize(width: 25.0, height: 25.0)
+        legend.numberOfRows = 1
+        legend.delegate = self
+
+        // Create a 2-tap gesture recognizer to show/hide the legend
+        //
+        let recognizer = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        recognizer.numberOfTouchesRequired = 1
+        recognizer.numberOfTapsRequired = 2
+        self.addGestureRecognizer(recognizer)
+    }
+
+    func handleTap(recognizer: UITapGestureRecognizer) {
+        guard let legend = self.hostedGraph?.legend else { return }
+        legend.isHidden = !legend.isHidden
+    }
+    
     func legend(_ legend: CPTLegend, legendEntryFor plot: CPTPlot, wasSelectedAt idx: UInt) {
         plot.isHidden = !plot.isHidden
     }
 }
+
+// - MARK: CPTScatterPlotDelegate Methods
 
 extension GraphLatencyByTime: CPTScatterPlotDelegate {
     func scatterPlot(_ plot: CPTScatterPlot, plotSymbolTouchUpAtRecord idx: UInt) {
@@ -545,8 +483,8 @@ extension GraphLatencyByTime: CPTScatterPlotDelegate {
 
         self.annotationIndex = Int(idx)
 
-        let sample = source.samples[self.annotationIndex]
-        let x = sample.arrivalTime.timeIntervalSince(source.startTime)
+        let sample = source!.samples[self.annotationIndex]
+        let x = sample.arrivalTime.timeIntervalSince(source!.startTime)
         let y = sample.latency
 
         let tag = latencyFormatter.string(from: NSNumber(value: y)) ?? "???"
@@ -557,7 +495,7 @@ extension GraphLatencyByTime: CPTScatterPlotDelegate {
         self.annotation = CPTPlotSpaceAnnotation(plotSpace: plotSpace, anchorPlotPoint: pos)
         self.annotation?.contentLayer = textLayer
 
-        let xOffset = (Double(textLayer.frame.width) + kPlotSymbolSize) / 2.0
+        let xOffset = (Double(textLayer.frame.width) + LatencyPlot.kPlotSymbolSize) / 2.0
         if x < plotSpace.xRange.locationDouble + plotSpace.xRange.lengthDouble / 2.0 {
             self.annotation?.displacement = CGPoint(x: xOffset, y: 0.0)
         }

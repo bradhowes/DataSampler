@@ -87,6 +87,11 @@
 		BDBCEF561DA9CC5400B09DC9 /* CriticalSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBCEF551DA9CC5400B09DC9 /* CriticalSection.swift */; };
 		BDBCEF581DA9CE3D00B09DC9 /* RecordingsStoreInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBCEF571DA9CE3D00B09DC9 /* RecordingsStoreInterface.swift */; };
 		BDD553DF1DABAB1100D2167E /* FixedTimestampGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDD553DE1DABAB1100D2167E /* FixedTimestampGenerator.swift */; };
+		BDD6E2511DCA1AA70076BD6E /* LatencyPlotInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDD6E2501DCA1AA70076BD6E /* LatencyPlotInterface.swift */; };
+		BDD6E2571DCA1AF30076BD6E /* LatencyPlot.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDD6E2531DCA1AF30076BD6E /* LatencyPlot.swift */; };
+		BDD6E2581DCA1AF30076BD6E /* AveragePlot.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDD6E2541DCA1AF30076BD6E /* AveragePlot.swift */; };
+		BDD6E2591DCA1AF30076BD6E /* MedianPlot.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDD6E2551DCA1AF30076BD6E /* MedianPlot.swift */; };
+		BDD6E25A1DCA1AF30076BD6E /* MissingPlot.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDD6E2561DCA1AF30076BD6E /* MissingPlot.swift */; };
 		BDDC9D781D8AFC4100C36430 /* GraphLatencyHistogram.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDDC9D771D8AFC4100C36430 /* GraphLatencyHistogram.swift */; };
 		BDFEEC3B1D91D0DC003E8555 /* NewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD49485D1D89F23000C50DE2 /* NewTests.swift */; };
 		BDFEEC3C1D91E875003E8555 /* UserSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD5605351D8FC2F200CFE29B /* UserSettings.swift */; };
@@ -212,6 +217,11 @@
 		BDBCEF551DA9CC5400B09DC9 /* CriticalSection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CriticalSection.swift; sourceTree = "<group>"; };
 		BDBCEF571DA9CE3D00B09DC9 /* RecordingsStoreInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RecordingsStoreInterface.swift; sourceTree = "<group>"; };
 		BDD553DE1DABAB1100D2167E /* FixedTimestampGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FixedTimestampGenerator.swift; sourceTree = "<group>"; };
+		BDD6E2501DCA1AA70076BD6E /* LatencyPlotInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LatencyPlotInterface.swift; sourceTree = "<group>"; };
+		BDD6E2531DCA1AF30076BD6E /* LatencyPlot.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LatencyPlot.swift; sourceTree = "<group>"; };
+		BDD6E2541DCA1AF30076BD6E /* AveragePlot.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AveragePlot.swift; sourceTree = "<group>"; };
+		BDD6E2551DCA1AF30076BD6E /* MedianPlot.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MedianPlot.swift; sourceTree = "<group>"; };
+		BDD6E2561DCA1AF30076BD6E /* MissingPlot.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MissingPlot.swift; sourceTree = "<group>"; };
 		BDDC9D771D8AFC4100C36430 /* GraphLatencyHistogram.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GraphLatencyHistogram.swift; sourceTree = "<group>"; };
 		BDFF8AB91DBF9B5600AB2FA8 /* RunDataInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RunDataInterface.swift; sourceTree = "<group>"; };
 		BDFF8ABB1DBF9B8700AB2FA8 /* DropboxControllerInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DropboxControllerInterface.swift; sourceTree = "<group>"; };
@@ -365,6 +375,7 @@
 		BD981C611DB132D100F18078 /* Interfaces */ = {
 			isa = PBXGroup;
 			children = (
+				BDD6E2501DCA1AA70076BD6E /* LatencyPlotInterface.swift */,
 				BD9AA0801DAE67FB00C8F7BD /* ActionableCell.swift */,
 				BDFF8ACB1DC3585000AB2FA8 /* ConfigurableCell.swift */,
 				BDFF8ABB1DBF9B8700AB2FA8 /* DropboxControllerInterface.swift */,
@@ -399,6 +410,7 @@
 		BDBB02541DA44EDE000838E0 /* Plots */ = {
 			isa = PBXGroup;
 			children = (
+				BDD6E2521DCA1ADE0076BD6E /* Latency Plots */,
 				BD87F5981D8A2AD1007A6F99 /* PlotsViewController.swift */,
 				BDBB025C1DA45983000838E0 /* LowerView.swift */,
 				BDBB025A1DA45942000838E0 /* LowerViewManager.swift */,
@@ -461,6 +473,17 @@
 				BDBCEF4F1DA8F9A800B09DC9 /* Info.plist */,
 			);
 			path = DataSamplerUITests;
+			sourceTree = "<group>";
+		};
+		BDD6E2521DCA1ADE0076BD6E /* Latency Plots */ = {
+			isa = PBXGroup;
+			children = (
+				BDD6E2531DCA1AF30076BD6E /* LatencyPlot.swift */,
+				BDD6E2541DCA1AF30076BD6E /* AveragePlot.swift */,
+				BDD6E2551DCA1AF30076BD6E /* MedianPlot.swift */,
+				BDD6E2561DCA1AF30076BD6E /* MissingPlot.swift */,
+			);
+			name = "Latency Plots";
 			sourceTree = "<group>";
 		};
 		E1DC4418229A0BE213244764 /* Frameworks */ = {
@@ -760,7 +783,9 @@
 				BDBCEF581DA9CE3D00B09DC9 /* RecordingsStoreInterface.swift in Sources */,
 				BDBCEF411DA7898300B09DC9 /* AppNotifications.swift in Sources */,
 				BD87F5991D8A2AD1007A6F99 /* PlotsViewController.swift in Sources */,
+				BDD6E2581DCA1AF30076BD6E /* AveragePlot.swift in Sources */,
 				BD6539F21DA3F71B008C32C6 /* RecordingModel.xcdatamodeld in Sources */,
+				BDD6E2511DCA1AA70076BD6E /* LatencyPlotInterface.swift in Sources */,
 				BD73D3651DAB907700845EEF /* TimestampGenerator.swift in Sources */,
 				BD75649D1D99703900CE455F /* TextRecorder.swift in Sources */,
 				BD6539EF1DA3F6EE008C32C6 /* Recording.swift in Sources */,
@@ -774,6 +799,7 @@
 				BD73D3611DAB6E5000845EEF /* RecordingActivityLogic.swift in Sources */,
 				BDDC9D781D8AFC4100C36430 /* GraphLatencyHistogram.swift in Sources */,
 				BDBB025B1DA45942000838E0 /* LowerViewManager.swift in Sources */,
+				BDD6E2591DCA1AF30076BD6E /* MedianPlot.swift in Sources */,
 				BD9AA0811DAE67FB00C8F7BD /* ActionableCell.swift in Sources */,
 				BDFF8AC01DBF9BDA00AB2FA8 /* VisualizerInterface.swift in Sources */,
 				BD8508911DAD153700BE3B53 /* Recording+CoreDataProperties.swift in Sources */,
@@ -786,6 +812,8 @@
 				BD7564A31D99C72600CE455F /* EventLog.swift in Sources */,
 				BD87F5A51D8ADDE0007A6F99 /* Histogram.swift in Sources */,
 				BD7564951D99171000CE455F /* PlotLatencyFormatter.swift in Sources */,
+				BDD6E25A1DCA1AF30076BD6E /* MissingPlot.swift in Sources */,
+				BDD6E2571DCA1AF30076BD6E /* LatencyPlot.swift in Sources */,
 				BD17D0511D8ED9EE00A18062 /* Collection+Additions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

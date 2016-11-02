@@ -16,11 +16,14 @@ dependencies to do its job.
 - [SwiftyDropbox](https://github.com/dropbox/SwiftyDropbox) — Swift Dropbox SDK
 
 These dependencies are listed in the [CocoaPods](https://cocoapods.org) `Podfile`. To build, you will need to
-first perform
+first perform `pod install`. Here's the minimal steps required to get going:
 
+    % git clone https://github.com/bradhowes/DataSampler.git DataSampler
+    % cd DataSampler
     % pod install
 
-in the top-level directory of your source's clone.
+Start Xcode and open the DataSampler work-space file (`DataSampler.xcworkspace`). Pick the emulator or device
+you wish to run on, then the build/run the application.
 
 # Usage
 

@@ -49,15 +49,17 @@ class TextRecorder: NSObject, UITextViewDelegate {
     }
 
     public func save(to: URL, done: @escaping (Int64)->() ) {
+        let contents = String(logText)
         let logPath = to.appendingPathComponent(fileName)
-        Logger.log("writing to \(logPath)")
-        guard let s = String(validatingUTF8: logText.utf8String!) else { return }
-        do {
-            try s.write(to: logPath, atomically: false, encoding: .utf8)
-        } catch {
-            print("*** failed to write to \(logPath)")
+        DispatchQueue.global(qos: .background).async {
+            Logger.log("writing to \(logPath)")
+            do {
+                try contents.write(to: logPath, atomically: true, encoding: .utf8)
+            } catch {
+                print("*** failed to write to \(logPath)")
+            }
+            done(Int64(contents.unicodeScalars.count))
         }
-        done(Int64(s.unicodeScalars.count / 4))
     }
 
     public func restore(from: URL) {

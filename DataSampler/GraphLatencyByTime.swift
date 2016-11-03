@@ -67,6 +67,11 @@ final class GraphLatencyByTime: CPTGraphHostingView, Skinnable {
         }
     }
 
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        updateBounds()
+    }
+
     fileprivate lazy var labelStyle: CPTTextStyle = {
         let labelStyle = CPTMutableTextStyle()
         labelStyle.color = CPTColor(componentRed: 0.0, green: 1.0, blue: 1.0, alpha: 0.75)
@@ -220,11 +225,6 @@ final class GraphLatencyByTime: CPTGraphHostingView, Skinnable {
         graph.add(plot, to: plotSpace)
     }
 
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        updateBounds()
-    }
-
     private func updateTitle() {
         guard let source = self.source else { return }
         if !source.name.isEmpty {
@@ -309,29 +309,38 @@ final class GraphLatencyByTime: CPTGraphHostingView, Skinnable {
         let plotWidthInTime = plotWidthInSamples() * spacing
         let oldRange = plotSpace.xRange
 
-        // Calculate initial X axis min/max values
-        //
         var xMin = 0.0
         var xMax = plotWidthInTime
         var xPos = xMax
-
         if samples.count > 0 {
             xPos = xValueFor(sample: samples.last!)
             if onePage {
+
+                // Want page to show everything between 0.0 and xPos
+                //
                 xMax = xPos
             }
             else if xPos > plotWidthInTime {
+
                 if oldRange != xRangeNeedsUpdate {
+
+                    // Assume we are going to adjust end of view
+                    //
                     xMin = xPos - plotWidthInTime
                     xMax = xPos
                 }
             }
             else {
+
+                // Assume we are going to show view of width 10.0
+                //
                 xMin = 0.0
                 xMax = max(xPos, 10.0)
             }
         }
 
+        // Allow swiping to move over all of X range
+        //
         plotSpace.globalXRange = CPTPlotRange(location: NSNumber(value: -0.1), length: NSNumber(value: xPos * 1.02))
 
         if samples.count > 1 && xValueFor(sample:samples[samples.count - 2]) < plotSpace.xRange.endDouble {
@@ -342,6 +351,9 @@ final class GraphLatencyByTime: CPTGraphHostingView, Skinnable {
             CPTAnimation.animate(plotSpace, property: "xRange", from: oldRange, to: newRange, duration: 0.125)
         }
         else if oldRange == xRangeNeedsUpdate || xMax < plotWidthInTime {
+
+            // Show view [0.0, xMax]
+            //
             let newRange = CPTPlotRange(location: -0.1, length: NSNumber(value: xMax * 1.02))
             CPTAnimation.animate(plotSpace, property: "xRange", from: oldRange, to: newRange, duration: 0.125)
         }
@@ -390,14 +402,31 @@ final class GraphLatencyByTime: CPTGraphHostingView, Skinnable {
 
 extension GraphLatencyByTime: CPTScatterPlotDataSource {
 
+    /**
+     Obtain number of samples for the given plot
+     - parameter plot: the plot being queried
+     - returns: the number of samples
+     */
     func numberOfRecords(for plot: CPTPlot) -> UInt {
         return UInt((plot as! LatencyPlotInterface).numberOfRecords())
     }
 
+    /**
+     Obtain the X axis value for a given sample.
+     - parameter sample: the sample to use
+     - returns: the X axis value to use
+     */
     func xValueFor(sample: Sample) -> Double {
         return sample.arrivalTime.timeIntervalSince(source!.startTime)
     }
 
+    /**
+     Obtain an X or Y value for plotting.
+     - parameter plot: the plot being queried
+     - parameter fieldEnum: indicator of the attribute to return
+     - parameter idx: the index of the sample to use
+     - returns: sample attribute value (may be nil)
+     */
     func number(for plot: CPTPlot, field fieldEnum: UInt, record idx: UInt) -> Any? {
         guard let field = CPTScatterPlotField(rawValue: Int(fieldEnum)) else { return nil }
         guard let p = plot as? LatencyPlotInterface else { fatalError("*** unexpected plot type") }

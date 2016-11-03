@@ -9,19 +9,6 @@
 import Foundation
 import CorePlot
 
-protocol Skinnable {
-    var activeSkin: GraphSkinInterface! {get}
-}
-
-protocol GraphSkinInterface {
-    var labelStyle: CPTTextStyle { get }
-    var titleStyle: CPTTextStyle { get }
-    var annotationStyle: CPTTextStyle { get }
-    var axisLineStyle: CPTLineStyle { get }
-    var gridLineStyle: CPTLineStyle { get }
-    var tickLineStyle: CPTLineStyle { get }
-}
-
 struct DisplayGraphSkin: GraphSkinInterface {
 
     var labelStyle: CPTTextStyle = {

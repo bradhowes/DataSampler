@@ -15,11 +15,14 @@ final class PlotLatencyFormatter : NumberFormatter {
 
     override init() {
         super.init()
-        maximumFractionDigits = 2
+        maximumFractionDigits = 1
+        minimumFractionDigits = 0
     }
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
+        maximumFractionDigits = 1
+        minimumFractionDigits = 0
     }
 
     /**

@@ -63,6 +63,11 @@ final class Logger : TextRecorder, LoggerInterface {
         return singleton.add(s)
     }
 
+    @discardableResult func log(format: String, _ args: CVarArg...) -> String {
+        let s = String(format: format, arguments: args)
+        return add(s)
+    }
+
     /**
      Add a new log entry. Converts given arguments to a String.
      - parameter args: the arguments to add
@@ -73,11 +78,17 @@ final class Logger : TextRecorder, LoggerInterface {
         return singleton.add(value)
     }
 
+    @discardableResult func log(_ args: CVarArg...) -> String {
+        let value = args.map { "\($0)" }.joined(separator: " ")
+        return add(value)
+    }
+
     /**
      Constructor for a new `Logger`
      */
-    private init(timestampGenerator: TimestampGeneratorInterface = TimestampGenerator()) {
-        super.init(fileName: "log.txt", timestampGenerator: timestampGenerator)
+    override init(fileName: String = "log.txt",
+                  timestampGenerator: TimestampGeneratorInterface = TimestampGenerator()) {
+        super.init(fileName: fileName, timestampGenerator: timestampGenerator)
     }
 
     /**

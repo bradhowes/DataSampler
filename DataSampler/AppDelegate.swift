@@ -34,6 +34,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             }
 
             setupDependencies()
+            EventLog.log("started")
         }
 
         return true

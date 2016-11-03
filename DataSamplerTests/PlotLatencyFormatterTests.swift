@@ -13,19 +13,12 @@ class PlotLatencyFormatterTests: XCTestCase {
     
     func testFormatting() {
         let lf = PlotLatencyFormatter()
-        XCTAssertEqual(lf.string(for: NSNumber(value: 0.0)), "0")
-        XCTAssertEqual(lf.string(for: NSNumber(value: 0.1)), "0.1")
-        XCTAssertEqual(lf.string(for: NSNumber(value: 0.01)), "0")
-        XCTAssertEqual(lf.string(for: NSNumber(value: 0.5)), "0.5")
-        XCTAssertEqual(lf.string(for: NSNumber(value: 0.9)), "0.9")
-        XCTAssertEqual(lf.string(for: NSNumber(value: 0.9999)), "1")
+        XCTAssertEqual(lf.string(for: NSNumber(value: 0.0))!, "0")
+        XCTAssertEqual(lf.string(for: NSNumber(value: 0.1))!, ".1")
+        XCTAssertEqual(lf.string(for: NSNumber(value: 0.01))!, "0")
+        XCTAssertEqual(lf.string(for: NSNumber(value: 0.06))!, ".1")
+        XCTAssertEqual(lf.string(for: NSNumber(value: 0.5))!, ".5")
+        XCTAssertEqual(lf.string(for: NSNumber(value: 0.9))!, ".9")
+        XCTAssertEqual(lf.string(for: NSNumber(value: 0.9999))!, "1")
     }
-
-    func testPerformanceExample() {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
-    }
-    
 }

@@ -23,28 +23,28 @@ class EventLogTests: XCTestCase {
     
     func testExample() {
         print("NSHomeDirectory: \(NSHomeDirectory())")
-        let log = EventLog.singleton
+        let eventLog = EventLog(fileName: "testExample.csv")
         let directory = URL(fileURLWithPath: NSHomeDirectory(), isDirectory: true)
 
-        EventLog.log("this", "is", "a", "test")
-        EventLog.log(1, 2, 3, 4.0, "hello", 5.0)
-        log.save(to: directory) { (count: Int64) in
-            XCTAssertEqual(count, 15)
-            let s = String(log.logText)
-            print(s)
-            XCTAssertTrue(s.contains(",this,is,a,test"))
-            XCTAssertTrue(s.contains(",1,2,3,4.0,hello,5.0"))
-            log.clear()
-            log.restore(from: directory)
-            XCTAssertEqual(String(log.logText), s)
-        }
-    }
+        eventLog.log("this", "is", "a", "test")
+        eventLog.log(1, 2, 3, 4.0, "hello", 5.0)
+        let s = String(eventLog.logText)
+        print(s)
+        XCTAssertTrue(s.contains(",this,is,a,test"))
+        XCTAssertTrue(s.contains(",1,2,3,4.0,hello,5.0"))
 
-    func testPerformanceExample() {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
+        let exp = expectation(description: "EventLog save")
+
+        eventLog.save(to: directory) { (count: Int64) in
+            XCTAssertEqual(count, 61)
+            eventLog.clear()
+            eventLog.restore(from: directory)
+            let r = String(eventLog.logText)
+            XCTAssertEqual(r, s)
+            exp.fulfill()
         }
+
+        print("*** after testExample.csv save")
+        waitForExpectations(timeout: 5.0, handler:nil)
     }
-    
 }

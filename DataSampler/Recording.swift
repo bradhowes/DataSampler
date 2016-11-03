@@ -159,11 +159,18 @@ public final class Recording : NSManagedObject {
         self.uploading = false
     }
 
-    @objc
-    private override init(entity: NSEntityDescription, insertInto context: NSManagedObjectContext?) {
+    /**
+     Initialize entity instance from Core Data store.
+     - parameter entity: the entity description to use
+     - parameter context: the context where the entity will live
+     */
+    @objc private override init(entity: NSEntityDescription, insertInto context: NSManagedObjectContext?) {
         super.init(entity: entity, insertInto: context)
     }
 
+    /**
+     Save any changes in entity state to its store.
+     */
     func save() {
         Logger.log("Recording.save - BEGIN")
         guard let context = self.managedObjectContext else {
@@ -180,6 +187,9 @@ public final class Recording : NSManagedObject {
         Logger.log("Recording.save - END")
     }
 
+    /**
+     Recording has started. Creates directory on device to hold recording assets.
+     */
     func started() {
 
         // Create folder to hold the recording data.
@@ -201,6 +211,10 @@ public final class Recording : NSManagedObject {
 
     }
 
+    /**
+     Recording has stopped. Update state and save a PDF rendering of the graphs.
+     - parameter pdfRenderer: object that will generate the PDF data
+     */
     func stopped(pdfRenderer: PDFRenderingInterface?) {
         Logger.log("Recording.finished")
 
@@ -225,6 +239,8 @@ public final class Recording : NSManagedObject {
             }
         }
 
+        // Save PDF data, log text, and even text to disk.
+        //
         DispatchQueue.global().async {
 
             let archivePath = self.folder.appendingPathComponent(Recording.runDataFileName)
@@ -246,6 +262,9 @@ public final class Recording : NSManagedObject {
         }
     }
 
+    /**
+     Delete this entity. Removes the assets from disk.
+     */
     func delete() {
         let fileManager = FileManager.default
         do {
@@ -264,6 +283,9 @@ public final class Recording : NSManagedObject {
 
 extension Recording {
 
+    /**
+     Configure instance for uploading to cloud.
+     */
     func uploadingRequested() {
         uploaded = false
         awaitingUpload = true
@@ -271,11 +293,17 @@ extension Recording {
         save()
     }
 
+    /**
+     Configure instance at start of uploading.
+     */
     func uploadingStarted() {
         progress = 0.0
         uploading = true
     }
 
+    /**
+     Configure instance at end of uploading.
+     */
     func uploadingCompleted() {
         uploaded = true
         uploading = false
@@ -284,6 +312,9 @@ extension Recording {
         save()
     }
 
+    /**
+     Configure instance to signal upload failure.
+     */
     func uploadingFailed() {
         progress = 0.0
         uploading = false

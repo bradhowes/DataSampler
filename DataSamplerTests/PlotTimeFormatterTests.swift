@@ -21,12 +21,4 @@ class PlotTimeFormatterTests: XCTestCase {
         XCTAssertEqual(bf.string(for: NSNumber(value: 3600.0 - 1.0)), "59m59s")
         XCTAssertEqual(bf.string(for: NSNumber(value: 3600.0 * 3 + 59.0)), "3h59s")
     }
-
-    func testPerformanceExample() {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
-    }
-    
 }

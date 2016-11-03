@@ -71,12 +71,18 @@ final class EventLog : TextRecorder, EventLogInterface {
         return singleton.add(value)
     }
 
+    @discardableResult func log(_ args: CVarArg...) -> String {
+        let value = args.map { "\($0)" }.joined(separator: ",")
+        return add(value)
+    }
+
     /**
      Constructor for a new `EventLog` instance.
      - parameter timestampGenerator: a generator for timestamp values
      */
-    private init(timestampGenerator: TimestampGeneratorInterface = TimestampGenerator()) {
-        super.init(fileName: "events.csv", timestampGenerator: timestampGenerator)
+    override init(fileName: String = "events.csv",
+                  timestampGenerator: TimestampGeneratorInterface = TimestampGenerator()) {
+        super.init(fileName: fileName, timestampGenerator: timestampGenerator)
     }
 
     /**

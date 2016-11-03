@@ -24,22 +24,29 @@ class LoggerTests: XCTestCase {
 
     func testExample() {
         print("NSHomeDirectory: \(NSHomeDirectory())")
-        let log = Logger.singleton
+        let logger = Logger(fileName: "LoggerTests_testExample.txt", timestampGenerator: FixedTimestampGenerator())
         let directory = URL(fileURLWithPath: NSHomeDirectory(), isDirectory: true)
 
-        XCTAssertEqual("01:00:01.100 this is 1 test\n", Logger.log(format: "this %@ %d %@", "is", 1, "test"))
-        XCTAssertEqual("01:00:02.200 this is 2 test\n", Logger.log("this", "is", 2, "test"))
+        XCTAssertEqual("01:00:01.100 this is 1 test\n",
+                       logger.log(format: "this %@ %d %@", "is", 1, "test"))
+        XCTAssertEqual("01:00:02.200 this is 2 test\n",
+                       logger.log("this", "is", 2, "test"))
 
-        log.save(to: directory) { (count: Int64) in
-            XCTAssertEqual(count, 163)
-            let s = String(log.logText)
-            print(s)
-            XCTAssertTrue(s.contains("01:00:01.100 this is 1 test\n"))
-            XCTAssertTrue(s.contains("01:00:02.200 this is 2 test\n"))
-            log.clear()
-            Logger.restore(from: directory)
-            XCTAssertEqual(String(log.logText), s)
+        let s = String(logger.logText)
+        print(s)
+        XCTAssertTrue(s.contains("01:00:01.100 this is 1 test\n"))
+        XCTAssertTrue(s.contains("01:00:02.200 this is 2 test\n"))
+
+        let exp = expectation(description: "Logger save")
+        logger.save(to: directory) { (count: Int64) in
+            XCTAssertEqual(count, 56)
+            logger.restore(from: directory)
+            XCTAssertEqual(String(logger.logText), s)
+            exp.fulfill()
         }
+
+        print("*** after LoggerTests_testExample.txt save")
+        waitForExpectations(timeout: 5.0, handler:nil)
     }
 
     func testMultithreading() {
@@ -65,12 +72,4 @@ class LoggerTests: XCTestCase {
             }
         }
     }
-
-    func testPerformanceExample() {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
-    }
-    
 }

@@ -92,6 +92,8 @@
 		BDD6E2581DCA1AF30076BD6E /* AveragePlot.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDD6E2541DCA1AF30076BD6E /* AveragePlot.swift */; };
 		BDD6E2591DCA1AF30076BD6E /* MedianPlot.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDD6E2551DCA1AF30076BD6E /* MedianPlot.swift */; };
 		BDD6E25A1DCA1AF30076BD6E /* MissingPlot.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDD6E2561DCA1AF30076BD6E /* MissingPlot.swift */; };
+		BDD6E25C1DCA69460076BD6E /* GraphSkinInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDD6E25B1DCA69460076BD6E /* GraphSkinInterface.swift */; };
+		BDD6E25F1DCAA6A70076BD6E /* StartStopUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDD6E25D1DCAA5EC0076BD6E /* StartStopUITests.swift */; };
 		BDDC9D781D8AFC4100C36430 /* GraphLatencyHistogram.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDDC9D771D8AFC4100C36430 /* GraphLatencyHistogram.swift */; };
 		BDFEEC3B1D91D0DC003E8555 /* NewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD49485D1D89F23000C50DE2 /* NewTests.swift */; };
 		BDFEEC3C1D91E875003E8555 /* UserSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD5605351D8FC2F200CFE29B /* UserSettings.swift */; };
@@ -222,6 +224,8 @@
 		BDD6E2541DCA1AF30076BD6E /* AveragePlot.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AveragePlot.swift; sourceTree = "<group>"; };
 		BDD6E2551DCA1AF30076BD6E /* MedianPlot.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MedianPlot.swift; sourceTree = "<group>"; };
 		BDD6E2561DCA1AF30076BD6E /* MissingPlot.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MissingPlot.swift; sourceTree = "<group>"; };
+		BDD6E25B1DCA69460076BD6E /* GraphSkinInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GraphSkinInterface.swift; sourceTree = "<group>"; };
+		BDD6E25D1DCAA5EC0076BD6E /* StartStopUITests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StartStopUITests.swift; sourceTree = "<group>"; };
 		BDDC9D771D8AFC4100C36430 /* GraphLatencyHistogram.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GraphLatencyHistogram.swift; sourceTree = "<group>"; };
 		BDFF8AB91DBF9B5600AB2FA8 /* RunDataInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RunDataInterface.swift; sourceTree = "<group>"; };
 		BDFF8ABB1DBF9B8700AB2FA8 /* DropboxControllerInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DropboxControllerInterface.swift; sourceTree = "<group>"; };
@@ -375,16 +379,17 @@
 		BD981C611DB132D100F18078 /* Interfaces */ = {
 			isa = PBXGroup;
 			children = (
-				BDD6E2501DCA1AA70076BD6E /* LatencyPlotInterface.swift */,
 				BD9AA0801DAE67FB00C8F7BD /* ActionableCell.swift */,
 				BDFF8ACB1DC3585000AB2FA8 /* ConfigurableCell.swift */,
 				BDFF8ABB1DBF9B8700AB2FA8 /* DropboxControllerInterface.swift */,
-				BD8FC1A91DC89FED0016C282 /* SamplingDriverInterface.swift */,
+				BDD6E25B1DCA69460076BD6E /* GraphSkinInterface.swift */,
+				BDD6E2501DCA1AA70076BD6E /* LatencyPlotInterface.swift */,
 				BDFF8AC31DC0B2B200AB2FA8 /* PDFRenderingInterface.swift */,
 				BDFF8AC11DBF9BFA00AB2FA8 /* RecordingActivityLogicInterface.swift */,
 				BDBCEF571DA9CE3D00B09DC9 /* RecordingsStoreInterface.swift */,
 				BDFF8AB91DBF9B5600AB2FA8 /* RunDataInterface.swift */,
 				BD981C621DB133F900F18078 /* SampleInterface.swift */,
+				BD8FC1A91DC89FED0016C282 /* SamplingDriverInterface.swift */,
 				BDFF8ABD1DBF9BB000AB2FA8 /* UserSettingsInterface.swift */,
 				BDFF8ABF1DBF9BDA00AB2FA8 /* VisualizerInterface.swift */,
 			);
@@ -410,12 +415,12 @@
 		BDBB02541DA44EDE000838E0 /* Plots */ = {
 			isa = PBXGroup;
 			children = (
-				BDD6E2521DCA1ADE0076BD6E /* Latency Plots */,
 				BD87F5981D8A2AD1007A6F99 /* PlotsViewController.swift */,
 				BDBB025C1DA45983000838E0 /* LowerView.swift */,
 				BDBB025A1DA45942000838E0 /* LowerViewManager.swift */,
 				BDFF8AC71DC1261A00AB2FA8 /* GraphSkin.swift */,
 				BD87F59E1D8AAAD1007A6F99 /* GraphLatencyByTime.swift */,
+				BDD6E2521DCA1ADE0076BD6E /* Latency Plots */,
 				BDDC9D771D8AFC4100C36430 /* GraphLatencyHistogram.swift */,
 				BDBB02591DA45246000838E0 /* Label Formatters */,
 			);
@@ -470,6 +475,7 @@
 			isa = PBXGroup;
 			children = (
 				BDBCEF4D1DA8F9A800B09DC9 /* ToolbarUITests.swift */,
+				BDD6E25D1DCAA5EC0076BD6E /* StartStopUITests.swift */,
 				BDBCEF4F1DA8F9A800B09DC9 /* Info.plist */,
 			);
 			path = DataSamplerUITests;
@@ -782,6 +788,7 @@
 				BD15E0B01D934486005B709D /* RandomUniform.swift in Sources */,
 				BDBCEF581DA9CE3D00B09DC9 /* RecordingsStoreInterface.swift in Sources */,
 				BDBCEF411DA7898300B09DC9 /* AppNotifications.swift in Sources */,
+				BDD6E25C1DCA69460076BD6E /* GraphSkinInterface.swift in Sources */,
 				BD87F5991D8A2AD1007A6F99 /* PlotsViewController.swift in Sources */,
 				BDD6E2581DCA1AF30076BD6E /* AveragePlot.swift in Sources */,
 				BD6539F21DA3F71B008C32C6 /* RecordingModel.xcdatamodeld in Sources */,
@@ -840,6 +847,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BDD6E25F1DCAA6A70076BD6E /* StartStopUITests.swift in Sources */,
 				BDBCEF4E1DA8F9A800B09DC9 /* ToolbarUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

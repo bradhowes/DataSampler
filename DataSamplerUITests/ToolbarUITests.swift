@@ -12,31 +12,57 @@ class ToolbarUITests: XCTestCase {
         
     override func setUp() {
         super.setUp()
-        
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-        
-        // In UI tests it is usually best to stop immediately when a failure occurs.
         continueAfterFailure = false
-        // UI tests must launch the application that they test. Doing this in setup will make sure it happens for each test method.
         XCUIApplication().launch()
-
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
+        XCUIDevice.shared().orientation = .portrait
     }
     
     override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
     }
 
-    func testExample() {
-
-        let toolbarsQuery = XCUIApplication().toolbars
-        toolbarsQuery.buttons["Histogram"].tap()
-        toolbarsQuery.buttons["Log"].tap()
-        toolbarsQuery.buttons["Events"].tap()
-
-        // Use recording to get started writing UI tests.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+    func getTextView(app: XCUIApplication, named: String) -> XCUIElement {
+        let other = app.otherElements[named]
+        if other.exists { return other }
+        let textView = app.textViews[named]
+        if textView.exists { return textView }
+        fatalError("missing item: \(named)")
     }
-    
+
+    func testToolbar() {
+        let app = XCUIApplication()
+        let rootFrame = app.windows.element(boundBy: 0).frame
+        let toolbar = app.toolbars.element(boundBy: 0)
+
+        let histogramButton = toolbar.buttons["Histogram"]
+        let logButton = toolbar.buttons["Log"]
+        let eventButton = toolbar.buttons["Events"]
+
+
+        // Default view shows histogram plot
+        //
+        let histogramView = getTextView(app: app, named: "HistogramView")
+        XCTAssertTrue(histogramView.exists)
+        XCTAssertTrue(rootFrame.contains(histogramView.frame))
+
+        // Switch to log view
+        //
+        logButton.tap()
+        let logView = getTextView(app: app, named: "LogView")
+        XCTAssertTrue(logView.exists)
+        XCTAssertTrue(rootFrame.contains(logView.frame))
+
+        // Switch to event view
+        //
+        eventButton.tap()
+        let eventView = getTextView(app: app, named: "EventsView")
+        XCTAssertTrue(eventView.exists)
+        XCTAssertTrue(rootFrame.contains(eventView.frame))
+
+        // Switch to histogram view
+        //
+        histogramButton.tap()
+        XCTAssertTrue(histogramView.exists)
+        XCTAssertTrue(rootFrame.contains(histogramView.frame))
+    }
 }
